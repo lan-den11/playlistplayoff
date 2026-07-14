@@ -598,11 +598,27 @@ label.row { cursor: pointer; }
   backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: 20px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bottom-progress.docked {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  border-radius: 20px 20px 0 0;
+  border-bottom: none;
+  z-index: 25;
+  animation: dock-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes dock-slide-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 /* ---------- Bracket tree ---------- */
 #bracket-tree-section {
-  padding: 30px 24px 60px;
+  padding: 30px 24px 20px;
   position: relative;
   z-index: 1;
   background: var(--bg);
@@ -736,14 +752,13 @@ label.row { cursor: pointer; }
     left: auto;
     transform: none;
     width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     padding: 14px;
-    margin: 8px 0;
+    margin: 6px 0;
     border-radius: 20px;
   }
   .vs-big { display: none; }
-  .side { min-height: 300px; }
+  .side { min-height: 0; }
   /* Backgrounds were split left/right to match a side-by-side layout — once
      content stacks top/bottom, the split needs to follow it or the two
      images end up behind the wrong halves entirely. */
@@ -756,6 +771,23 @@ label.row { cursor: pointer; }
   }
   #side-bg-a { top: -30px; }
   #side-bg-b { bottom: -30px; top: auto; }
+}
+
+/* Tighter pass specifically for phones — everything needs to actually fit on
+   one screen (both songs, the center controls, and the status bar) without
+   forcing a scroll just to see the second song. */
+@media (max-width: 600px) {
+  .side-content { padding: 10px; gap: 8px; }
+  .embed-card { padding: 8px; }
+  .center-panel { padding: 8px 14px; margin: 4px 0; gap: 4px; }
+  .center-controls { gap: 6px; margin: 2px 0; }
+  .icon-btn { width: 32px; height: 32px; font-size: 0.85rem; }
+  .round-label { font-size: 0.7rem; }
+  .battle-counter { font-size: 0.72rem; }
+  .pick-btn { padding: 9px; font-size: 0.85rem; }
+  .bottom-progress { margin: 6px 12px 10px; padding: 8px 14px; }
+  .scroll-hint { padding-bottom: 8px; font-size: 0.65rem; }
+  .scroll-hint-chevron { font-size: 1.1rem; }
 }
 
 .side.reveal-left { animation: slide-in-left 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -798,6 +830,9 @@ label.row { cursor: pointer; }
 }
 .modal-box h3 { margin: 0 0 8px; }
 #clerk-signin-modal .modal-box { max-width: 420px; padding: 20px; }
+@media (max-width: 600px) {
+  #clerk-signin-modal .modal-box { max-width: calc(100vw - 32px); padding: 16px; }
+}
 
 /* ---------- Compact shareable results card (rendered off-screen for export) ---------- */
 .share-card {

@@ -10,7 +10,8 @@ window.onSpotifyIframeApiReady = (API) => {
 function createController(elementId) {
   return new Promise((resolve) => {
     const element = document.getElementById(elementId);
-    IFrameAPI.createController(element, { width: '100%', height: '152', uri: '' }, (EmbedController) => {
+    const embedHeight = window.innerWidth <= 600 ? '80' : '152';
+    IFrameAPI.createController(element, { width: '100%', height: embedHeight, uri: '' }, (EmbedController) => {
       resolve(EmbedController);
     });
   });
@@ -256,6 +257,7 @@ function startTournament() {
   mainBracketRounds = null;
   completedRealMatchesOverall = 0;
   isFirstReveal = true;
+  document.querySelector('.bottom-progress').classList.remove('docked');
 
   if (sorted.length <= size || !wildcardEnabled) {
     const seeds = sorted.slice(0, size);
@@ -443,6 +445,7 @@ function showMatch(a, b, skipTransition) {
       hint.classList.add('visible');
       const dismissHint = () => {
         hint.classList.add('dismissed');
+        document.querySelector('.bottom-progress').classList.add('docked');
         window.removeEventListener('scroll', dismissHint);
       };
       window.addEventListener('scroll', dismissHint, { once: true });
@@ -1118,6 +1121,7 @@ async function initClerk() {
         colorPrimary: '#1db954',
         colorTextOnPrimaryBackground: '#05130a',
         colorText: '#f2f4ee',
+        colorForeground: '#f2f4ee',
         colorTextSecondary: '#8b9186',
         colorInputBackground: '#10120e',
         colorInputText: '#f2f4ee',
