@@ -730,9 +730,32 @@ label.row { cursor: pointer; }
 
 @media (max-width: 860px) {
   .battle-stage { flex-direction: column; }
-  .center-panel { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+  .center-panel {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 20px;
+  }
   .vs-big { display: none; }
-  .side { min-height: 340px; }
+  .side { min-height: 300px; }
+  /* Backgrounds were split left/right to match a side-by-side layout — once
+     content stacks top/bottom, the split needs to follow it or the two
+     images end up behind the wrong halves entirely. */
+  .side-bg {
+    width: 100vw;
+    height: 50vh;
+    top: auto;
+    bottom: auto;
+    left: 0;
+  }
+  #side-bg-a { top: -30px; }
+  #side-bg-b { bottom: -30px; top: auto; }
 }
 
 .side.reveal-left { animation: slide-in-left 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -869,4 +892,40 @@ label.row { cursor: pointer; }
 @keyframes chevron-bounce {
   0%, 100% { transform: translateY(0); opacity: 0.6; }
   50% { transform: translateY(6px); opacity: 1; }
+}
+
+/* ---------- General narrow-screen pass (phones) ---------- */
+@media (max-width: 600px) {
+  #app { padding: 16px 12px 48px; }
+
+  header {
+    padding: 8px 12px;
+    margin: 10px 0 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-radius: 20px;
+  }
+  .brand-name { font-size: 1.05rem; }
+  .brand-mark { width: 28px; height: 28px; font-size: 1.1rem; }
+  .header-actions { gap: 6px; }
+  #exit-bracket-btn, #clerk-signin-btn { padding: 8px 12px; font-size: 0.8rem; }
+  .header-progress { left: 12px; right: 12px; }
+
+  /* Input+button pairs were forced into a single tight row — let them stack
+     instead of squeezing button text into nothing on a phone-width screen. */
+  .row { flex-wrap: wrap; }
+  .row input[type="text"], .row select { flex-basis: 100%; }
+  .row button { flex: 1; }
+
+  .modal-box {
+    max-width: calc(100vw - 32px);
+    padding: 22px 20px;
+  }
+
+  .settings-panel { max-width: calc(100vw - 40px); }
+
+  .champion-inner { padding: 40px 16px 60px; }
+  .champion-embed-wrap { width: 100%; }
+
+  .share-status, .card h2 { word-break: break-word; }
 }
