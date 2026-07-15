@@ -42,6 +42,10 @@ header {
   padding: 10px 20px;
   box-shadow: 0 12px 30px -16px rgba(0,0,0,0.6);
 }
+/* While actively viewing a bracket, the header shouldn't stay pinned once
+   you scroll past the battle stage into the tree — it should scroll away
+   naturally like normal content, taking its progress bar with it. */
+header.no-sticky { position: relative; top: auto; }
 
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand-mark {
@@ -419,12 +423,18 @@ label.row { cursor: pointer; }
   position: relative;
   z-index: 1;
 }
+@media (max-width: 860px) {
+  .stage-wrap { min-height: auto; }
+}
 
 .battle-stage {
   display: flex;
   flex: 1;
   min-height: 520px;
   position: relative;
+}
+@media (max-width: 860px) {
+  .battle-stage { min-height: auto; }
 }
 
 .side {
@@ -745,20 +755,22 @@ label.row { cursor: pointer; }
 }
 
 @media (max-width: 860px) {
-  .battle-stage { flex-direction: column; }
+  .battle-stage { flex-direction: column; align-items: center; }
   .center-panel {
     position: relative;
     top: auto;
     left: auto;
     transform: none;
-    width: 100%;
+    width: auto;
+    max-width: 280px;
+    align-self: center;
     flex-direction: column;
     padding: 14px;
     margin: 6px 0;
     border-radius: 20px;
   }
   .vs-big { display: none; }
-  .side { min-height: 0; }
+  .side { min-height: 0; width: 100%; }
   /* Backgrounds were split left/right to match a side-by-side layout — once
      content stacks top/bottom, the split needs to follow it or the two
      images end up behind the wrong halves entirely. */
@@ -825,9 +837,13 @@ label.row { cursor: pointer; }
   border-radius: 22px;
   padding: 28px 32px;
   max-width: 380px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
   text-align: center;
   box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7);
 }
+#clerk-signin-mount { width: 100%; }
 .modal-box h3 { margin: 0 0 8px; }
 #clerk-signin-modal .modal-box { max-width: 420px; padding: 20px; }
 @media (max-width: 600px) {
@@ -963,4 +979,46 @@ label.row { cursor: pointer; }
   .champion-embed-wrap { width: 100%; }
 
   .share-status, .card h2 { word-break: break-word; }
+}
+
+/* ---------- Clerk components: direct stable-class overrides ----------
+   The appearance.variables JS object wasn't reliably taking effect for every
+   sub-component in our vanilla script-tag setup, so this targets Clerk's own
+   documented, stable CSS classes directly instead — confirmed current as of
+   their Core 2 docs (text-color styling now applies to the parent button
+   class itself, e.g. cl-userButtonPopoverActionButton, not a separate nested
+   text element). */
+.cl-rootBox, .cl-card, .cl-cardBox, .cl-userButtonPopoverCard {
+  color: #f2f4ee;
+}
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsBlockButtonText,
+.cl-formFieldLabel,
+.cl-formFieldInput,
+.cl-headerTitle,
+.cl-headerSubtitle,
+.cl-footerActionText,
+.cl-footerActionLink,
+.cl-userButtonPopoverActionButton,
+.cl-userButtonPopoverActionButton__manageAccount,
+.cl-userButtonPopoverActionButton__signOut,
+.cl-profileSectionTitleText,
+.cl-profileSectionContent,
+.cl-navbarButton,
+.cl-badge,
+.cl-menuItem,
+.cl-formHeaderTitle,
+.cl-formHeaderSubtitle,
+.cl-identityPreviewText,
+.cl-dividerText {
+  color: #f2f4ee !important;
+}
+.cl-socialButtonsBlockButton {
+  background: #10120e !important;
+  border-color: #2a2f26 !important;
+}
+.cl-dividerLine { background: #2a2f26 !important; }
+.cl-formFieldInput {
+  background: #10120e !important;
+  border-color: #2a2f26 !important;
 }

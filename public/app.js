@@ -37,6 +37,7 @@ function showScreen(id) {
   document.getElementById(id).style.display = 'block';
   document.getElementById('exit-bracket-btn').style.display = id === 'bracket-screen' ? 'inline-flex' : 'none';
   document.getElementById('header-progress').style.display = id === 'bracket-screen' || id === 'champion-screen' ? 'block' : 'none';
+  document.querySelector('header').classList.toggle('no-sticky', id === 'bracket-screen');
   const bgDisplay = id === 'bracket-screen' ? 'block' : 'none';
   document.getElementById('side-bg-a').style.display = bgDisplay;
   document.getElementById('side-bg-b').style.display = bgDisplay;
