@@ -56,7 +56,7 @@ app.use(clerkMiddleware);
 // free-tier pause — Supabase only resets its 7-day inactivity timer on real
 // database queries, not on any HTTP request to your app. A plain homepage
 // ping (which is enough to keep Render itself awake) does nothing for this.
-app.get('/api/health', async (req, res) => {
+app.all('/api/health', async (req, res) => {
   if (!pool) return res.json({ ok: true, database: 'not configured' });
   try {
     await pool.query('SELECT 1');
