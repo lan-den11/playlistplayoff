@@ -50,7 +50,14 @@ if (CLERK_PUBLISHABLE_KEY && CLERK_SECRET_KEY) {
   requireAuth = clerkExpress.requireAuth();
   getAuthUserId = (req) => clerkExpress.getAuth(req)?.userId || null;
 }
-app.use(clerkMiddleware);
+// Deliberately NOT applied globally via app.use() — Clerk's middleware can
+// trigger a "handshake" redirect to its own servers on certain requests
+// (notably automated/bot-like traffic without a normal browser session,
+// exactly what an uptime monitor looks like). Every other route in this app
+// — including the health check, which needs to stay reachable by external
+// monitors no matter what — should never pass through Clerk at all. It's
+// applied directly on the two /api/profile routes below instead, which are
+// the only things that actually need auth.
 
 // Pinging this (not just the homepage) is what actually prevents Supabase's
 // free-tier pause — Supabase only resets its 7-day inactivity timer on real
@@ -70,7 +77,7 @@ app.get('/api/clerk-config', (req, res) => {
   res.json({ enabled: !!CLERK_PUBLISHABLE_KEY, publishableKey: CLERK_PUBLISHABLE_KEY || null });
 });
 
-app.get('/api/profile', requireAuth, async (req, res) => {
+app.get('/api/profile', clerkMiddleware, requireAuth, async (req, res) => {
   if (!pool) return res.status(503).json({ error: 'Database not configured.' });
   const userId = getAuthUserId(req);
   try {
@@ -84,7 +91,7 @@ app.get('/api/profile', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/profile', requireAuth, async (req, res) => {
+app.post('/api/profile', clerkMiddleware, requireAuth, async (req, res) => {
   if (!pool) return res.status(503).json({ error: 'Database not configured.' });
   const userId = getAuthUserId(req);
   const { spotifyUsername, lastfmUsername } = req.body || {};
