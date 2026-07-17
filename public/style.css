@@ -68,12 +68,12 @@ header.no-sticky { position: relative; top: auto; }
 .header-actions { display: flex; align-items: center; gap: 10px; }
 
 .header-progress {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 4px;
-  height: 3px;
-  background: rgba(255,255,255,0.08);
+  position: sticky;
+  top: calc(var(--header-space, 90px) + 8px);
+  z-index: 15;
+  height: 4px;
+  margin: 0 24px 10px;
+  background: rgba(255,255,255,0.1);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -199,6 +199,9 @@ button.secondary:hover { background: #1b1f18; box-shadow: none; transform: none;
   width: 100%;
   position: relative;
   background: #0d0f0b;
+}
+@media (max-width: 600px) {
+  .embed-wrap { min-height: 80px; }
 }
 .embed-wrap iframe { border-radius: 16px; display: block; position: relative; z-index: 1; }
 
@@ -990,6 +993,12 @@ label.row { cursor: pointer; }
    text element). */
 .cl-rootBox, .cl-card, .cl-cardBox, .cl-userButtonPopoverCard {
   color: #f2f4ee;
+}
+/* Custom menu items (like "Edit music profile") apparently don't carry the
+   same class as Clerk's built-in ones, so this catches everything inside
+   the popover regardless of its specific class name. */
+.cl-userButtonPopoverCard, .cl-userButtonPopoverCard * {
+  color: #f2f4ee !important;
 }
 .cl-socialButtonsBlockButton,
 .cl-socialButtonsBlockButtonText,

@@ -1117,6 +1117,12 @@ async function initClerk() {
   await window.Clerk.load({
     ui: { ClerkUI: window.__internal_ClerkUICtor },
     appearance: {
+      layout: {
+        // TODO: remove once on a real custom domain / production Clerk keys —
+        // this only hides the dev-mode warning banner, it doesn't change the
+        // actual 100-user development instance cap.
+        unsafe_disableDevelopmentModeWarnings: true,
+      },
       variables: {
         colorBackground: '#171a15',
         colorPrimary: '#1db954',
