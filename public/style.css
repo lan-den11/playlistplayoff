@@ -68,12 +68,12 @@ header.no-sticky { position: relative; top: auto; }
 .header-actions { display: flex; align-items: center; gap: 10px; }
 
 .header-progress {
-  position: sticky;
-  top: calc(var(--header-space, 90px) + 8px);
-  z-index: 15;
-  height: 4px;
-  margin: 0 24px 10px;
-  background: rgba(255,255,255,0.1);
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 4px;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -614,7 +614,7 @@ label.row { cursor: pointer; }
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bottom-progress.docked {
-  position: fixed;
+  position: sticky;
   left: 0;
   right: 0;
   bottom: 0;
