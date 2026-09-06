@@ -7,6 +7,19 @@ const inter = Inter({
   display: 'swap',
 });
 
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta name="darkreader-lock" />
+      </head>
+      <body>
+        {children}
+      </body>
+    </html>
+  );
+}
+
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['500', '600', '700'],
