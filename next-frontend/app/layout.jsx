@@ -7,19 +7,6 @@ const inter = Inter({
   display: 'swap',
 });
 
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta name="darkreader-lock" />
-      </head>
-      <body>
-        {children}
-      </body>
-    </html>
-  );
-}
-
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['500', '600', '700'],
@@ -36,7 +23,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <body className="font-sans antialiased">{children}</body>
+      <head>
+        <meta name="darkreader-lock" />
+      </head>
+      <body className="font-sans antialiased bg-zinc-950 text-zinc-50">
+        {children}
+      </body>
     </html>
   );
 }
