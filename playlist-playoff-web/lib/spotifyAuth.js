@@ -2,6 +2,13 @@ import axios from 'axios';
 
 let appToken = null; // { access_token, expires_at }
 
+// Spotify's own editorially-curated "Top 50 - Global" playlist. Used as a
+// stable, no-extra-auth-scopes source of "what's trending right now" for
+// the homepage teaser bracket (see components/home/Hero.jsx) — loaded
+// through the exact same /api/playlist/[idOrUrl]/tracks route as any
+// playlist a person pastes in themselves.
+export const TRENDING_PLAYLIST_ID = '37i9dQZEVXbMDoHDwVN2tF';
+
 export async function getAppToken() {
   if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
     // Thrown (not silently returned) so the calling route's catch block can

@@ -6,16 +6,6 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        // "Showdown" gradient stops kept as named tokens so they stay
-        // consistent everywhere instead of re-typing hexes per component.
-        showdown: {
-          violet: '#8b5cf6',
-          cyan: '#22d3ee',
-          pink: '#ec4899',
-          orange: '#fb923c',
-        },
-      },
       fontFamily: {
         // Body copy — set in app/layout.jsx via next/font/google.
         sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],

@@ -17,14 +17,15 @@ export default function MultiplayerTeaser() {
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-8 py-16 text-center backdrop-blur-md sm:px-14"
       >
-        {/* Exclusive glow — the pink/orange half of the "showdown" palette,
-            reserved for this one section so it reads as a distinct, premium beat. */}
+        {/* Gold glow ties this "premium/coming soon" section to the same
+            accent used for the champion moment — one consistent meaning for
+            gold across the app, instead of a one-off hue. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-pink-600/25 to-orange-500/20 blur-[100px]"
+          className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/15 blur-[100px]"
         />
 
-        <div className="relative mx-auto inline-flex items-center gap-1.5 rounded-full border border-pink-400/30 bg-pink-500/10 px-3.5 py-1.5 text-xs font-semibold text-pink-300">
+        <div className="relative mx-auto inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300">
           <Sparkles className="h-3.5 w-3.5" />
           Coming soon
         </div>

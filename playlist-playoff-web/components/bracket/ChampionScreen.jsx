@@ -8,7 +8,10 @@ import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
 import GradientButton from '../ui/GradientButton';
 import GlassButton from '../ui/GlassButton';
 
-const CONFETTI_COLORS = ['#8b5cf6', '#22d3ee', '#ec4899', '#fb923c', '#fafafa'];
+// Confetti stays tied to the app's actual palette (brand violet/indigo,
+// champion gold, and white) instead of throwing in extra one-off hues —
+// festive without turning into five clashing colors.
+const CONFETTI_COLORS = ['#7c3aed', '#6366f1', '#f5b759', '#fafafa'];
 
 function Confetti() {
   const pieces = useMemo(
@@ -182,7 +185,7 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
         {shareStatus && <p className="mt-3 text-xs text-zinc-500">{shareStatus}</p>}
 
         <div className="mt-8">
-          <GradientButton gradient="sunset" onClick={onRestart}>
+          <GradientButton gradient="gold" onClick={onRestart}>
             <RotateCcw className="h-4 w-4" />
             Start a new bracket
           </GradientButton>

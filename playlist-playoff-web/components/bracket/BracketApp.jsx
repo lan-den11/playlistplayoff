@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useBracket } from '../../hooks/useBracket';
+import { useBracket, TRENDING_HANDOFF_STORAGE_KEY } from '../../hooks/useBracket';
 import { useLastfmData } from '../../hooks/useLastfmData';
 import { useProfileSync } from '../../hooks/useProfileSync';
 import { buildFetchOrder } from '../../lib/bracketEngine';
@@ -17,7 +18,14 @@ import ResumeModal from './ResumeModal';
 import ProfileNudgeModal from './ProfileNudgeModal';
 
 export default function BracketApp() {
-  const bracket = useBracket();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // Arriving from the homepage teaser (Hero.jsx) means the in-progress
+  // bracket lives in its OWN storage slot instead of the normal one — this
+  // query param is the only thing that tells this page which slot to read.
+  const cameFromTrending = searchParams.get('from') === 'trending';
+
+  const bracket = useBracket(cameFromTrending ? { storageKey: TRENDING_HANDOFF_STORAGE_KEY } : undefined);
   const { lastfmData, lastfmEnabled, enqueueTracks, usernameOverride, setUsernameOverride } = useLastfmData();
 
   const [nudgeOpen, setNudgeOpen] = useState(false);
@@ -40,6 +48,13 @@ export default function BracketApp() {
   useEffect(() => {
     if (bracket.state.matches.length) enqueueTracks(buildFetchOrder(bracket.state.matches));
   }, [bracket.state.matches, enqueueTracks]);
+
+  // Once the resume choice is made, drop the ?from=trending param so a
+  // later refresh (or pasting a brand-new playlist) goes back to using the
+  // normal save slot instead of the teaser's.
+  function clearTrendingParam() {
+    if (cameFromTrending) router.replace('/bracket');
+  }
 
   const { screen } = bracket.state;
 
@@ -126,7 +141,17 @@ export default function BracketApp() {
         </motion.div>
       </AnimatePresence>
 
-      <ResumeModal open={Boolean(bracket.savedSnapshot)} onResume={bracket.resumeSaved} onDiscard={bracket.discardSaved} />
+      <ResumeModal
+        open={Boolean(bracket.savedSnapshot)}
+        onResume={() => {
+          bracket.resumeSaved();
+          clearTrendingParam();
+        }}
+        onDiscard={() => {
+          bracket.discardSaved();
+          clearTrendingParam();
+        }}
+      />
 
       <ProfileNudgeModal
         open={nudgeOpen}

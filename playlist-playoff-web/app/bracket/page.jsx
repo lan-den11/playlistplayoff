@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import BracketApp from '../../components/bracket/BracketApp';
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function BracketPage() {
-  return <BracketApp />;
+  return (
+    <Suspense fallback={null}>
+      <BracketApp />
+    </Suspense>
+  );
 }

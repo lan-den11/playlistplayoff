@@ -42,7 +42,7 @@ export default function ProfileNudgeModal({ open, onClose, onSave, initialSpotif
         />
       </div>
       <div className="mt-6 flex justify-center gap-3">
-        <GradientButton gradient="violet" onClick={() => onSave(spotifyUsername.trim(), lastfmUsername.trim())}>
+        <GradientButton gradient="brand" onClick={() => onSave(spotifyUsername.trim(), lastfmUsername.trim())}>
           Save
         </GradientButton>
         <GlassButton onClick={onClose}>Maybe later</GlassButton>

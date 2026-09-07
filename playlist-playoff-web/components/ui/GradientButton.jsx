@@ -3,8 +3,13 @@
 import { motion } from 'framer-motion';
 
 const GRADIENTS = {
-  violet: 'from-violet-500 via-fuchsia-400 to-cyan-400',
-  sunset: 'from-pink-500 via-rose-400 to-orange-400',
+  // Primary brand accent — every default action in the app (CTAs, "Start
+  // Bracket", sign-in) uses this one gradient so the whole product reads as
+  // a single, deliberate color story instead of a different hue per screen.
+  brand: 'from-violet-500 to-indigo-500',
+  // Reserved for celebratory / premium moments only (champion crowning,
+  // "coming soon" multiplayer) so it stays special instead of diluted.
+  gold: 'from-amber-400 to-orange-400',
 };
 
 /**
@@ -14,12 +19,12 @@ const GRADIENTS = {
  */
 export default function GradientButton({
   children,
-  gradient = 'violet',
+  gradient = 'brand',
   onClick,
   type = 'button',
   className = '',
 }) {
-  const stops = GRADIENTS[gradient] ?? GRADIENTS.violet;
+  const stops = GRADIENTS[gradient] ?? GRADIENTS.brand;
 
   return (
     <motion.button
@@ -32,8 +37,8 @@ export default function GradientButton({
     >
       <motion.span
         aria-hidden="true"
-        className={`absolute -inset-1 rounded-full bg-gradient-to-r ${stops} blur-lg opacity-60 group-hover:opacity-90 transition-opacity`}
-        animate={{ opacity: [0.45, 0.75, 0.45] }}
+        className={`absolute -inset-1 rounded-full bg-gradient-to-r ${stops} blur-lg opacity-50 group-hover:opacity-80 transition-opacity`}
+        animate={{ opacity: [0.35, 0.6, 0.35] }}
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       />
       <span

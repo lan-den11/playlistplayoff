@@ -58,7 +58,7 @@ export default function HowItWorks() {
           >
             <span className="font-display text-sm font-bold text-zinc-600">{step.number}</span>
 
-            <div className="mt-4 mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400">
+            <div className="mt-4 mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500">
               <step.icon className="h-6 w-6 text-zinc-950" strokeWidth={2.25} />
             </div>
 

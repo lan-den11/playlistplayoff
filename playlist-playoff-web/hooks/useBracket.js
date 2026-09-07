@@ -13,7 +13,16 @@ import {
 } from '../lib/bracketEngine';
 import { fetchPlaylistTracks, fetchUserPlaylists } from '../lib/api';
 
-const SAVE_KEY = 'spotifyBracketSave_v1';
+// Default slot used by a normal, real bracket (paste-a-playlist flow).
+export const DEFAULT_SAVE_KEY = 'spotifyBracketSave_v1';
+
+// A completely separate slot used only by the homepage teaser bracket
+// (components/home/Hero.jsx). Keeping it isolated from DEFAULT_SAVE_KEY
+// means playing the teaser can never silently overwrite a real in-progress
+// bracket someone already saved by pasting their own playlist. When the
+// teaser hands off to the full /bracket page, it does so via a
+// `?from=trending` query param that tells this hook which slot to read.
+export const TRENDING_HANDOFF_STORAGE_KEY = 'trendingTeaserBracketSave_v1';
 
 const initialState = {
   screen: 'setup', // 'setup' | 'options' | 'battle' | 'champion'
@@ -329,40 +338,43 @@ function reducer(state, action) {
 
 // ---------- the hook ----------
 
-export function useBracket() {
+// `storageKey` lets a caller isolate its autosave/resume slot from the
+// default one — see TRENDING_HANDOFF_STORAGE_KEY above for why that matters.
+export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [userPlaylists, setUserPlaylists] = useState(null);
   const [findUserError, setFindUserError] = useState('');
   const [savedSnapshot, setSavedSnapshot] = useState(null);
 
-  // Check once, on mount, for an in-progress bracket saved to this browser.
+  // Check once, on mount, for an in-progress bracket saved to this browser
+  // under this instance's storage key.
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
+      const raw = localStorage.getItem(storageKey);
       const parsed = raw ? JSON.parse(raw) : null;
       if (parsed?.matches?.[parsed.matchIndex]) setSavedSnapshot(parsed);
     } catch {
       // corrupted/unavailable storage — just skip resume
     }
-  }, []);
+  }, [storageKey]);
 
   // Autosave whenever the live matchup changes.
   useEffect(() => {
     if (state.screen !== 'battle') return;
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      localStorage.setItem(storageKey, JSON.stringify(state));
     } catch {
       // storage full/unavailable — not critical, skip this save
     }
-  }, [state]);
+  }, [state, storageKey]);
 
   const clearSaved = useCallback(() => {
     try {
-      localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(storageKey);
     } catch {
       // ignore
     }
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (state.screen === 'champion') clearSaved();

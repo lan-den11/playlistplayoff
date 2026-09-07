@@ -41,7 +41,7 @@ function drawConnectors(wrapEl, svgEl, rounds) {
       paths += `<path d="M ${x1} ${y1} H ${midX} V ${y2} H ${x2}" stroke="url(#tree-connector-gradient)" stroke-width="2" fill="none" />`;
     });
   }
-  svgEl.innerHTML = `<defs><linearGradient id="tree-connector-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8b5cf6" /><stop offset="100%" stop-color="#22d3ee" /></linearGradient></defs>${paths}`;
+  svgEl.innerHTML = `<defs><linearGradient id="tree-connector-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8b5cf6" /><stop offset="100%" stop-color="#6366f1" /></linearGradient></defs>${paths}`;
 }
 
 function TreeBlock({ rounds, heading, isActiveBlock, activeRoundIdx, activeMatchIndex }) {

@@ -82,35 +82,48 @@ export default function BattleScreen({
 
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
-  // New matchup arrived: reset animation flags, (re)load embeds, flash round
-  // name if the round actually changed.
+  // New matchup arrived: reset the pick animation + spinner state and start
+  // the fixed 550ms "loading" delay for the embeds. Deliberately keyed ONLY
+  // on matchKey — this used to also depend on embedA.ready/embedB.ready,
+  // which meant the one-time "iframe API finished loading" flip re-ran this
+  // effect and cancelled the pending timers before they fired, leaving the
+  // spinner stuck forever. Splitting it out fixes that.
   useEffect(() => {
     if (!pendingA || !pendingB) return;
     setIsAnimatingPick(null);
     setEmbedLoadingA(true);
     setEmbedLoadingB(true);
 
-    if (embedA.ready) embedA.loadUri(pendingA.uri);
-    if (embedB.ready) embedB.loadUri(pendingB.uri);
     const t1 = setTimeout(() => setEmbedLoadingA(false), 550);
     const t2 = setTimeout(() => setEmbedLoadingB(false), 550);
-
-    if (roundLabel !== lastFlashKeyRef.current) {
-      lastFlashKeyRef.current = roundLabel;
-      setFlashText(roundLabel);
-      const t3 = setTimeout(() => setFlashText(null), 1100);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-      };
-    }
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchKey, embedA.ready, embedB.ready]);
+  }, [matchKey, pendingA, pendingB]);
+
+  // Loads each embed's URI whenever the matchup changes OR the controller
+  // finishes initializing — whichever happens second. Fully independent of
+  // the effect above so the one-time "ready" flip can't cancel its timers.
+  useEffect(() => {
+    if (embedA.ready && pendingA) embedA.loadUri(pendingA.uri);
+  }, [matchKey, embedA.ready, embedA.loadUri, pendingA]);
+
+  useEffect(() => {
+    if (embedB.ready && pendingB) embedB.loadUri(pendingB.uri);
+  }, [matchKey, embedB.ready, embedB.loadUri, pendingB]);
+
+  // Flashes the round name only when the round actually changes, tracked via
+  // a ref so it's decoupled from embed readiness — this is what used to get
+  // stuck showing "Round of 64" forever.
+  useEffect(() => {
+    if (!pendingA || !pendingB) return;
+    if (roundLabel === lastFlashKeyRef.current) return;
+    lastFlashKeyRef.current = roundLabel;
+    setFlashText(roundLabel);
+    const t = setTimeout(() => setFlashText(null), 1100);
+    return () => clearTimeout(t);
+  }, [roundLabel, pendingA, pendingB]);
 
   // Keyboard shortcuts: ← picks A, → picks B.
   useEffect(() => {
@@ -189,7 +202,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-violet-500 to-cyan-400" />
+            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-violet-500 to-indigo-500" />
             <TrackMeta track={pendingA} show={showDetails} lastfmEntry={lastfmData[pendingA.id]} lastfmEnabled={lastfmEnabled} />
             <motion.button
               type="button"
@@ -198,7 +211,7 @@ export default function BattleScreen({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="mt-4 w-full max-w-xs rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-400 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-60"
+              className="mt-4 w-full max-w-xs rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-60"
             >
               Choose Song
             </motion.button>
@@ -273,7 +286,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-cyan-400 to-blue-400" />
+            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-teal-400 to-cyan-600" />
             <TrackMeta track={pendingB} show={showDetails} lastfmEntry={lastfmData[pendingB.id]} lastfmEnabled={lastfmEnabled} />
             <motion.button
               type="button"
@@ -282,7 +295,7 @@ export default function BattleScreen({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="mt-4 w-full max-w-xs rounded-full bg-gradient-to-r from-cyan-400 to-blue-400 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-60"
+              className="mt-4 w-full max-w-xs rounded-full bg-gradient-to-r from-teal-400 to-cyan-600 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-60"
             >
               Choose Song
             </motion.button>
@@ -293,7 +306,7 @@ export default function BattleScreen({
         <div className="mx-auto mt-14 max-w-md">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400"
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
               animate={{ width: `${progressPct}%` }}
               transition={{ type: 'spring', stiffness: 200, damping: 30 }}
             />

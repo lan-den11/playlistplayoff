@@ -71,7 +71,7 @@ export default function OptionsScreen({
         <p className="mt-5 text-sm leading-relaxed text-zinc-400">{breakdown}</p>
 
         <div className="mt-8 flex gap-3">
-          <GradientButton gradient="violet" onClick={onStart}>
+          <GradientButton gradient="brand" onClick={onStart}>
             Start Bracket
           </GradientButton>
           <GlassButton onClick={onBack}>Back</GlassButton>
