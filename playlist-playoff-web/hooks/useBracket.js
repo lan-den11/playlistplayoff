@@ -17,11 +17,11 @@ import { fetchPlaylistTracks, fetchUserPlaylists } from '../lib/api';
 export const DEFAULT_SAVE_KEY = 'spotifyBracketSave_v1';
 
 // A completely separate slot used only by the homepage teaser bracket
-// (components/home/Hero.jsx). Keeping it isolated from DEFAULT_SAVE_KEY
-// means playing the teaser can never silently overwrite a real in-progress
-// bracket someone already saved by pasting their own playlist. When the
-// teaser hands off to the full /bracket page, it does so via a
-// `?from=trending` query param that tells this hook which slot to read.
+// (components/home/HeroMatchup.jsx). Keeping it isolated from
+// DEFAULT_SAVE_KEY means playing the teaser can never silently overwrite a
+// real in-progress bracket someone already saved by pasting their own
+// playlist. When the teaser hands off to the full /bracket page, it does so
+// via a `?from=trending` query param that tells this hook which slot to read.
 export const TRENDING_HANDOFF_STORAGE_KEY = 'trendingTeaserBracketSave_v1';
 
 const initialState = {

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, Coins, Shuffle, Clock, Settings2, ChevronDown } from 'lucide-react';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
+import EmbedPanel from './EmbedPanel';
 import TrackMeta from './TrackMeta';
 
 function SideBackground({ track, side }) {
@@ -26,26 +27,6 @@ function SideBackground({ track, side }) {
         )}
       </AnimatePresence>
       <div className="absolute inset-0 bg-zinc-950/60" />
-    </div>
-  );
-}
-
-function EmbedPanel({ track, elRef, loading, gradient }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div ref={elRef} className="min-h-[80px] sm:min-h-[152px]" />
-      <AnimatePresence>
-        {loading && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center gap-2 bg-zinc-950/80 text-xs text-zinc-400"
-          >
-            <span className={`h-3 w-3 animate-spin rounded-full border-2 border-t-transparent bg-gradient-to-r ${gradient}`} />
-            Loading…
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -190,20 +171,38 @@ export default function BattleScreen({
 
       <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-8">
         <div className="grid items-start gap-6 md:grid-cols-[1fr_auto_1fr] md:gap-8">
-          {/* Side A */}
+          {/* Side A — deliberately NOT keyed on the matchup anymore. It used
+              to be `key={`a-${matchKey}`}`, which forced React to unmount
+              and rebuild this entire subtree — including the <div> the
+              Spotify controller was attached to — on every single new song
+              pair. useSpotifyEmbed's controller (built once on first mount)
+              kept pointing at that now-destroyed node forever after, so only
+              matchup #1 ever actually played. Track art/name still animate
+              in fresh below via their own AnimatePresence; only the embed's
+              host div stays put now, and loadUri() correctly retargets the
+              same live iframe every time instead. */}
           <motion.div
-            key={`a-${matchKey}`}
-            initial={{ opacity: 0, x: -24 }}
             animate={
               isAnimatingPick
-                ? { opacity: isAnimatingPick === 'a' ? 1 : 0.35, scale: isAnimatingPick === 'a' ? 1.03 : 0.97, x: 0 }
-                : { opacity: 1, x: 0, scale: 1 }
+                ? { opacity: isAnimatingPick === 'a' ? 1 : 0.35, scale: isAnimatingPick === 'a' ? 1.03 : 0.97 }
+                : { opacity: 1, scale: 1 }
             }
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
             <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-violet-500 to-indigo-500" />
-            <TrackMeta track={pendingA} show={showDetails} lastfmEntry={lastfmData[pendingA.id]} lastfmEnabled={lastfmEnabled} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pendingA.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="w-full"
+              >
+                <TrackMeta track={pendingA} show={showDetails} lastfmEntry={lastfmData[pendingA.id]} lastfmEnabled={lastfmEnabled} />
+              </motion.div>
+            </AnimatePresence>
             <motion.button
               type="button"
               onClick={() => handlePick('a')}
@@ -276,18 +275,27 @@ export default function BattleScreen({
 
           {/* Side B */}
           <motion.div
-            key={`b-${matchKey}`}
-            initial={{ opacity: 0, x: 24 }}
             animate={
               isAnimatingPick
-                ? { opacity: isAnimatingPick === 'b' ? 1 : 0.35, scale: isAnimatingPick === 'b' ? 1.03 : 0.97, x: 0 }
-                : { opacity: 1, x: 0, scale: 1 }
+                ? { opacity: isAnimatingPick === 'b' ? 1 : 0.35, scale: isAnimatingPick === 'b' ? 1.03 : 0.97 }
+                : { opacity: 1, scale: 1 }
             }
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
             <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-teal-400 to-cyan-600" />
-            <TrackMeta track={pendingB} show={showDetails} lastfmEntry={lastfmData[pendingB.id]} lastfmEnabled={lastfmEnabled} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pendingB.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="w-full"
+              >
+                <TrackMeta track={pendingB} show={showDetails} lastfmEntry={lastfmData[pendingB.id]} lastfmEnabled={lastfmEnabled} />
+              </motion.div>
+            </AnimatePresence>
             <motion.button
               type="button"
               onClick={() => handlePick('b')}

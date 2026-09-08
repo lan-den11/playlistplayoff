@@ -20,9 +20,10 @@ import ProfileNudgeModal from './ProfileNudgeModal';
 export default function BracketApp() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Arriving from the homepage teaser (Hero.jsx) means the in-progress
-  // bracket lives in its OWN storage slot instead of the normal one — this
-  // query param is the only thing that tells this page which slot to read.
+  // Arriving from the homepage teaser (HeroMatchup.jsx) means the
+  // in-progress bracket lives in its OWN storage slot instead of the normal
+  // one — this query param is the only thing that tells this page which
+  // slot to read.
   const cameFromTrending = searchParams.get('from') === 'trending';
 
   const bracket = useBracket(cameFromTrending ? { storageKey: TRENDING_HANDOFF_STORAGE_KEY } : undefined);
