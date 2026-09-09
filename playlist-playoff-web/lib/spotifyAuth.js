@@ -2,12 +2,17 @@ import axios from 'axios';
 
 let appToken = null; // { access_token, expires_at }
 
-// Spotify's own editorially-curated "Top 50 - Global" playlist. Used as a
-// stable, no-extra-auth-scopes source of "what's trending right now" for
-// the homepage teaser bracket (see components/home/HeroMatchup.jsx) —
-// loaded through the exact same /api/playlist/[idOrUrl]/tracks route as any
-// playlist a person pastes in themselves.
-export const TRENDING_PLAYLIST_ID = '37i9dQZEVXbMDoHDwVN2tF';
+// Spotify's own editorially-curated "Top 50 - USA" playlist. Used as a
+// stable, no-extra-auth-scopes source of "what's trending right now in the
+// US" for the homepage teaser bracket (see components/home/HeroMatchup.jsx)
+// — loaded through the exact same /api/playlist/[idOrUrl]/tracks route as
+// any playlist a person pastes in themselves.
+//
+// FIX (this round): this used to point at Spotify's "Top 50 - Global"
+// playlist (37i9dQZEVXbMDoHDwVN2tF). The homepage is explicitly supposed to
+// show top trending songs in America, not a global mix, so this now points
+// at Spotify's own "Top 50 - USA" playlist instead.
+export const TRENDING_PLAYLIST_ID = '37i9dQZEVXbLRQDuF5jeBp';
 
 export async function getAppToken() {
   if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {

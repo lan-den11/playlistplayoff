@@ -152,7 +152,12 @@ export default function BattleScreen({
       <SideBackground track={pendingA} side="a" />
       <SideBackground track={pendingB} side="b" />
 
-      {/* Round announcement flash */}
+      {/* Round announcement flash. AUDIT FIX (this round): added
+          pointer-events-none. This is a purely informational toast — it
+          used to sit on top of the real buttons for its full ~1.1s without
+          pointer-events-none, silently swallowing clicks/taps on "Choose
+          Song" and the control row underneath for that whole window. A
+          transition should never lock out input it doesn't need to. */}
       <AnimatePresence>
         {flashText && (
           <motion.div
@@ -160,7 +165,7 @@ export default function BattleScreen({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-            className="fixed inset-0 z-30 flex items-center justify-center bg-zinc-950/70 backdrop-blur-sm"
+            className="pointer-events-none fixed inset-0 z-30 flex items-center justify-center bg-zinc-950/70 backdrop-blur-sm"
           >
             <span className="rounded-3xl border border-white/10 bg-white/5 px-8 py-4 font-display text-2xl font-bold tracking-tight text-zinc-50 backdrop-blur-md sm:text-3xl">
               {flashText}

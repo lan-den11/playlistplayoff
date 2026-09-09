@@ -9,13 +9,13 @@ import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
 import EmbedPanel from '../bracket/EmbedPanel';
 
-// After this many real picks, the teaser hands off to the full-screen
-// bracket at /bracket. Assumes TEASER_BRACKET_SIZE songs with no wildcard —
-// an 8-song single-elimination bracket always has 7 real matches, so 5
-// always lands mid-bracket, well before a champion is crowned. This only
-// holds because Spotify's Top 50 Global playlist reliably has 50 tracks;
-// if that source ever shrank below 6 songs the math would need revisiting.
-const PICKS_BEFORE_HANDOFF = 5;
+// FIX (this round): was 5 — the ask is "let the user make 2 selections then
+// take them to the bracket screen." After this many real picks, the teaser
+// hands off to the full-screen bracket at /bracket. Assumes
+// TEASER_BRACKET_SIZE songs with no wildcard — an 8-song single-elimination
+// bracket always has 7 real matches, so 2 always lands mid-bracket, well
+// before a champion is crowned, regardless of how this number changes later.
+const PICKS_BEFORE_HANDOFF = 2;
 const TEASER_BRACKET_SIZE = 8;
 
 function StaticFallback() {
@@ -86,6 +86,9 @@ function TeaserSide({ side, track, elRef, loading, gradient, onPick, isAnimating
  * experience — same audio, same "Choose Song" mechanic, same visual
  * language — instead of a static, click-only mockup with album art and no
  * sound. It's a taste of the real thing, not an ad for it.
+ *
+ * Seeded from Spotify's own "Top 50 - USA" playlist (see
+ * lib/spotifyAuth.js) — top trending songs in America, not a global mix.
  */
 export default function HeroMatchup() {
   const router = useRouter();
@@ -209,7 +212,7 @@ export default function HeroMatchup() {
     >
       <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">
         <Flame className="h-3.5 w-3.5 text-violet-400" />
-        Trending on Spotify · {bracket.roundLabel}
+        Trending in the US · {bracket.roundLabel}
       </p>
 
       <div className="flex items-start gap-3">

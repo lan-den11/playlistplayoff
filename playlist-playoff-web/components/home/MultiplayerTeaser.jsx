@@ -2,11 +2,44 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Bell, Check } from 'lucide-react';
+import { useWaitlist } from '@clerk/nextjs';
+import { Sparkles, Bell, Check, Loader2 } from 'lucide-react';
 import GlassButton from '../ui/GlassButton';
 
+// FIX (this round): "Get notified" used to just flip a local boolean —
+// nobody's email actually went anywhere. This now collects an email and
+// joins Clerk's real Waitlist via useWaitlist(), the same mechanism behind
+// the /waitlist page (see app/waitlist/page.jsx).
+//
+// NOTE for Landen: `waitlist.join()` will return an error until Waitlist
+// mode is switched on for this app in the Clerk Dashboard (Configure >
+// Restrictions > Sign-up modes > Waitlist) — that toggle lives on your
+// account and isn't something code can flip. The form below still renders
+// and behaves correctly either way; it'll just show a real error from Clerk
+// until that's turned on.
 export default function MultiplayerTeaser() {
-  const [notified, setNotified] = useState(false);
+  const { waitlist, errors, fetchStatus } = useWaitlist();
+  const [email, setEmail] = useState('');
+  const [localError, setLocalError] = useState('');
+
+  const joined = Boolean(waitlist?.id);
+  const isSubmitting = fetchStatus === 'fetching';
+  const fieldError = errors?.fields?.emailAddress?.longMessage;
+  const errorText = localError || fieldError;
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const value = email.trim();
+    if (!value) {
+      setLocalError('Enter an email address first.');
+      return;
+    }
+    setLocalError('');
+    const { error } = await waitlist.join({ emailAddress: value });
+    if (error) {
+      console.error('Failed to join waitlist:', error);
+    }
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-24 md:px-8 md:py-32">
@@ -41,7 +74,7 @@ export default function MultiplayerTeaser() {
 
         <div className="relative mt-9 flex justify-center">
           <AnimatePresence mode="wait" initial={false}>
-            {notified ? (
+            {joined ? (
               <motion.div
                 key="confirmed"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -53,15 +86,31 @@ export default function MultiplayerTeaser() {
                 You're on the list
               </motion.div>
             ) : (
-              <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <GlassButton onClick={() => setNotified(true)}>
-                  <Bell className="h-4 w-4" />
-                  Get notified
+              <motion.form
+                key="cta"
+                onSubmit={handleSubmit}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex w-full max-w-sm flex-col items-stretch gap-2 sm:flex-row"
+              >
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none disabled:opacity-60"
+                />
+                <GlassButton type="submit" className={isSubmitting ? 'pointer-events-none opacity-70' : ''}>
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+                  {isSubmitting ? 'Joining…' : 'Get notified'}
                 </GlassButton>
-              </motion.div>
+              </motion.form>
             )}
           </AnimatePresence>
         </div>
+        {errorText && !joined && <p className="relative mt-3 text-xs text-rose-400">{errorText}</p>}
       </motion.div>
     </section>
   );
