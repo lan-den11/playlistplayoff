@@ -14,14 +14,8 @@ function readStoredUsername() {
   }
 }
 
-/**
- * Background Last.fm play-count fetcher. Tracks are enqueued (typically in
- * bracket-appearance order) and fetched one at a time — the actual 5 req/sec
- * throttling already lives server-side in Express, this just avoids firing
- * dozens of concurrent requests from the client for no reason.
- */
 export function useLastfmData() {
-  const [data, setData] = useState({}); // trackId -> { status, playcount, tags }
+  const [data, setData] = useState({});
   const [enabled, setEnabled] = useState(true);
   const queueRef = useRef([]);
   const queuedIdsRef = useRef(new Set());

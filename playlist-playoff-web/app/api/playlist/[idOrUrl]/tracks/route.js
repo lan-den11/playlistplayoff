@@ -6,9 +6,6 @@ export async function GET(_request, { params }) {
   const playlistId = extractPlaylistId(idOrUrl);
 
   try {
-    // This line crashed the old Express server when it lived outside the
-    // try block (an uncaught rejection here took down the whole process).
-    // Keeping it in here is the actual fix, not just a rewrite.
     const token = await getAppToken();
 
     let items = [];
@@ -48,9 +45,6 @@ export async function GET(_request, { params }) {
       );
     }
     if (!status) {
-      // Not a Spotify API error (no e.response) — most likely a local config
-      // problem like missing credentials. Surface the real message instead
-      // of a generic one so it's actually debuggable from the browser.
       return Response.json({ error: e.message }, { status: 500 });
     }
     return Response.json({ error: 'Failed to fetch playlist tracks.' }, { status: 500 });

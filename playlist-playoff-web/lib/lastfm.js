@@ -9,17 +9,6 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Same sliding-window limiter as the original Express queue: at most 5
-// requests to Last.fm per rolling second, enforced by making callers wait
-// their turn rather than rejecting them.
-//
-// NOTE: this only holds as a hard guarantee on a single, persistent Node
-// process (e.g. `next start` on a VPS/Railway/Fly, or `next dev`). If this
-// app is deployed to a serverless platform (Vercel functions), each
-// concurrent function instance gets its OWN copy of this counter, so the
-// real aggregate rate to Last.fm could exceed 5/sec under concurrent
-// traffic. Fine for solo/small-group use; worth revisiting before this is
-// under real concurrent load.
 async function acquireSlot() {
   for (;;) {
     const now = Date.now();

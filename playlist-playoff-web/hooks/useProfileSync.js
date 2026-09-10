@@ -4,14 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { fetchProfile, saveProfile as saveProfileRequest } from '../lib/api';
 
-/**
- * Loads the saved profile the moment someone signs in, and exposes a save
- * function for the settings panel / nudge modal to call.
- *
- * No token-passing needed anymore — now that /api/profile lives in this same
- * Next.js app, the browser sends the Clerk session cookie automatically and
- * the route reads it server-side via auth().
- */
 export function useProfileSync({ onLoaded, onEmptyProfile } = {}) {
   const { isSignedIn } = useAuth();
   const { isLoaded } = useUser();

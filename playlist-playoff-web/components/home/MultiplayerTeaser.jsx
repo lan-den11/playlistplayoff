@@ -6,17 +6,6 @@ import { useWaitlist } from '@clerk/nextjs';
 import { Sparkles, Bell, Check, Loader2 } from 'lucide-react';
 import GlassButton from '../ui/GlassButton';
 
-// FIX (this round): "Get notified" used to just flip a local boolean —
-// nobody's email actually went anywhere. This now collects an email and
-// joins Clerk's real Waitlist via useWaitlist(), the same mechanism behind
-// the /waitlist page (see app/waitlist/page.jsx).
-//
-// NOTE for Landen: `waitlist.join()` will return an error until Waitlist
-// mode is switched on for this app in the Clerk Dashboard (Configure >
-// Restrictions > Sign-up modes > Waitlist) — that toggle lives on your
-// account and isn't something code can flip. The form below still renders
-// and behaves correctly either way; it'll just show a real error from Clerk
-// until that's turned on.
 export default function MultiplayerTeaser() {
   const { waitlist, errors, fetchStatus } = useWaitlist();
   const [email, setEmail] = useState('');
@@ -50,9 +39,6 @@ export default function MultiplayerTeaser() {
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-8 py-16 text-center backdrop-blur-md sm:px-14"
       >
-        {/* Gold glow ties this "premium/coming soon" section to the same
-            accent used for the champion moment — one consistent meaning for
-            gold across the app, instead of a one-off hue. */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/15 blur-[100px]"

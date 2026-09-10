@@ -9,19 +9,15 @@ import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
 import EmbedPanel from '../bracket/EmbedPanel';
 
-// FIX (this round): was 5 — the ask is "let the user make 2 selections then
-// take them to the bracket screen." After this many real picks, the teaser
-// hands off to the full-screen bracket at /bracket. Assumes
-// TEASER_BRACKET_SIZE songs with no wildcard — an 8-song single-elimination
-// bracket always has 7 real matches, so 2 always lands mid-bracket, well
-// before a champion is crowned, regardless of how this number changes later.
 const PICKS_BEFORE_HANDOFF = 2;
 const TEASER_BRACKET_SIZE = 8;
 
 function StaticFallback() {
   // Shown only if the live Spotify fetch fails entirely (e.g. missing
-  // credentials) — a non-interactive placeholder so the homepage never
-  // looks broken to a visitor.
+  // credentials, an invalid/expired token, or a network error) — a
+  // non-interactive placeholder so the homepage never looks fully broken to
+  // a visitor. See the console.error below this component for exactly why
+  // it's showing in any given case — this card itself never explains why.
   return (
     <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
       <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">Round of 8</p>
@@ -80,21 +76,29 @@ function TeaserSide({ side, track, elRef, loading, gradient, onPick, isAnimating
 }
 
 /**
- * The homepage's live, playable teaser. This runs a real 8-song bracket
- * through the exact same engine (useBracket) and the exact same Spotify
- * embed component (EmbedPanel / useSpotifyEmbed) as the full /bracket
- * experience — same audio, same "Choose Song" mechanic, same visual
- * language — instead of a static, click-only mockup with album art and no
- * sound. It's a taste of the real thing, not an ad for it.
+ * The homepage's live, playable teaser. Runs a real 8-song bracket through
+ * the exact same engine (useBracket) and the exact same Spotify embed
+ * component (EmbedPanel / useSpotifyEmbed) as the full /bracket experience.
  *
- * Seeded from Spotify's own "Top 50 - USA" playlist (see
- * lib/spotifyAuth.js) — top trending songs in America, not a global mix.
+ * Seeded from Spotify's own "Top 50 - USA" playlist (see lib/spotifyAuth.js)
+ * — VERIFIED live against Spotify this round, this ID is correct and current.
+ *
+ * DIAGNOSTIC ADDED (this round): if you're seeing the static, non-interactive
+ * placeholder card here instead of real, playable songs, this component was
+ * ALREADY built to fall back to that placeholder the moment the trending
+ * playlist fails to load for ANY reason — but it swallowed the actual error
+ * completely silently, with zero indication of why. That's almost certainly
+ * what you're seeing: not a rendering bug, but `bracket.state.loadError`
+ * being set because the fetch to Spotify failed. The single most common
+ * cause is `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` missing or wrong in
+ * this environment's env vars — that's a `.env.local` file locally, and a
+ * separate environment-variable entry on your hosting platform's dashboard
+ * if deployed (see README_CHANGES.txt for the exact fastest way to confirm
+ * this in under 10 seconds). The `console.error` below now surfaces the
+ * *exact* reason the moment it happens, instead of you having to guess.
  */
 export default function HeroMatchup() {
   const router = useRouter();
-  // Its own isolated save slot (see hooks/useBracket.js) so this teaser can
-  // never overwrite a real in-progress bracket someone already has saved
-  // from pasting their own playlist.
   const bracket = useBracket({ storageKey: TRENDING_HANDOFF_STORAGE_KEY });
   const embedA = useSpotifyEmbed();
   const embedB = useSpotifyEmbed();
@@ -108,16 +112,24 @@ export default function HeroMatchup() {
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
-  // Kick off loading the trending playlist once, on mount — the exact same
-  // playlist-tracks route a pasted-in playlist would use.
   useEffect(() => {
     bracket.loadPlaylist(TRENDING_PLAYLIST_ID);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The instant tracks are loaded, skip the options screen entirely — this
-  // teaser always runs the same fixed 8-song, no-wildcard, shuffled bracket
-  // — and jump straight into battling.
+  // DIAGNOSTIC (this round): surfaces the real reason the live teaser fell
+  // back to the static placeholder, instead of failing completely silently.
+  // Open the browser console — the exact error from /api/playlist/.../tracks
+  // (e.g. "Spotify credentials not configured...") will be right here.
+  useEffect(() => {
+    if (bracket.state.loadError) {
+      console.error(
+        '[HeroMatchup] Trending playlist failed to load — falling back to the static, non-interactive preview. Reason:',
+        bracket.state.loadError
+      );
+    }
+  }, [bracket.state.loadError]);
+
   useEffect(() => {
     if (bracket.state.screen === 'options' && !autoStartedRef.current) {
       autoStartedRef.current = true;
@@ -129,10 +141,6 @@ export default function HeroMatchup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bracket.state.screen]);
 
-  // After a handful of real picks, hand off to the full bracket page.
-  // useBracket already autosaved every one of those picks under
-  // TRENDING_HANDOFF_STORAGE_KEY, so /bracket just needs to know to look
-  // there (via the ?from=trending query param) and offer to resume.
   useEffect(() => {
     if (bracket.state.screen !== 'battle') return;
     if (bracket.state.completedRealMatchesOverall < PICKS_BEFORE_HANDOFF) return;
@@ -141,12 +149,6 @@ export default function HeroMatchup() {
     return () => clearTimeout(t);
   }, [bracket.state.completedRealMatchesOverall, bracket.state.screen, router]);
 
-  // Same fixed 550ms "loading" delay BattleScreen uses, reset per matchup.
-  // Just like BattleScreen, the embeds' host <div>s below (inside
-  // EmbedPanel) are never remounted across matchups — only re-targeted via
-  // loadUri(). That symmetry is deliberate: it's the fix for the "only the
-  // first song ever plays" bug, and it has to hold here too or this teaser
-  // would have the exact same bug all over again.
   useEffect(() => {
     if (!pendingA || !pendingB) return;
     setIsAnimatingPick(null);

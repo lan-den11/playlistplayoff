@@ -63,12 +63,6 @@ export default function BattleScreen({
 
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
-  // New matchup arrived: reset the pick animation + spinner state and start
-  // the fixed 550ms "loading" delay for the embeds. Deliberately keyed ONLY
-  // on matchKey — this used to also depend on embedA.ready/embedB.ready,
-  // which meant the one-time "iframe API finished loading" flip re-ran this
-  // effect and cancelled the pending timers before they fired, leaving the
-  // spinner stuck forever. Splitting it out fixes that.
   useEffect(() => {
     if (!pendingA || !pendingB) return;
     setIsAnimatingPick(null);
@@ -83,9 +77,6 @@ export default function BattleScreen({
     };
   }, [matchKey, pendingA, pendingB]);
 
-  // Loads each embed's URI whenever the matchup changes OR the controller
-  // finishes initializing — whichever happens second. Fully independent of
-  // the effect above so the one-time "ready" flip can't cancel its timers.
   useEffect(() => {
     if (embedA.ready && pendingA) embedA.loadUri(pendingA.uri);
   }, [matchKey, embedA.ready, embedA.loadUri, pendingA]);
@@ -94,9 +85,6 @@ export default function BattleScreen({
     if (embedB.ready && pendingB) embedB.loadUri(pendingB.uri);
   }, [matchKey, embedB.ready, embedB.loadUri, pendingB]);
 
-  // Flashes the round name only when the round actually changes, tracked via
-  // a ref so it's decoupled from embed readiness — this is what used to get
-  // stuck showing "Round of 64" forever.
   useEffect(() => {
     if (!pendingA || !pendingB) return;
     if (roundLabel === lastFlashKeyRef.current) return;
@@ -106,7 +94,6 @@ export default function BattleScreen({
     return () => clearTimeout(t);
   }, [roundLabel, pendingA, pendingB]);
 
-  // Keyboard shortcuts: ← picks A, → picks B.
   useEffect(() => {
     function handleKeydown(e) {
       const tag = e.target.tagName;
@@ -119,7 +106,6 @@ export default function BattleScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingA, pendingB, isAnimatingPick]);
 
-  // Dismiss the "see full bracket" hint the first time the person scrolls.
   useEffect(() => {
     if (!showScrollHint) return;
     function handleScroll() {
@@ -152,12 +138,6 @@ export default function BattleScreen({
       <SideBackground track={pendingA} side="a" />
       <SideBackground track={pendingB} side="b" />
 
-      {/* Round announcement flash. AUDIT FIX (this round): added
-          pointer-events-none. This is a purely informational toast — it
-          used to sit on top of the real buttons for its full ~1.1s without
-          pointer-events-none, silently swallowing clicks/taps on "Choose
-          Song" and the control row underneath for that whole window. A
-          transition should never lock out input it doesn't need to. */}
       <AnimatePresence>
         {flashText && (
           <motion.div
@@ -176,16 +156,6 @@ export default function BattleScreen({
 
       <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-8">
         <div className="grid items-start gap-6 md:grid-cols-[1fr_auto_1fr] md:gap-8">
-          {/* Side A — deliberately NOT keyed on the matchup anymore. It used
-              to be `key={`a-${matchKey}`}`, which forced React to unmount
-              and rebuild this entire subtree — including the <div> the
-              Spotify controller was attached to — on every single new song
-              pair. useSpotifyEmbed's controller (built once on first mount)
-              kept pointing at that now-destroyed node forever after, so only
-              matchup #1 ever actually played. Track art/name still animate
-              in fresh below via their own AnimatePresence; only the embed's
-              host div stays put now, and loadUri() correctly retargets the
-              same live iframe every time instead. */}
           <motion.div
             animate={
               isAnimatingPick
@@ -221,7 +191,6 @@ export default function BattleScreen({
             </motion.button>
           </motion.div>
 
-          {/* Center panel */}
           <div className="order-first flex flex-col items-center gap-3 md:order-none md:w-56">
             <p className="font-display text-sm font-bold uppercase tracking-widest text-zinc-500">{roundLabel}</p>
             <p className="text-xs text-zinc-500">
@@ -278,7 +247,6 @@ export default function BattleScreen({
             </AnimatePresence>
           </div>
 
-          {/* Side B */}
           <motion.div
             animate={
               isAnimatingPick
@@ -315,7 +283,6 @@ export default function BattleScreen({
           </motion.div>
         </div>
 
-        {/* Bottom progress + scroll hint */}
         <div className="mx-auto mt-14 max-w-md">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
             <motion.div

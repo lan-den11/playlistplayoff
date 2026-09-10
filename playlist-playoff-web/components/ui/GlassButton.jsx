@@ -2,10 +2,6 @@
 
 import { motion } from 'framer-motion';
 
-/**
- * Secondary CTA — translucent glass pill, used wherever a gradient button
- * would compete with a nearby primary action (nav, coming-soon section).
- */
 export default function GlassButton({ children, onClick, type = 'button', className = '' }) {
   return (
     <motion.button

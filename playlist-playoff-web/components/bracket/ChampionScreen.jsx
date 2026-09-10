@@ -8,9 +8,6 @@ import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
 import GradientButton from '../ui/GradientButton';
 import GlassButton from '../ui/GlassButton';
 
-// Confetti stays tied to the app's actual palette (brand violet/indigo,
-// champion gold, and white) instead of throwing in extra one-off hues —
-// festive without turning into five clashing colors.
 const CONFETTI_COLORS = ['#7c3aed', '#6366f1', '#f5b759', '#fafafa'];
 
 function Confetti() {

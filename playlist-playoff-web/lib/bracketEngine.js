@@ -1,8 +1,3 @@
-// Pure bracket logic, ported directly from the original app.js. Nothing here
-// touches the DOM or does I/O — it's just data in, data out — so the reducer
-// in useBracket.js can call it deterministically and it stays trivially
-// testable on its own.
-
 export function shuffleArray(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -24,9 +19,6 @@ export function pairUp(arr) {
   return m;
 }
 
-// Reorders a padded (power-of-two-length) seed array so byes (nulls, always
-// at the tail after padding) get distributed as 1-real-vs-1-bye pairs instead
-// of clumping into wasted bye-vs-bye pairs.
 export function standardSeed(arr) {
   const n = arr.length;
   const result = new Array(n);
@@ -53,11 +45,9 @@ export function buildTreeStructure(seeds) {
 export function autoPickBracketSize(total) {
   const options = [4, 8, 16, 32, 64, 128, 256];
   for (const opt of options) if (total <= opt) return opt;
-  return 256; // biggest supported size; overflow still handled via the wildcard round
+  return 256;
 }
 
-// Wildcard slots scale with how much overflow there actually is, instead of
-// always reserving half the bracket regardless of how close total is to size.
 export function computeWildcardSplit(total, size) {
   if (total <= size) return { autoSlots: total, wildcardSlots: 0, wildcardPool: 0, needsWildcard: false };
   const overflow = total - size;
@@ -99,8 +89,6 @@ export function buildFetchOrder(matchesArr) {
   return order;
 }
 
-// Scoped to the main bracket only (not the wildcard qualifier) — the
-// wildcard round decides who *qualifies*, not final placement.
 export function computeStandings(mainBracketRounds) {
   const standings = [];
   if (!mainBracketRounds) return standings;

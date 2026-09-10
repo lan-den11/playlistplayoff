@@ -1,8 +1,3 @@
-// Fetch wrapper for this app's own API routes (app/api/**). Now that the
-// API lives in the same Next.js app instead of a separate Express server,
-// these are just same-origin relative paths — no base URL, no CORS, no
-// bearer tokens (the browser sends the Clerk session cookie automatically).
-
 async function request(path, options = {}) {
   const res = await fetch(path, options);
   const data = await res.json().catch(() => ({}));

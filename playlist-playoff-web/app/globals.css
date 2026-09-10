@@ -11,18 +11,11 @@ body {
   color: #fafafa;
 }
 
-/* Visible keyboard focus everywhere, since we override a lot of default
-   browser button/link styling below. */
 :focus-visible {
   outline: 2px solid rgba(139, 92, 246, 0.8);
   outline-offset: 3px;
 }
 
-/* Covers plain CSS transitions/animations (e.g. the hover-color transitions
-   on GlassButton, Navbar links). Framer Motion's animations are handled
-   separately via <MotionConfig reducedMotion="user"> in app/layout.jsx,
-   since they run on transform/opacity through JS, not through these CSS
-   properties — this block alone never touched them. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -32,21 +25,12 @@ body {
   }
 }
 
-/* AUDIT ADDITION (this round): the app leans heavily on backdrop-blur glass
-   panels, but had no fallback for people who've asked their OS to reduce
-   transparency. This drops the blur everywhere when that preference is on,
-   so translucent surfaces read as flatter, higher-contrast panels instead
-   of relying on blur for legibility. */
 @media (prefers-reduced-transparency: reduce) {
   * {
     backdrop-filter: none !important;
   }
 }
 
-/* AUDIT ADDITION (this round): a generic, safe boost for people who've
-   asked for more contrast — the app's borders are mostly a subtle
-   border-white/10, which is easy to lose against the zinc-950 background at
-   higher contrast settings. */
 @media (prefers-contrast: more) {
   * {
     border-color: rgba(255, 255, 255, 0.4) !important;

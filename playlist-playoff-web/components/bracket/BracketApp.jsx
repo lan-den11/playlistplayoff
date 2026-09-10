@@ -20,10 +20,6 @@ import ProfileNudgeModal from './ProfileNudgeModal';
 export default function BracketApp() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Arriving from the homepage teaser (HeroMatchup.jsx) means the
-  // in-progress bracket lives in its OWN storage slot instead of the normal
-  // one — this query param is the only thing that tells this page which
-  // slot to read.
   const cameFromTrending = searchParams.get('from') === 'trending';
 
   const bracket = useBracket(cameFromTrending ? { storageKey: TRENDING_HANDOFF_STORAGE_KEY } : undefined);
@@ -40,8 +36,6 @@ export default function BracketApp() {
     onEmptyProfile: () => setNudgeOpen(true),
   });
 
-  // Last.fm prefetch starts the moment a playlist loads (ordered by
-  // recency), then re-orders to bracket-appearance order once a round starts.
   useEffect(() => {
     if (bracket.state.masterSortedTracks.length) enqueueTracks(bracket.state.masterSortedTracks);
   }, [bracket.state.masterSortedTracks, enqueueTracks]);
@@ -50,9 +44,6 @@ export default function BracketApp() {
     if (bracket.state.matches.length) enqueueTracks(buildFetchOrder(bracket.state.matches));
   }, [bracket.state.matches, enqueueTracks]);
 
-  // Once the resume choice is made, drop the ?from=trending param so a
-  // later refresh (or pasting a brand-new playlist) goes back to using the
-  // normal save slot instead of the teaser's.
   function clearTrendingParam() {
     if (cameFromTrending) router.replace('/bracket');
   }
