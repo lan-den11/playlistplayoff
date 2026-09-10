@@ -11,7 +11,7 @@ let appToken = null; // { access_token, expires_at }
 // Hero teaser is still falling back to the static, non-interactive preview
 // card, the ID is NOT the problem — see the note in HeroMatchup.jsx and
 // README_CHANGES.txt about SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET.
-export const TRENDING_PLAYLIST_ID = '37i9dQZEVXbLRQDuF5jeBp';
+export const TRENDING_PLAYLIST_ID = '37i9dQZF1FwRJQfEovuoNH';
 
 export async function getAppToken() {
   if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
