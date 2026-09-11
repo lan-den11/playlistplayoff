@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import GradientButton from '../ui/GradientButton';
+import GhostFibers from '../ui/GhostFibers';
 import HeroMatchup from './HeroMatchup';
 
 const container = {
@@ -21,14 +22,10 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden px-6 pb-16 pt-14 md:px-8 md:pb-32 md:pt-28">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-violet-600/20 blur-[120px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-24 right-0 h-[26rem] w-[26rem] rounded-full bg-indigo-500/15 blur-[110px]"
-      />
+      <div aria-hidden="true" className="absolute inset-0 -z-10">
+        <GhostFibers lineColor="#140E35" glowColor="#3437A0" />
+        <div className="absolute inset-0 bg-zinc-950/45" />
+      </div>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-16">
         <motion.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">

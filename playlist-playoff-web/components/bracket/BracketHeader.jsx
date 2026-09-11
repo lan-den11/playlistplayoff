@@ -16,8 +16,8 @@ export default function BracketHeader({ screen, headerProgressPct, onExit, onEdi
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500">
-            <Headphones className="h-5 w-5 text-zinc-950" strokeWidth={2.5} />
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md">
+            <Headphones className="h-5 w-5 text-zinc-50" strokeWidth={2.5} />
           </span>
           <span className="hidden font-display text-lg font-bold tracking-tight text-zinc-50 sm:inline">
             Playlist Playoff
@@ -64,7 +64,7 @@ export default function BracketHeader({ screen, headerProgressPct, onExit, onEdi
       {showProgress && (
         <div className="h-1 w-full bg-white/5">
           <motion.div
-            className="h-full bg-gradient-to-r from-violet-500 to-indigo-500"
+            className="h-full bg-zinc-50 shadow-[0_0_10px_rgba(255,255,255,0.6)]"
             animate={{ width: `${headerProgressPct}%` }}
             transition={{ type: 'spring', stiffness: 200, damping: 30 }}
           />

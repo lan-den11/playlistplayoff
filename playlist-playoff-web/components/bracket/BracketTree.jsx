@@ -44,7 +44,7 @@ function drawConnectors(wrapEl, contentEl, svgEl, rounds, lastSizeRef) {
       paths += `<path d="M ${x1} ${y1} H ${midX} V ${y2} H ${x2}" stroke="url(#tree-connector-gradient)" stroke-width="2" fill="none" />`;
     });
   }
-  svgEl.innerHTML = `<defs><linearGradient id="tree-connector-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8b5cf6" /><stop offset="100%" stop-color="#6366f1" /></linearGradient></defs>${paths}`;
+  svgEl.innerHTML = `<defs><linearGradient id="tree-connector-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,0.25)" /><stop offset="100%" stop-color="rgba(255,255,255,0.85)" /></linearGradient></defs>${paths}`;
 }
 
 function TreeBlock({ rounds, heading, isActiveBlock, activeRoundIdx, activeMatchIndex }) {
@@ -100,8 +100,8 @@ function TreeBlock({ rounds, heading, isActiveBlock, activeRoundIdx, activeMatch
                   <div
                     key={i}
                     data-match-idx={i}
-                    className={`w-48 overflow-hidden rounded-xl border ${
-                      isActive ? 'border-violet-400/50 bg-violet-500/10 shadow-[0_0_0_1px_rgba(139,92,246,0.3)]' : 'border-white/10 bg-white/5'
+                    className={`w-48 overflow-hidden rounded-xl border backdrop-blur-md ${
+                      isActive ? 'border-white/30 bg-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.25)]' : 'border-white/10 bg-white/5'
                     }`}
                   >
                     <div
