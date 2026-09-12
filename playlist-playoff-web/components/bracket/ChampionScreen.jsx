@@ -8,7 +8,7 @@ import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
 import GradientButton from '../ui/GradientButton';
 import GlassButton from '../ui/GlassButton';
 
-const CONFETTI_COLORS = ['#7c3aed', '#6366f1', '#f5b759', '#fafafa'];
+const CONFETTI_COLORS = ['#3437A0', '#7B7DC1', '#f5b759', '#fafafa'];
 
 function Confetti() {
   const pieces = useMemo(

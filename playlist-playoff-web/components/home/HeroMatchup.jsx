@@ -7,6 +7,7 @@ import { Flame, Loader2, Music2 } from 'lucide-react';
 import { useBracket, TRENDING_HANDOFF_STORAGE_KEY } from '../../hooks/useBracket';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
+import GradientButton from '../ui/GradientButton';
 import EmbedPanel from '../bracket/EmbedPanel';
 
 const PICKS_BEFORE_HANDOFF = 2;
@@ -22,17 +23,17 @@ function StaticFallback() {
     <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
       <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">Round of 8</p>
       <div className="flex items-start gap-3">
-        <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-violet-400/30 bg-violet-500/10 p-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500">
-            <Music2 className="h-6 w-6 text-zinc-950" />
+        <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-brand/30 bg-brand/10 p-4 backdrop-blur-md">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
+            <Music2 className="h-6 w-6 text-brand-light" />
           </div>
           <p className="truncate text-sm font-semibold text-zinc-50">Night Drive</p>
           <p className="truncate text-xs text-zinc-400">Nocturn</p>
         </div>
         <span className="mt-8 flex-none font-display text-sm font-bold text-zinc-600">VS</span>
-        <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-teal-400/30 bg-teal-500/10 p-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-cyan-600">
-            <Music2 className="h-6 w-6 text-zinc-950" />
+        <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 backdrop-blur-md">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
+            <Music2 className="h-6 w-6 text-sky-400" />
           </div>
           <p className="truncate text-sm font-semibold text-zinc-50">Golden Hour</p>
           <p className="truncate text-xs text-zinc-400">Marlowe</p>
@@ -42,7 +43,7 @@ function StaticFallback() {
   );
 }
 
-function TeaserSide({ side, track, elRef, loading, gradient, onPick, isAnimatingPick }) {
+function TeaserSide({ side, track, elRef, loading, embedGradient, accent, onPick, isAnimatingPick }) {
   const isWinner = isAnimatingPick === side;
 
   return (
@@ -55,22 +56,20 @@ function TeaserSide({ side, track, elRef, loading, gradient, onPick, isAnimating
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
       className="flex flex-1 flex-col items-center gap-2.5"
     >
-      <EmbedPanel elRef={elRef} loading={loading} gradient={gradient} />
+      <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} />
       <div className="w-full text-center">
         <p className="truncate font-display text-sm font-semibold text-zinc-50">{track?.name}</p>
         <p className="truncate text-xs text-zinc-400">{track?.artists}</p>
       </div>
-      <motion.button
-        type="button"
+      <GradientButton
+        gradient={accent}
+        size="sm"
         onClick={() => onPick(side)}
         disabled={Boolean(isAnimatingPick)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className={`w-full rounded-full bg-gradient-to-r ${gradient} px-4 py-2.5 text-xs font-semibold text-zinc-950 disabled:opacity-60`}
+        className="w-full"
       >
         Choose Song
-      </motion.button>
+      </GradientButton>
     </motion.div>
   );
 }
@@ -83,19 +82,13 @@ function TeaserSide({ side, track, elRef, loading, gradient, onPick, isAnimating
  * Seeded from Spotify's own "Top 50 - USA" playlist (see lib/spotifyAuth.js)
  * — VERIFIED live against Spotify this round, this ID is correct and current.
  *
- * DIAGNOSTIC ADDED (this round): if you're seeing the static, non-interactive
- * placeholder card here instead of real, playable songs, this component was
- * ALREADY built to fall back to that placeholder the moment the trending
- * playlist fails to load for ANY reason — but it swallowed the actual error
- * completely silently, with zero indication of why. That's almost certainly
- * what you're seeing: not a rendering bug, but `bracket.state.loadError`
- * being set because the fetch to Spotify failed. The single most common
- * cause is `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` missing or wrong in
- * this environment's env vars — that's a `.env.local` file locally, and a
- * separate environment-variable entry on your hosting platform's dashboard
- * if deployed (see README_CHANGES.txt for the exact fastest way to confirm
- * this in under 10 seconds). The `console.error` below now surfaces the
- * *exact* reason the moment it happens, instead of you having to guess.
+ * DIAGNOSTIC ADDED: if you're seeing the static, non-interactive placeholder
+ * card here instead of real, playable songs, this component was already
+ * built to fall back to that placeholder the moment the trending playlist
+ * fails to load for ANY reason. The single most common cause is
+ * `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` missing or wrong in this
+ * environment's env vars. The `console.error` below surfaces the exact
+ * reason the moment it happens.
  */
 export default function HeroMatchup() {
   const router = useRouter();
@@ -117,10 +110,10 @@ export default function HeroMatchup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // DIAGNOSTIC (this round): surfaces the real reason the live teaser fell
-  // back to the static placeholder, instead of failing completely silently.
-  // Open the browser console — the exact error from /api/playlist/.../tracks
-  // (e.g. "Spotify credentials not configured...") will be right here.
+  // DIAGNOSTIC: surfaces the real reason the live teaser fell back to the
+  // static placeholder, instead of failing completely silently. Open the
+  // browser console — the exact error from /api/playlist/.../tracks (e.g.
+  // "Spotify credentials not configured...") will be right here.
   useEffect(() => {
     if (bracket.state.loadError) {
       console.error(
@@ -187,7 +180,7 @@ export default function HeroMatchup() {
         animate={{ opacity: 1, scale: 1 }}
         className="mx-auto flex w-full max-w-lg flex-col items-center gap-3 rounded-3xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur-md"
       >
-        <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-brand-light" />
         <p className="font-display text-sm font-semibold text-zinc-50">Setting up your full bracket…</p>
       </motion.div>
     );
@@ -213,7 +206,7 @@ export default function HeroMatchup() {
       className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40"
     >
       <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">
-        <Flame className="h-3.5 w-3.5 text-violet-400" />
+        <Flame className="h-3.5 w-3.5 text-brand-light" />
         Trending in the US · {bracket.roundLabel}
       </p>
 
@@ -223,7 +216,8 @@ export default function HeroMatchup() {
           track={pendingA}
           elRef={embedA.elRef}
           loading={embedLoadingA}
-          gradient="from-violet-500 to-indigo-500"
+          embedGradient="from-brand to-brand-light"
+          accent="brand"
           onPick={handlePick}
           isAnimatingPick={isAnimatingPick}
         />
@@ -233,7 +227,8 @@ export default function HeroMatchup() {
           track={pendingB}
           elRef={embedB.elRef}
           loading={embedLoadingB}
-          gradient="from-teal-400 to-cyan-600"
+          embedGradient="from-sky-400 to-sky-600"
+          accent="sideB"
           onPick={handlePick}
           isAnimatingPick={isAnimatingPick}
         />

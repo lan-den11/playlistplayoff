@@ -86,7 +86,7 @@ export default function MultiplayerTeaser() {
                   type="email"
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none disabled:opacity-60"
+                  className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
                 />
                 <GlassButton type="submit" className={isSubmitting ? 'pointer-events-none opacity-70' : ''}>
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}

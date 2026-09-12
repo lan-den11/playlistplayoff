@@ -31,14 +31,14 @@ export default function ProfileNudgeModal({ open, onClose, onSave, initialSpotif
           onChange={(e) => setSpotifyUsername(e.target.value)}
           type="text"
           placeholder="Spotify username (optional)"
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none"
         />
         <input
           value={lastfmUsername}
           onChange={(e) => setLastfmUsername(e.target.value)}
           type="text"
           placeholder="Last.fm username (optional)"
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none"
         />
       </div>
       <div className="mt-6 flex justify-center gap-3">

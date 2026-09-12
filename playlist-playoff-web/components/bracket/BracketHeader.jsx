@@ -64,7 +64,7 @@ export default function BracketHeader({ screen, headerProgressPct, onExit, onEdi
       {showProgress && (
         <div className="h-1 w-full bg-white/5">
           <motion.div
-            className="h-full bg-zinc-50 shadow-[0_0_10px_rgba(255,255,255,0.6)]"
+            className="h-full bg-gradient-to-r from-brand to-brand-light shadow-[0_0_10px_rgba(52,55,160,0.6)]"
             animate={{ width: `${headerProgressPct}%` }}
             transition={{ type: 'spring', stiffness: 200, damping: 30 }}
           />

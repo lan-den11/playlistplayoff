@@ -13,8 +13,8 @@ function TrackDetailsMockup() {
       className="relative mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md shadow-2xl shadow-black/40"
     >
       <div className="flex items-center gap-3 border-b border-white/10 pb-5">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500">
-          <Music2 className="h-6 w-6 text-zinc-950" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md">
+          <Music2 className="h-6 w-6 text-zinc-50" />
         </div>
         <div className="min-w-0">
           <p className="truncate font-display text-base font-semibold tracking-tight text-zinc-50">
@@ -28,13 +28,13 @@ function TrackDetailsMockup() {
         <div>
           <div className="mb-1.5 flex items-center justify-between text-xs">
             <span className="flex items-center gap-1.5 font-medium text-zinc-300">
-              <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
+              <BarChart3 className="h-3.5 w-3.5 text-brand-light" />
               Your plays
             </span>
             <span className="font-display font-bold text-zinc-50">247</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
-            <div className="h-full w-[88%] rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" />
+            <div className="h-full w-[88%] rounded-full bg-gradient-to-r from-brand to-brand-light" />
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, Coins, Shuffle, Clock, Settings2, ChevronDown } from 'lucide-react';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
+import GradientButton from '../ui/GradientButton';
 import EmbedPanel from './EmbedPanel';
 import TrackMeta from './TrackMeta';
 
@@ -165,7 +166,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-violet-500 to-indigo-500" />
+            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-brand to-brand-light" />
             <AnimatePresence mode="wait">
               <motion.div
                 key={pendingA.id}
@@ -178,17 +179,9 @@ export default function BattleScreen({
                 <TrackMeta track={pendingA} show={showDetails} lastfmEntry={lastfmData[pendingA.id]} lastfmEnabled={lastfmEnabled} />
               </motion.div>
             </AnimatePresence>
-            <motion.button
-              type="button"
-              onClick={() => handlePick('a')}
-              disabled={controlsDisabled}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="mt-4 w-full max-w-xs rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-60"
-            >
+            <GradientButton gradient="brand" onClick={() => handlePick('a')} disabled={controlsDisabled} className="mt-4 w-full max-w-xs">
               Choose Song
-            </motion.button>
+            </GradientButton>
           </motion.div>
 
           <div className="order-first flex flex-col items-center gap-3 md:order-none md:w-56">
@@ -227,7 +220,7 @@ export default function BattleScreen({
                         type="checkbox"
                         checked={showDetails}
                         onChange={(e) => onSetShowDetails(e.target.checked)}
-                        className="h-3.5 w-3.5 accent-violet-500"
+                        className="h-3.5 w-3.5 accent-brand"
                       />
                       Show track details
                     </label>
@@ -238,7 +231,7 @@ export default function BattleScreen({
                         value={usernameOverride}
                         onChange={(e) => onSetUsernameOverride(e.target.value)}
                         placeholder="your Last.fm username"
-                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none"
+                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -256,7 +249,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-teal-400 to-cyan-600" />
+            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-sky-400 to-sky-600" />
             <AnimatePresence mode="wait">
               <motion.div
                 key={pendingB.id}
@@ -269,24 +262,16 @@ export default function BattleScreen({
                 <TrackMeta track={pendingB} show={showDetails} lastfmEntry={lastfmData[pendingB.id]} lastfmEnabled={lastfmEnabled} />
               </motion.div>
             </AnimatePresence>
-            <motion.button
-              type="button"
-              onClick={() => handlePick('b')}
-              disabled={controlsDisabled}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="mt-4 w-full max-w-xs rounded-full bg-gradient-to-r from-teal-400 to-cyan-600 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-60"
-            >
+            <GradientButton gradient="sideB" onClick={() => handlePick('b')} disabled={controlsDisabled} className="mt-4 w-full max-w-xs">
               Choose Song
-            </motion.button>
+            </GradientButton>
           </motion.div>
         </div>
 
         <div className="mx-auto mt-14 max-w-md">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
+              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-light"
               animate={{ width: `${progressPct}%` }}
               transition={{ type: 'spring', stiffness: 200, damping: 30 }}
             />
@@ -328,7 +313,7 @@ function ControlButton({ icon: Icon, label, onClick, disabled, active }) {
       whileTap={disabled ? undefined : { scale: 0.92 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors disabled:opacity-30 ${
-        active ? 'border-violet-400/40 bg-violet-500/10 text-violet-300' : 'border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-100'
+        active ? 'border-brand/50 bg-brand/15 text-brand-light' : 'border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-100'
       }`}
     >
       <Icon className="h-4 w-4" />

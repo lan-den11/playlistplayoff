@@ -65,7 +65,7 @@ export default function SetupScreen({
               onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
               type="text"
               placeholder="https://open.spotify.com/playlist/..."
-              className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none"
+              className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none"
             />
           </div>
           <GradientButton gradient="brand" onClick={handleLoad} className="flex-none">
@@ -83,7 +83,7 @@ export default function SetupScreen({
               onKeyDown={(e) => e.key === 'Enter' && handleFind()}
               type="text"
               placeholder="Spotify username"
-              className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-violet-400/50 focus:outline-none"
+              className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none"
             />
           </div>
           <GlassButton onClick={handleFind} className="flex-none">
@@ -95,7 +95,7 @@ export default function SetupScreen({
           <select
             defaultValue=""
             onChange={(e) => e.target.value && onLoadPlaylist(e.target.value)}
-            className="mt-3 w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-50 focus:border-violet-400/50 focus:outline-none"
+            className="mt-3 w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-50 focus:border-brand/50 focus:outline-none"
           >
             <option value="">Select a playlist…</option>
             {userPlaylists.map((p) => (

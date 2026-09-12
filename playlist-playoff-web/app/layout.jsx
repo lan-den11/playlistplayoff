@@ -24,7 +24,7 @@ export const metadata = {
 
 const clerkAppearance = {
   variables: {
-    colorPrimary: '#8b5cf6',
+    colorPrimary: '#3437A0',
     colorBackground: '#09090b',
     colorInput: '#18181b',
     colorInputForeground: '#fafafa',
@@ -45,15 +45,15 @@ const clerkAppearance = {
     socialButtonsBlockButton: 'border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-50 rounded-full',
     socialButtonsBlockButtonText: 'text-zinc-50 font-semibold',
     formFieldLabel: 'text-zinc-300',
-    formFieldInput: 'bg-white/5 border border-white/10 text-zinc-50 rounded-xl focus:border-violet-400/50',
+    formFieldInput: 'bg-white/5 border border-white/10 text-zinc-50 rounded-xl focus:border-brand/50',
     formButtonPrimary:
-      'bg-gradient-to-r from-violet-500 to-indigo-500 hover:opacity-90 text-zinc-950 font-semibold rounded-full shadow-none normal-case',
+      'bg-white/10 backdrop-blur-md border border-brand/40 hover:bg-white/15 hover:border-brand/60 text-zinc-50 font-semibold rounded-full shadow-none normal-case transition-colors',
     footerActionText: 'text-zinc-400',
-    footerActionLink: 'text-violet-400 hover:text-violet-300',
+    footerActionLink: 'text-brand-light hover:text-white',
     identityPreviewText: 'text-zinc-300',
-    identityPreviewEditButton: 'text-violet-400',
+    identityPreviewEditButton: 'text-brand-light',
     otpCodeFieldInput: 'bg-white/5 border border-white/10 text-zinc-50 rounded-xl',
-    formResendCodeLink: 'text-violet-400 hover:text-violet-300',
+    formResendCodeLink: 'text-brand-light hover:text-white',
     formFieldSuccessText: 'text-emerald-400',
     formFieldErrorText: 'text-rose-400',
     userButtonPopoverCard: 'bg-zinc-900/95 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl',

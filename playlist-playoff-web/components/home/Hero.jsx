@@ -23,8 +23,8 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden px-6 pb-16 pt-14 md:px-8 md:pb-32 md:pt-28">
       <div aria-hidden="true" className="absolute inset-0 -z-10">
-        <GhostFibers lineColor="#140E35" glowColor="#3437A0" />
-        <div className="absolute inset-0 bg-zinc-950/45" />
+        <GhostFibers lineColor="#140E35" glowColor="#3437A0" brightness={2.2} glowIntensity={1.8} />
+        <div className="absolute inset-0 bg-zinc-950/15" />
       </div>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-16">

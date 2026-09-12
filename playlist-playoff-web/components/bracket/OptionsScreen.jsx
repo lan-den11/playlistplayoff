@@ -38,7 +38,7 @@ export default function OptionsScreen({
               type="checkbox"
               checked={doShuffle}
               onChange={(e) => onSetShuffle(e.target.checked)}
-              className="h-4 w-4 accent-violet-500"
+              className="h-4 w-4 accent-brand"
             />
             Shuffle seeding
           </label>
@@ -47,7 +47,7 @@ export default function OptionsScreen({
               type="checkbox"
               checked={wildcardEnabled}
               onChange={(e) => onSetWildcardEnabled(e.target.checked)}
-              className="h-4 w-4 accent-violet-500"
+              className="h-4 w-4 accent-brand"
             />
             Enable wildcard qualifying round
           </label>
@@ -57,7 +57,7 @@ export default function OptionsScreen({
             <select
               value={bracketSize}
               onChange={(e) => onSetBracketSize(Number(e.target.value))}
-              className="rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 focus:border-violet-400/50 focus:outline-none"
+              className="rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 focus:border-brand/50 focus:outline-none"
             >
               {SIZES.map((s) => (
                 <option key={s} value={s}>

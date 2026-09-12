@@ -2,15 +2,6 @@ import axios from 'axios';
 
 let appToken = null; // { access_token, expires_at }
 
-// Spotify's own editorially-curated "Top 50 - USA" playlist. Used as a
-// stable, no-extra-auth-scopes source of "what's trending right now in the
-// US" for the homepage teaser bracket (see components/home/HeroMatchup.jsx).
-//
-// VERIFIED (this round): confirmed live against Spotify — this ID resolves
-// to the real, currently-updating "Top 50 - USA" editorial playlist. If the
-// Hero teaser is still falling back to the static, non-interactive preview
-// card, the ID is NOT the problem — see the note in HeroMatchup.jsx and
-// README_CHANGES.txt about SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET.
 export const TRENDING_PLAYLIST_ID = '37i9dQZF1FwRJQfEovuoNH';
 
 export async function getAppToken() {

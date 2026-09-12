@@ -38,11 +38,6 @@ const GlassSurface = ({
   const blueChannelRef = useRef(null);
   const gaussianBlurRef = useRef(null);
 
-  // This app is permanently dark (bg-zinc-950) — it never follows the OS
-  // light/dark preference, so the surface should always render its dark
-  // glass treatment rather than reading prefers-color-scheme.
-  const isDarkMode = true;
-
   const generateDisplacementMap = () => {
     const rect = containerRef.current?.getBoundingClientRect();
     const actualWidth = rect?.width || 400;
@@ -166,40 +161,40 @@ const GlassSurface = ({
 
     const backdropFilterSupported = supportsBackdropFilter();
 
+    // Always the clear-white glass treatment — this app has no light/dark
+    // toggle, and a black-tinted pane here would smother any color glowing
+    // behind it (the whole point of the ambient accent glow on buttons).
     if (svgSupported) {
       return {
         ...baseStyles,
-        background: `hsl(0 0% 0% / ${backgroundOpacity})`,
+        background: `hsl(0 0% 100% / ${backgroundOpacity})`,
         backdropFilter: `url(#${filterId}) saturate(${saturation})`,
-        boxShadow: `0 0 2px 1px color-mix(in oklch, white, transparent 65%) inset,
-           0 0 10px 4px color-mix(in oklch, white, transparent 85%) inset,
-           0px 4px 16px rgba(17, 17, 26, 0.05),
-           0px 8px 24px rgba(17, 17, 26, 0.05),
-           0px 16px 56px rgba(17, 17, 26, 0.05),
-           0px 4px 16px rgba(17, 17, 26, 0.05) inset,
-           0px 8px 24px rgba(17, 17, 26, 0.05) inset,
-           0px 16px 56px rgba(17, 17, 26, 0.05) inset`,
+        boxShadow: `0 1px 1px 0 rgba(255, 255, 255, 0.5) inset,
+           0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+           0 8px 24px rgba(0, 0, 0, 0.35)`,
       };
     }
 
     if (!backdropFilterSupported) {
       return {
         ...baseStyles,
-        background: 'rgba(0, 0, 0, 0.4)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-                    inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`,
+        background: 'rgba(255, 255, 255, 0.14)',
+        border: '1px solid rgba(255, 255, 255, 0.26)',
+        boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+                    inset 0 -1px 0 0 rgba(255, 255, 255, 0.08),
+                    0 8px 24px rgba(0, 0, 0, 0.3)`,
       };
     }
 
     return {
       ...baseStyles,
-      background: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(12px) saturate(1.8) brightness(1.2)',
-      WebkitBackdropFilter: 'blur(12px) saturate(1.8) brightness(1.2)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-                  inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`,
+      background: 'rgba(255, 255, 255, 0.12)',
+      backdropFilter: 'blur(14px) saturate(1.8) brightness(1.15)',
+      WebkitBackdropFilter: 'blur(14px) saturate(1.8) brightness(1.15)',
+      border: '1px solid rgba(255, 255, 255, 0.22)',
+      boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+                  inset 0 -1px 0 0 rgba(255, 255, 255, 0.08),
+                  0 8px 24px rgba(0, 0, 0, 0.3)`,
     };
   };
 
