@@ -1,6 +1,7 @@
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { MotionConfig } from 'framer-motion';
+import PostHogIdentity from '../components/PostHogIdentity';
 import './globals.css';
 
 const inter = Inter({
@@ -67,6 +68,7 @@ export default function RootLayout({ children }) {
     <ClerkProvider afterSignOutUrl="/" waitlistUrl="/waitlist" appearance={clerkAppearance}>
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
         <body className="font-sans antialiased">
+          <PostHogIdentity />
           <MotionConfig reducedMotion="user">{children}</MotionConfig>
         </body>
       </html>

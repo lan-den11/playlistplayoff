@@ -12,6 +12,7 @@ import {
   roundLabelText,
 } from '../lib/bracketEngine';
 import { fetchPlaylistTracks, fetchUserPlaylists } from '../lib/api';
+import { captureClientException, captureEvent } from '../lib/posthog-client';
 
 // Default slot used by a normal, real bracket (paste-a-playlist flow).
 export const DEFAULT_SAVE_KEY = 'spotifyBracketSave_v1';
@@ -380,16 +381,27 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
     if (state.screen === 'champion') clearSaved();
   }, [state.screen, clearSaved]);
 
+  const analyticsSource = storageKey === TRENDING_HANDOFF_STORAGE_KEY ? 'trending_teaser' : 'playlist_setup';
+
   const loadPlaylist = useCallback(async (idOrUrl) => {
     dispatch({ type: 'LOAD_START' });
     try {
       const data = await fetchPlaylistTracks(idOrUrl);
       if (data.tracks.length < 2) throw new Error('Playlist needs at least 2 songs to make a bracket.');
       dispatch({ type: 'LOAD_SUCCESS', tracks: data.tracks });
+      captureEvent('playlist_loaded', {
+        track_count: data.tracks.length,
+        source: analyticsSource,
+      });
     } catch (e) {
       dispatch({ type: 'LOAD_ERROR', message: e.message });
+      captureEvent('playlist_load_failed', {
+        error_type: e.name || 'Error',
+        source: analyticsSource,
+      });
+      captureClientException(e, { flow: 'playlist_load', source: analyticsSource });
     }
-  }, []);
+  }, [analyticsSource]);
 
   const findUserPlaylistsByUsername = useCallback(async (username) => {
     setFindUserError('');
@@ -398,8 +410,10 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
       const data = await fetchUserPlaylists(username);
       if (!data.length) throw new Error('That user has no public playlists on their profile.');
       setUserPlaylists(data);
+      captureEvent('user_playlists_found', { playlist_count: data.length });
     } catch (e) {
       setFindUserError(e.message);
+      captureClientException(e, { flow: 'user_playlist_search' });
     }
   }, []);
 
@@ -431,21 +445,64 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
     setShuffle: (value) => dispatch({ type: 'SET_SHUFFLE', value }),
     setWildcardEnabled: (value) => dispatch({ type: 'SET_WILDCARD', value }),
     backToSetup: () => dispatch({ type: 'BACK_TO_SETUP' }),
-    startTournament: () => dispatch({ type: 'START_TOURNAMENT' }),
-    pick: (track) => dispatch({ type: 'PICK', track }),
+    startTournament: () => {
+      captureEvent('bracket_started', {
+        track_count: state.loadedTracks.length,
+        bracket_size: state.bracketSize,
+        shuffle_enabled: state.doShuffle,
+        wildcard_enabled: state.wildcardEnabled,
+        source: analyticsSource,
+      });
+      dispatch({ type: 'START_TOURNAMENT' });
+    },
+    pick: (track) => {
+      const completedMatchCount = state.completedRealMatchesOverall + 1;
+      captureEvent('matchup_chosen', {
+        phase: state.phase,
+        round_size: state.round.length,
+        match_number: completedMatchCount,
+        total_matches: state.totalRealMatchesOverall,
+        source: analyticsSource,
+      });
+      if (state.totalRealMatchesOverall && completedMatchCount >= state.totalRealMatchesOverall) {
+        captureEvent('bracket_completed', {
+          bracket_size: state.bracketSize,
+          total_matches: state.totalRealMatchesOverall,
+          wildcard_enabled: state.wildcardEnabled,
+          source: analyticsSource,
+        });
+      }
+      dispatch({ type: 'PICK', track });
+    },
     undo: () => dispatch({ type: 'UNDO' }),
     shuffleSwap: () => dispatch({ type: 'SHUFFLE_SWAP' }),
     skipSwap: () => dispatch({ type: 'SKIP_SWAP' }),
     setShowDetails: (value) => dispatch({ type: 'SET_SHOW_DETAILS', value }),
     restart: () => {
+      captureEvent('bracket_restarted', {
+        bracket_size: state.bracketSize,
+        total_matches: state.totalRealMatchesOverall,
+        source: analyticsSource,
+      });
       clearSaved();
       dispatch({ type: 'RESTART' });
     },
     resumeSaved: () => {
-      if (savedSnapshot) dispatch({ type: 'RESTORE_SAVED', payload: savedSnapshot });
+      if (savedSnapshot) {
+        captureEvent('bracket_resumed', {
+          completed_matches: savedSnapshot.completedRealMatchesOverall || 0,
+          total_matches: savedSnapshot.totalRealMatchesOverall || 0,
+          source: analyticsSource,
+        });
+        dispatch({ type: 'RESTORE_SAVED', payload: savedSnapshot });
+      }
       setSavedSnapshot(null);
     },
     discardSaved: () => {
+      captureEvent('bracket_discarded', {
+        completed_matches: savedSnapshot?.completedRealMatchesOverall || 0,
+        source: analyticsSource,
+      });
       clearSaved();
       setSavedSnapshot(null);
     },

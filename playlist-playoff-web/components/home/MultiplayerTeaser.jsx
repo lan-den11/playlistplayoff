@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWaitlist } from '@clerk/nextjs';
 import { Sparkles, Bell, Check, Loader2 } from 'lucide-react';
+import { captureEvent } from '../../lib/posthog-client';
 import GlassButton from '../ui/GlassButton';
 
 export default function MultiplayerTeaser() {
@@ -26,8 +27,11 @@ export default function MultiplayerTeaser() {
     setLocalError('');
     const { error } = await waitlist.join({ emailAddress: value });
     if (error) {
+      captureEvent('waitlist_join_failed', { source: 'multiplayer_teaser' });
       console.error('Failed to join waitlist:', error);
+      return;
     }
+    captureEvent('waitlist_joined', { source: 'multiplayer_teaser' });
   }
 
   return (

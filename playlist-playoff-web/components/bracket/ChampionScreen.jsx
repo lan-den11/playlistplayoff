@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Copy, Download, RotateCcw } from 'lucide-react';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
+import { captureClientException, captureEvent } from '../../lib/posthog-client';
 import GradientButton from '../ui/GradientButton';
 import GlassButton from '../ui/GlassButton';
 
@@ -102,8 +103,10 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
     try {
       await navigator.clipboard.writeText(buildResultsText(standings));
       setShareStatus('Copied to clipboard!');
-    } catch {
+      captureEvent('results_copied', { standing_group_count: standings.length });
+    } catch (error) {
       setShareStatus('Could not copy — clipboard permission blocked?');
+      captureClientException(error, { flow: 'results_copy' });
     }
   }
 
@@ -118,8 +121,10 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
       link.href = canvas.toDataURL('image/png');
       link.click();
       setShareStatus('Results image downloaded!');
-    } catch {
+      captureEvent('results_image_downloaded', { standing_group_count: standings.length });
+    } catch (error) {
       setShareStatus('Could not generate image — album art may be blocking cross-origin capture.');
+      captureClientException(error, { flow: 'results_image_download' });
     }
   }
 

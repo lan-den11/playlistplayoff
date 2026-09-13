@@ -21,7 +21,13 @@ export default function Hero() {
   const router = useRouter();
 
   return (
-    <section className="relative overflow-hidden px-6 pb-16 pt-14 md:px-8 md:pb-32 md:pt-28">
+    // `isolate` is the fix: position:relative alone does NOT create a
+    // stacking context, so the -z-10 GhostFibers layer below was escaping
+    // past this section AND past <main>'s own bg-zinc-950 in app/page.jsx —
+    // main's opaque background was painting on top of it every time,
+    // regardless of brightness/opacity tuning. `isolate` traps the negative
+    // z-index layer inside this section where it belongs.
+    <section className="relative isolate overflow-hidden px-6 pb-16 pt-14 md:px-8 md:pb-32 md:pt-28">
       <div aria-hidden="true" className="absolute inset-0 -z-10">
         <GhostFibers lineColor="#140E35" glowColor="#3437A0" brightness={2.2} glowIntensity={1.8} />
         <div className="absolute inset-0 bg-zinc-950/15" />

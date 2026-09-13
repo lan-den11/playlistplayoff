@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { getPool, ensureTable } from '../../../lib/db';
+import { captureServerEvent, captureServerException } from '../../../lib/posthog-server';
 
 export async function GET() {
   const { userId } = await auth();
@@ -43,9 +44,20 @@ export async function POST(request) {
        DO UPDATE SET spotify_username = $2, lastfm_username = $3, updated_at = now()`,
       [userId, spotifyUsername || null, lastfmUsername || null]
     );
+    await captureServerEvent({
+      distinctId: userId,
+      event: 'profile_saved',
+      properties: {
+        has_spotify_profile: Boolean(spotifyUsername),
+        has_lastfm_profile: Boolean(lastfmUsername),
+      },
+    }).catch((error) => console.error('Failed to capture profile_saved:', error.message));
     return Response.json({ ok: true });
   } catch (e) {
     console.error('Failed to save profile:', e.message);
+    await captureServerException(e, userId, { flow: 'profile_save' }).catch((error) =>
+      console.error('Failed to capture profile save exception:', error.message)
+    );
     return Response.json({ error: 'Failed to save profile.' }, { status: 500 });
   }
 }

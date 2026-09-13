@@ -7,6 +7,7 @@ import { useBracket, TRENDING_HANDOFF_STORAGE_KEY } from '../../hooks/useBracket
 import { useLastfmData } from '../../hooks/useLastfmData';
 import { useProfileSync } from '../../hooks/useProfileSync';
 import { buildFetchOrder } from '../../lib/bracketEngine';
+import { captureEvent } from '../../lib/posthog-client';
 
 import BracketHeader from './BracketHeader';
 import SetupScreen from './SetupScreen';
@@ -147,7 +148,10 @@ export default function BracketApp() {
 
       <ProfileNudgeModal
         open={nudgeOpen}
-        onClose={() => setNudgeOpen(false)}
+        onClose={() => {
+          captureEvent('profile_nudge_dismissed', { source: 'bracket' });
+          setNudgeOpen(false);
+        }}
         initialSpotify={linkedSpotifyUsername}
         initialLastfm={usernameOverride}
         onSave={async (spotifyUsername, lastfmUsername) => {
