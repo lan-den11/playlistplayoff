@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Headphones } from 'lucide-react';
 import { Waitlist } from '@clerk/nextjs';
 import Footer from '../../components/home/Footer';
+import { getAppAccessMode } from '../../lib/posthog-server';
 
 export const metadata = {
   title: 'Playlist Playoff — Join the Waitlist',
@@ -11,8 +12,16 @@ export const metadata = {
 };
 
 export default async function WaitlistPage() {
-  const { userId } = await auth();
-  if (userId) redirect('/');
+  const [{ userId }, mode] = await Promise.all([auth(), getAppAccessMode()]);
+
+  // "unlocked" — there's nothing to wait for, send everyone to the app.
+  if (mode === 'unlocked') redirect('/');
+
+  // "hero-only" (default) — a signed-in visitor doesn't need this screen.
+  // In "waitlist-only" mode, though, EVERYONE stays here, signed in or not —
+  // otherwise a signed-in user would bounce to `/`, and proxy.js would just
+  // bounce them straight back here, looping forever.
+  if (userId && mode !== 'waitlist-only') redirect('/');
 
   return (
     <main className="min-h-screen bg-zinc-950">

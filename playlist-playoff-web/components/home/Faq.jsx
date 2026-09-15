@@ -13,7 +13,7 @@ const FAQS = [
   {
     icon: UserCircle,
     q: 'Do I need an account?',
-    a: "Yes, right now — the app is in early access, so every page requires signing in. If you don't have an invite yet, join the waitlist and we'll let you know the moment a spot opens up.",
+    a: "Only to play a full bracket — the homepage's live matchup is open to everyone. Sign in (or join the waitlist if we haven't let you in yet) once you're ready to run a full bracket of your own.",
   },
   {
     icon: ListMusic,

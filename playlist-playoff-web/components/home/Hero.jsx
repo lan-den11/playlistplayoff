@@ -17,7 +17,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
 };
 
-export default function Hero() {
+export default function Hero({ trendingPlaylistId }) {
   const router = useRouter();
 
   return (
@@ -55,7 +55,7 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        <HeroMatchup />
+        <HeroMatchup trendingPlaylistId={trendingPlaylistId} />
       </div>
     </section>
   );

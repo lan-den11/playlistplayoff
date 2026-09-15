@@ -79,8 +79,11 @@ function TeaserSide({ side, track, elRef, loading, embedGradient, accent, onPick
  * the exact same engine (useBracket) and the exact same Spotify embed
  * component (EmbedPanel / useSpotifyEmbed) as the full /bracket experience.
  *
- * Seeded from Spotify's own "Top 50 - USA" playlist (see lib/spotifyAuth.js)
- * — VERIFIED live against Spotify this round, this ID is correct and current.
+ * Seeded from `trendingPlaylistId` — passed down from app/page.jsx, which
+ * resolves it server-side from the "homepage-trending-playlist" PostHog
+ * flag (see lib/posthog-server.js). Falls back to the hardcoded Spotify
+ * "Top 50 - USA" playlist (lib/spotifyAuth.js) whenever that flag is off,
+ * unset, or this component is ever rendered without the prop.
  *
  * DIAGNOSTIC ADDED: if you're seeing the static, non-interactive placeholder
  * card here instead of real, playable songs, this component was already
@@ -90,7 +93,7 @@ function TeaserSide({ side, track, elRef, loading, embedGradient, accent, onPick
  * environment's env vars. The `console.error` below surfaces the exact
  * reason the moment it happens.
  */
-export default function HeroMatchup() {
+export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID }) {
   const router = useRouter();
   const bracket = useBracket({ storageKey: TRENDING_HANDOFF_STORAGE_KEY });
   const embedA = useSpotifyEmbed();
@@ -106,9 +109,9 @@ export default function HeroMatchup() {
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
   useEffect(() => {
-    bracket.loadPlaylist(TRENDING_PLAYLIST_ID);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    bracket.loadPlaylist(trendingPlaylistId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- bracket.loadPlaylist is a stable-enough ref from useBracket(); only re-run if the resolved playlist ID itself changes
+  }, [trendingPlaylistId]);
 
   // DIAGNOSTIC: surfaces the real reason the live teaser fell back to the
   // static placeholder, instead of failing completely silently. Open the
