@@ -10,11 +10,16 @@ import { TRENDING_PLAYLIST_ID } from '../lib/spotifyAuth';
 
 // Without this, Next statically prerenders "/" once at build/deploy time —
 // getTrendingPlaylistId() would run exactly once, forever, and toggling the
-// PostHog flag afterward would do nothing until the next deploy. Revalidate
-// on a 60s cadence (matching PLAYLIST_CACHE_MS in lib/posthog-server.js) so
-// the homepage picks up a flag change within about a minute, no redeploy
-// needed, while still serving cached HTML the rest of the time.
-export const revalidate = 60;
+// PostHog flag afterward would do nothing until the next deploy.
+//
+// Deliberately force-dynamic rather than `revalidate: N`: the PostHog fetch
+// itself now sets `cache: 'no-store'` (see lib/posthog-server.js), which
+// already forces this route dynamic under the hood — declaring it explicitly
+// here just makes that intentional instead of implicit, and avoids stacking
+// a second, redundant ISR caching signal on top of our own in-memory TTL.
+// Staleness is bounded by PLAYLIST_CACHE_MS (60s) in lib/posthog-server.js,
+// not by anything Next.js caches at the route level.
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   // Resolved server-side so there's no client-side flicker/refetch — see

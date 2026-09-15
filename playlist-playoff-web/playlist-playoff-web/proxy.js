@@ -5,7 +5,7 @@ import { getAppAccessMode } from './lib/posthog-server';
 // Always reachable no matter the access mode — the waitlist screen has to
 // render even when the mode IS "waitlist-only", and health checks shouldn't
 // depend on PostHog being reachable.
-const isAlwaysPublicRoute = createRouteMatcher(['/waitlist(.*)', '/api/health']);
+const isAlwaysPublicRoute = createRouteMatcher(['/waitlist(.*)', '/api/health', '/api/debug(.*)']);
 
 // Only the actual gameplay page is ever gated behind sign-in. The homepage
 // teaser (HeroMatchup) and the API routes it calls (playlist/user/lastfm)
