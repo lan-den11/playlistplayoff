@@ -399,7 +399,13 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
         error_type: e.name || 'Error',
         source: analyticsSource,
       });
-      captureClientException(e, { flow: 'playlist_load', source: analyticsSource });
+      // A connectivity blip that already survived the retries in lib/api.js is
+      // transport flakiness, not an application bug — the playlist_load_failed
+      // event above still records it, but keep it out of error tracking so
+      // exceptions there stay about real bugs.
+      if (!e.isNetworkError) {
+        captureClientException(e, { flow: 'playlist_load', source: analyticsSource });
+      }
     }
   }, [analyticsSource]);
 

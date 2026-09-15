@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Flame, Loader2, Music2 } from 'lucide-react';
+import { Flame, Loader2, Music2, RefreshCw } from 'lucide-react';
 import { useBracket, TRENDING_HANDOFF_STORAGE_KEY } from '../../hooks/useBracket';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
@@ -13,12 +13,14 @@ import EmbedPanel from '../bracket/EmbedPanel';
 const PICKS_BEFORE_HANDOFF = 2;
 const TEASER_BRACKET_SIZE = 8;
 
-function StaticFallback() {
+function StaticFallback({ onRetry }) {
   // Shown only if the live Spotify fetch fails entirely (e.g. missing
-  // credentials, an invalid/expired token, or a network error) — a
-  // non-interactive placeholder so the homepage never looks fully broken to
-  // a visitor. See the console.error below this component for exactly why
-  // it's showing in any given case — this card itself never explains why.
+  // credentials, an invalid/expired token, or a network error that outlives
+  // the retries in lib/api.js) — a placeholder so the homepage never looks
+  // fully broken to a visitor. `onRetry` reloads the trending playlist so a
+  // transient blip is not a dead end for the rest of the page view. See the
+  // console.error below this component for exactly why it's showing in any
+  // given case — this card itself never explains why.
   return (
     <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
       <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">Round of 8</p>
@@ -39,6 +41,18 @@ function StaticFallback() {
           <p className="truncate text-xs text-zinc-400">Marlowe</p>
         </div>
       </div>
+      {onRetry && (
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-light transition-colors hover:text-zinc-50"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Load the live matchup
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -174,7 +188,9 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID 
     }, 300);
   }
 
-  if (bracket.state.loadError) return <StaticFallback />;
+  if (bracket.state.loadError) {
+    return <StaticFallback onRetry={() => bracket.loadPlaylist(trendingPlaylistId)} />;
+  }
 
   if (handingOff) {
     return (
