@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWaitlist } from '@clerk/nextjs';
 import { Sparkles, Bell, Check, Loader2 } from 'lucide-react';
 import { captureEvent } from '../../lib/posthog-client';
-import GlassButton from '../ui/GlassButton';
+import GradientButton from '../ui/GradientButton';
 
 export default function MultiplayerTeaser() {
   const { waitlist, errors, fetchStatus } = useWaitlist();
@@ -47,19 +47,22 @@ export default function MultiplayerTeaser() {
           aria-hidden="true"
           className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/15 blur-[100px]"
         />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-24 right-0 h-64 w-[30rem] max-w-full rounded-full bg-brand/25 blur-[110px]"
+        />
 
-        <div className="relative mx-auto inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300">
-          <Sparkles className="h-3.5 w-3.5" />
+        <div className="relative mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
+          <Sparkles className="h-4 w-4" />
           Coming soon
         </div>
 
         <h2 className="relative mt-6 font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
-          Play with friends.
+          Music taste, revolutionized
         </h2>
         <p className="relative mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-zinc-400">
-          Private rooms, async voting, and a running leaderboard for your group —
-          plus Quick Round, a lightweight weekly pick-a-theme game for when a
-          full bracket's too much.
+          A personalized musical bracket experience complete with your listening data, analyzed by our PlayoffAI to
+          surface insights on your taste.
         </p>
 
         <div className="relative mt-9 flex justify-center">
@@ -82,7 +85,7 @@ export default function MultiplayerTeaser() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex w-full max-w-sm flex-col items-stretch gap-2 sm:flex-row"
+                className="flex w-full max-w-sm flex-col items-stretch gap-3 sm:flex-row"
               >
                 <input
                   value={email}
@@ -92,10 +95,17 @@ export default function MultiplayerTeaser() {
                   disabled={isSubmitting}
                   className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
                 />
-                <GlassButton type="submit" className={isSubmitting ? 'pointer-events-none opacity-70' : ''}>
+                {/* Gold, not the usual blue glass — this card already reads
+                    warm (amber "coming soon" glow), and a blue button here
+                    clashed against it. Gold is the design system's existing
+                    celebratory accent (see ChampionScreen), so it's a drop-in
+                    fit rather than a one-off color. `disabled` uses
+                    GradientButton's built-in state instead of an opacity
+                    override on className. */}
+                <GradientButton type="submit" gradient="gold" disabled={isSubmitting}>
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
-                  {isSubmitting ? 'Joining…' : 'Get notified'}
-                </GlassButton>
+                  {isSubmitting ? 'Joining…' : 'Get Notified'}
+                </GradientButton>
               </motion.form>
             )}
           </AnimatePresence>

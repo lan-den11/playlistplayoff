@@ -166,7 +166,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-brand to-brand-light" />
+            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-brand to-brand-light" height={embedA.height} />
             <AnimatePresence mode="wait">
               <motion.div
                 key={pendingA.id}
@@ -203,7 +203,7 @@ export default function BattleScreen({
               />
             </div>
 
-            <span className="font-display text-lg font-bold text-zinc-700">VS</span>
+            <span className="font-display text-lg font-bold text-zinc-50">VS</span>
 
             <AnimatePresence>
               {settingsOpen && (
@@ -249,7 +249,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-sky-400 to-sky-600" />
+            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-sky-400 to-sky-600" height={embedB.height} />
             <AnimatePresence mode="wait">
               <motion.div
                 key={pendingB.id}

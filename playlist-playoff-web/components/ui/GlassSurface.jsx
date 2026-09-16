@@ -161,9 +161,6 @@ const GlassSurface = ({
 
     const backdropFilterSupported = supportsBackdropFilter();
 
-    // Always the clear-white glass treatment — this app has no light/dark
-    // toggle, and a black-tinted pane here would smother any color glowing
-    // behind it (the whole point of the ambient accent glow on buttons).
     if (svgSupported) {
       return {
         ...baseStyles,

@@ -8,6 +8,18 @@ export async function GET(_request, { params }) {
   try {
     const token = await getAppToken();
 
+    // Fired in parallel with track pagination below, not awaited until the
+    // very end — this is purely cosmetic (powers the homepage teaser's
+    // "<playlist name> · Round of 8" label) so a failure here must never
+    // break the actual track load. Kept to just the `name` field so it's a
+    // cheap request alongside the heavier paginated tracks call.
+    const namePromise = axios
+      .get(`https://api.spotify.com/v1/playlists/${playlistId}?fields=name`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((r) => r.data.name)
+      .catch(() => null);
+
     let items = [];
     let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&fields=next,items(added_at,track(id,uri,name,duration_ms,popularity,artists(name),album(name,release_date,images)))`;
     while (url) {
@@ -31,8 +43,11 @@ export async function GET(_request, { params }) {
         releaseYear: t.album?.release_date ? t.album.release_date.slice(0, 4) : null,
       }));
 
+    const playlistName = await namePromise;
+
     return Response.json({
       tracks,
+      playlistName,
       lastfmEnabled: Boolean(process.env.LASTFM_API_KEY && process.env.LASTFM_USERNAME),
     });
   } catch (e) {

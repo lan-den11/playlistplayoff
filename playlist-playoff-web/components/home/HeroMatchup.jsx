@@ -9,6 +9,7 @@ import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
 import GradientButton from '../ui/GradientButton';
 import EmbedPanel from '../bracket/EmbedPanel';
+import Modal from '../bracket/Modal';
 
 const PICKS_BEFORE_HANDOFF = 2;
 const TEASER_BRACKET_SIZE = 8;
@@ -17,11 +18,11 @@ function StaticFallback() {
   // Shown only if the live Spotify fetch fails entirely (e.g. missing
   // credentials, an invalid/expired token, or a network error) — a
   // non-interactive placeholder so the homepage never looks fully broken to
-  // a visitor. See the console.error below this component for exactly why
-  // it's showing in any given case — this card itself never explains why.
+  // a visitor. See the console.error in HeroMatchup for exactly why it's
+  // showing in any given case — this card itself never explains why.
   return (
     <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
-      <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">Round of 8</p>
+      <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">Round of 8</p>
       <div className="flex items-start gap-3">
         <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-brand/30 bg-brand/10 p-4 backdrop-blur-md">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
@@ -30,7 +31,7 @@ function StaticFallback() {
           <p className="truncate text-sm font-semibold text-zinc-50">Night Drive</p>
           <p className="truncate text-xs text-zinc-400">Nocturn</p>
         </div>
-        <span className="mt-8 flex-none font-display text-sm font-bold text-zinc-600">VS</span>
+        <span className="mt-8 flex-none font-display text-sm font-bold text-zinc-50">VS</span>
         <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 backdrop-blur-md">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
             <Music2 className="h-6 w-6 text-sky-400" />
@@ -43,7 +44,7 @@ function StaticFallback() {
   );
 }
 
-function TeaserSide({ side, track, elRef, loading, embedGradient, accent, onPick, isAnimatingPick }) {
+function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent, onPick, isAnimatingPick }) {
   const isWinner = isAnimatingPick === side;
 
   return (
@@ -56,7 +57,7 @@ function TeaserSide({ side, track, elRef, loading, embedGradient, accent, onPick
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
       className="flex flex-1 flex-col items-center gap-2.5"
     >
-      <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} />
+      <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} height={height} />
       <div className="w-full text-center">
         <p className="truncate font-display text-sm font-semibold text-zinc-50">{track?.name}</p>
         <p className="truncate text-xs text-zinc-400">{track?.artists}</p>
@@ -79,28 +80,23 @@ function TeaserSide({ side, track, elRef, loading, embedGradient, accent, onPick
  * the exact same engine (useBracket) and the exact same Spotify embed
  * component (EmbedPanel / useSpotifyEmbed) as the full /bracket experience.
  *
- * Seeded from `trendingPlaylistId` — passed down from app/page.jsx, which
- * resolves it server-side from the "homepage-trending-playlist" PostHog
- * flag (see lib/posthog-server.js). Falls back to the hardcoded Spotify
- * "Top 50 - USA" playlist (lib/spotifyAuth.js) whenever that flag is off,
- * unset, or this component is ever rendered without the prop.
- *
- * DIAGNOSTIC ADDED: if you're seeing the static, non-interactive placeholder
- * card here instead of real, playable songs, this component was already
- * built to fall back to that placeholder the moment the trending playlist
- * fails to load for ANY reason. The single most common cause is
- * `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` missing or wrong in this
- * environment's env vars. The `console.error` below surfaces the exact
- * reason the moment it happens.
+ * `accessMode` (passed down from app/page.jsx's server-resolved PostHog
+ * flag) controls what happens once the visitor has made their picks:
+ *  - 'unlocked': hands off to the real /bracket page, same as always.
+ *  - anything else (the 'hero-only' default): the app isn't open yet, so
+ *    instead of navigating away this shows a "thanks for playing, join the
+ *    waitlist" popup right on top of the still-visible teaser card.
  */
-export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID }) {
+export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID, accessMode = 'hero-only' }) {
   const router = useRouter();
+  const isOpen = accessMode === 'unlocked';
   const bracket = useBracket({ storageKey: TRENDING_HANDOFF_STORAGE_KEY });
   const embedA = useSpotifyEmbed();
   const embedB = useSpotifyEmbed();
 
   const autoStartedRef = useRef(false);
   const [handingOff, setHandingOff] = useState(false);
+  const [showWaitlistPrompt, setShowWaitlistPrompt] = useState(false);
   const [isAnimatingPick, setIsAnimatingPick] = useState(null);
   const [embedLoadingA, setEmbedLoadingA] = useState(true);
   const [embedLoadingB, setEmbedLoadingB] = useState(true);
@@ -113,10 +109,6 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- bracket.loadPlaylist is a stable-enough ref from useBracket(); only re-run if the resolved playlist ID itself changes
   }, [trendingPlaylistId]);
 
-  // DIAGNOSTIC: surfaces the real reason the live teaser fell back to the
-  // static placeholder, instead of failing completely silently. Open the
-  // browser console — the exact error from /api/playlist/.../tracks (e.g.
-  // "Spotify credentials not configured...") will be right here.
   useEffect(() => {
     if (bracket.state.loadError) {
       console.error(
@@ -140,10 +132,14 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID 
   useEffect(() => {
     if (bracket.state.screen !== 'battle') return;
     if (bracket.state.completedRealMatchesOverall < PICKS_BEFORE_HANDOFF) return;
-    setHandingOff(true);
-    const t = setTimeout(() => router.push('/bracket?from=trending'), 700);
-    return () => clearTimeout(t);
-  }, [bracket.state.completedRealMatchesOverall, bracket.state.screen, router]);
+
+    if (isOpen) {
+      setHandingOff(true);
+      const t = setTimeout(() => router.push('/bracket?from=trending'), 700);
+      return () => clearTimeout(t);
+    }
+    setShowWaitlistPrompt(true);
+  }, [bracket.state.completedRealMatchesOverall, bracket.state.screen, router, isOpen]);
 
   useEffect(() => {
     if (!pendingA || !pendingB) return;
@@ -202,45 +198,73 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID 
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.92, y: 12 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.3 }}
-      className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40"
-    >
-      <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-500">
-        <Flame className="h-3.5 w-3.5 text-brand-light" />
-        Trending in the US · {bracket.roundLabel}
-      </p>
+    <div className="relative mx-auto w-full max-w-lg">
+      {/* Ambient pulsing glow behind the card — a small, tasteful nudge that
+          this is the interactive, playable part of the page. */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-brand/30 via-brand/10 to-transparent blur-2xl"
+        animate={{ opacity: [0.5, 0.85, 0.5] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+      />
 
-      <div className="flex items-start gap-3">
-        <TeaserSide
-          side="a"
-          track={pendingA}
-          elRef={embedA.elRef}
-          loading={embedLoadingA}
-          embedGradient="from-brand to-brand-light"
-          accent="brand"
-          onPick={handlePick}
-          isAnimatingPick={isAnimatingPick}
-        />
-        <span className="mt-20 flex-none font-display text-sm font-bold text-zinc-600">VS</span>
-        <TeaserSide
-          side="b"
-          track={pendingB}
-          elRef={embedB.elRef}
-          loading={embedLoadingB}
-          embedGradient="from-sky-400 to-sky-600"
-          accent="sideB"
-          onPick={handlePick}
-          isAnimatingPick={isAnimatingPick}
-        />
-      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.3 }}
+      >
+        {/* Independent, continuous idle float — kept separate from the
+            one-time entrance animation above so it doesn't reset/jump on
+            every loop the way a single shared keyframe array would. */}
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+          className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40"
+        >
+          <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">
+            <Flame className="h-3.5 w-3.5 text-brand-light" />
+            {bracket.state.playlistName || 'Trending in the US'} · {bracket.roundLabel}
+          </p>
 
-      <p className="mt-4 text-center text-[11px] text-zinc-500">
-        Vote {Math.min(bracket.state.completedRealMatchesOverall + 1, PICKS_BEFORE_HANDOFF)}/{PICKS_BEFORE_HANDOFF} to
-        jump into the full bracket
-      </p>
-    </motion.div>
+          <div className="flex items-start gap-3">
+            <TeaserSide
+              side="a"
+              track={pendingA}
+              elRef={embedA.elRef}
+              loading={embedLoadingA}
+              height={embedA.height}
+              embedGradient="from-brand to-brand-light"
+              accent="brand"
+              onPick={handlePick}
+              isAnimatingPick={isAnimatingPick}
+            />
+            <span className="mt-20 flex-none font-display text-sm font-bold text-zinc-50">VS</span>
+            <TeaserSide
+              side="b"
+              track={pendingB}
+              elRef={embedB.elRef}
+              loading={embedLoadingB}
+              height={embedB.height}
+              embedGradient="from-sky-400 to-sky-600"
+              accent="sideB"
+              onPick={handlePick}
+              isAnimatingPick={isAnimatingPick}
+            />
+          </div>
+        </motion.div>
+      </motion.div>
+
+      <Modal open={showWaitlistPrompt} onClose={() => setShowWaitlistPrompt(false)}>
+        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">Thanks for playing!</h3>
+        <p className="mt-2 text-sm text-zinc-400">
+          More coming soon — join our waitlist to be notified the moment full brackets open up.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <GradientButton gradient="brand" onClick={() => router.push('/waitlist')}>
+            Join waitlist
+          </GradientButton>
+        </div>
+      </Modal>
+    </div>
   );
 }

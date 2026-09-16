@@ -8,7 +8,7 @@ export default function Footer() {
           <Headphones className="h-4 w-4" />
           <span>Playlist Playoff</span>
         </div>
-        <p>© {new Date().getFullYear()} Playlist Playoff. Not affiliated with Spotify.</p>
+        <p>© {new Date().getFullYear()} Playlist Playoff.</p>
       </div>
     </footer>
   );

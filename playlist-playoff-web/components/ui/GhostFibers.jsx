@@ -193,6 +193,17 @@ const GhostFibers = ({
       dpr: Math.min(Math.max(dpr, 0.5), 2),
     });
     const gl = renderer.gl;
+
+    // Safari (especially iOS) has, at various points, defaulted a WebGL
+    // canvas's drawing-buffer color space to the display's wide-gamut P3
+    // profile instead of sRGB, while Chrome/Firefox default to sRGB. Since
+    // this shader's colors are authored and reasoned about in sRGB, that
+    // mismatch is exactly why the same blue reads as purple/magenta on
+    // Safari but correct everywhere else. Forcing sRGB here (feature-
+    // detected, since older browsers don't expose the property at all)
+    // makes every browser composite the canvas the same way.
+    if ('drawingBufferColorSpace' in gl) gl.drawingBufferColorSpace = 'srgb';
+
     const canvas = gl.canvas;
     canvas.style.width = '100%';
     canvas.style.height = '100%';

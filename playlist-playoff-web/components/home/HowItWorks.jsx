@@ -2,25 +2,26 @@
 
 import { motion } from 'framer-motion';
 import { Link2, Play, Trophy } from 'lucide-react';
+import GlassIconBadge from '../ui/GlassIconBadge';
 
 const STEPS = [
   {
     number: '01',
     icon: Link2,
-    title: 'Paste a playlist.',
-    body: "Yours, a friend's, anyone's — public Spotify playlists work instantly.",
+    title: 'Pick a playlist.',
+    body: 'Choose any public Spotify playlist to personalize your bracket experience.',
   },
   {
     number: '02',
     icon: Play,
-    title: 'Pick a winner.',
-    body: "Real embedded playback on every song, so you're actually listening, not guessing from a title.",
+    title: 'Select a winner.',
+    body: 'Spotify playback embeds and listening history stats help influence your chosen matchup winner.',
   },
   {
     number: '03',
     icon: Trophy,
     title: 'Crown a champion.',
-    body: 'See the full bracket, share the results, run it again with a different playlist.',
+    body: 'See the complete bracket, share results, and play again with a different playlist.',
   },
 ];
 
@@ -36,7 +37,12 @@ const card = {
 
 export default function HowItWorks() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24 md:px-8 md:py-32">
+    <section className="relative overflow-hidden px-6 py-24 md:px-8 md:py-32">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[40rem] max-w-full -translate-x-1/2 rounded-full bg-brand/15 blur-[110px]"
+      />
+
       <div className="mx-auto mb-16 max-w-2xl text-center">
         <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
           How it works
@@ -48,7 +54,7 @@ export default function HowItWorks() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
-        className="grid gap-6 md:grid-cols-3"
+        className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3"
       >
         {STEPS.map((step) => (
           <motion.div
@@ -58,8 +64,8 @@ export default function HowItWorks() {
           >
             <span className="font-display text-sm font-bold text-zinc-600">{step.number}</span>
 
-            <div className="mt-4 mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md">
-              <step.icon className="h-6 w-6 text-zinc-50" strokeWidth={2.25} />
+            <div className="mt-4 mb-5">
+              <GlassIconBadge icon={step.icon} size="lg" />
             </div>
 
             <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50">

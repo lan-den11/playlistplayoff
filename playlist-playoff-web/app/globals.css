@@ -6,9 +6,22 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   background-color: #09090b; /* zinc-950 — deep midnight, never pure black */
   color: #fafafa;
+}
+
+/* Defensive reset for the Spotify-injected iframes (embed panels): some
+   browsers add a default border/outline to bare iframes, which — stacked
+   on top of our own rounded glass panel border — was part of what made the
+   embeds look "off" versus the container around them. */
+iframe {
+  border: 0;
 }
 
 :focus-visible {

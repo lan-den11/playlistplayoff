@@ -14,29 +14,22 @@ import {
 import { fetchPlaylistTracks, fetchUserPlaylists } from '../lib/api';
 import { captureClientException, captureEvent } from '../lib/posthog-client';
 
-// Default slot used by a normal, real bracket (paste-a-playlist flow).
 export const DEFAULT_SAVE_KEY = 'spotifyBracketSave_v1';
-
-// A completely separate slot used only by the homepage teaser bracket
-// (components/home/HeroMatchup.jsx). Keeping it isolated from
-// DEFAULT_SAVE_KEY means playing the teaser can never silently overwrite a
-// real in-progress bracket someone already saved by pasting their own
-// playlist. When the teaser hands off to the full /bracket page, it does so
-// via a `?from=trending` query param that tells this hook which slot to read.
 export const TRENDING_HANDOFF_STORAGE_KEY = 'trendingTeaserBracketSave_v1';
 
 const initialState = {
-  screen: 'setup', // 'setup' | 'options' | 'battle' | 'champion'
+  screen: 'setup',
   loadError: '',
   isLoadingPlaylist: false,
   loadedTracks: [],
   masterSortedTracks: [],
+  playlistName: '',
 
   bracketSize: 32,
   doShuffle: true,
   wildcardEnabled: true,
 
-  phase: 'main', // 'main' | 'wildcard'
+  phase: 'main',
   round: [],
   matches: [],
   matchIndex: 0,
@@ -54,8 +47,6 @@ const initialState = {
   showDetails: true,
   championTrack: null,
 };
-
-// ---------- helpers that operate on state and return new state ----------
 
 function cloneTree(tree) {
   return tree.map((round) => round.map((m) => ({ ...m })));
@@ -93,9 +84,6 @@ function startRound(state) {
   };
 }
 
-// Walks forward through auto-resolved byes until it finds a real match to
-// show, or the round/phase/tournament is fully resolved. Direct port of the
-// original nextMatch() while-loop.
 function advanceToNextMatch(state) {
   let s = { ...state };
   while (s.matchIndex < s.matches.length) {
@@ -265,8 +253,6 @@ function shuffleSwapReducer(state) {
   return withCurrentTree({ ...state, matches }, tree);
 }
 
-// Swaps the whole current matchup with the last resolvable matchup remaining
-// in this round, so "think about it later" keeps pushing it to the back.
 function skipSwapReducer(state) {
   const target = findSkipTarget(state);
   if (target === -1) return state;
@@ -285,12 +271,13 @@ function skipSwapReducer(state) {
   return withCurrentTree({ ...state, matches }, tree);
 }
 
-function setLoadedTracks(state, tracks) {
+function setLoadedTracks(state, tracks, playlistName) {
   const masterSortedTracks = tracks.slice().sort((x, y) => new Date(y.addedAt) - new Date(x.addedAt));
   return {
     ...state,
     loadedTracks: tracks,
     masterSortedTracks,
+    playlistName: playlistName || '',
     bracketSize: autoPickBracketSize(tracks.length),
     screen: 'options',
     loadError: '',
@@ -304,7 +291,7 @@ function reducer(state, action) {
     case 'LOAD_ERROR':
       return { ...state, isLoadingPlaylist: false, loadError: action.message };
     case 'LOAD_SUCCESS':
-      return { ...setLoadedTracks(state, action.tracks), isLoadingPlaylist: false };
+      return { ...setLoadedTracks(state, action.tracks, action.playlistName), isLoadingPlaylist: false };
     case 'SET_BRACKET_SIZE':
       return { ...state, bracketSize: action.value };
     case 'SET_SHUFFLE':
@@ -337,18 +324,12 @@ function reducer(state, action) {
   }
 }
 
-// ---------- the hook ----------
-
-// `storageKey` lets a caller isolate its autosave/resume slot from the
-// default one — see TRENDING_HANDOFF_STORAGE_KEY above for why that matters.
 export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [userPlaylists, setUserPlaylists] = useState(null);
   const [findUserError, setFindUserError] = useState('');
   const [savedSnapshot, setSavedSnapshot] = useState(null);
 
-  // Check once, on mount, for an in-progress bracket saved to this browser
-  // under this instance's storage key.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey);
@@ -359,7 +340,6 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
     }
   }, [storageKey]);
 
-  // Autosave whenever the live matchup changes.
   useEffect(() => {
     if (state.screen !== 'battle') return;
     try {
@@ -388,7 +368,7 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
     try {
       const data = await fetchPlaylistTracks(idOrUrl);
       if (data.tracks.length < 2) throw new Error('Playlist needs at least 2 songs to make a bracket.');
-      dispatch({ type: 'LOAD_SUCCESS', tracks: data.tracks });
+      dispatch({ type: 'LOAD_SUCCESS', tracks: data.tracks, playlistName: data.playlistName });
       captureEvent('playlist_loaded', {
         track_count: data.tracks.length,
         source: analyticsSource,

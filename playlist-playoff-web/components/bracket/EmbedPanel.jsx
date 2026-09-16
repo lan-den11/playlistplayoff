@@ -2,10 +2,20 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-export default function EmbedPanel({ elRef, loading, gradient }) {
+export default function EmbedPanel({ elRef, loading, gradient, height }) {
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div ref={elRef} className="min-h-[80px] sm:min-h-[152px]" />
+    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [&_iframe]:block [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0">
+      <div
+        ref={elRef}
+        className="min-h-[80px] w-full sm:min-h-[152px]"
+        // `height` comes straight from useSpotifyEmbed, measured off this
+        // same container's actual rendered width rather than assumed from
+        // the viewport — see that hook for why. Setting it here guarantees
+        // the wrapper's height always matches exactly what was requested
+        // from Spotify, so there's no size mismatch for the iframe to try
+        // to reconcile with an internal scrollbar.
+        style={height ? { height: `${height}px`, minHeight: `${height}px` } : undefined}
+      />
       <AnimatePresence>
         {loading && (
           <motion.div
