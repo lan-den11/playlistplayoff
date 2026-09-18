@@ -34,16 +34,8 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
-  // No `runtime` key needed here: this file is named proxy.js, Next.js 16's
-  // renamed convention for what used to be middleware.js, and proxy.js
-  // ALWAYS runs on the full Node.js runtime already (declaring `runtime`
-  // explicitly is actually a build error — "Proxy always runs on Node.js
-  // runtime"). That's exactly what posthog-node needs, so getAppAccessMode()
-  // above just works with no extra config.
   matcher: [
-    // Skip Next.js internals and static files, unless referenced via a search param
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };

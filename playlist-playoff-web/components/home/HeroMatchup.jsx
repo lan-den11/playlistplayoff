@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Flame, Loader2, Music2 } from 'lucide-react';
 import { useBracket, TRENDING_HANDOFF_STORAGE_KEY } from '../../hooks/useBracket';
@@ -9,10 +9,22 @@ import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
 import GradientButton from '../ui/GradientButton';
 import EmbedPanel from '../bracket/EmbedPanel';
-import Modal from '../bracket/Modal';
 
 const PICKS_BEFORE_HANDOFF = 2;
 const TEASER_BRACKET_SIZE = 8;
+
+// A plain "vs" divider between the two stacked matchup cards — lines
+// flanking the label instead of a bare floating word, so it reads as a
+// deliberate divider rather than an afterthought.
+function MatchupDivider() {
+  return (
+    <div className="flex items-center gap-3 px-1" aria-hidden="true">
+      <span className="h-px flex-1 bg-white/10" />
+      <span className="flex-none font-display text-xs font-bold uppercase tracking-widest text-zinc-500">vs</span>
+      <span className="h-px flex-1 bg-white/10" />
+    </div>
+  );
+}
 
 function StaticFallback() {
   // Shown only if the live Spotify fetch fails entirely (e.g. missing
@@ -23,16 +35,16 @@ function StaticFallback() {
   return (
     <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
       <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">Round of 8</p>
-      <div className="flex items-start gap-3">
-        <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-brand/30 bg-brand/10 p-4 backdrop-blur-md">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-brand/30 bg-brand/10 p-4 backdrop-blur-md">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
             <Music2 className="h-6 w-6 text-brand-light" />
           </div>
           <p className="truncate text-sm font-semibold text-zinc-50">Night Drive</p>
           <p className="truncate text-xs text-zinc-400">Nocturn</p>
         </div>
-        <span className="mt-8 flex-none font-display text-sm font-bold text-zinc-50">VS</span>
-        <div className="flex flex-1 flex-col items-center gap-2.5 rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 backdrop-blur-md">
+        <MatchupDivider />
+        <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 backdrop-blur-md">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
             <Music2 className="h-6 w-6 text-sky-400" />
           </div>
@@ -51,11 +63,11 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
     <motion.div
       animate={
         isAnimatingPick
-          ? { opacity: isWinner ? 1 : 0.35, scale: isWinner ? 1.03 : 0.97 }
+          ? { opacity: isWinner ? 1 : 0.35, scale: isWinner ? 1.02 : 0.98 }
           : { opacity: 1, scale: 1 }
       }
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-      className="flex flex-1 flex-col items-center gap-2.5"
+      className="flex w-full flex-col items-center gap-2.5"
     >
       <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} height={height} />
       <div className="w-full text-center">
@@ -67,7 +79,7 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
         size="sm"
         onClick={() => onPick(side)}
         disabled={Boolean(isAnimatingPick)}
-        className="w-full"
+        className="mx-auto w-full max-w-xs"
       >
         Choose Song
       </GradientButton>
@@ -80,12 +92,19 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
  * the exact same engine (useBracket) and the exact same Spotify embed
  * component (EmbedPanel / useSpotifyEmbed) as the full /bracket experience.
  *
+ * The two songs are stacked vertically rather than side by side — this
+ * card only ever gets up to `max-w-lg` (448px) of width, and split in half
+ * that's not enough room for Spotify's embed to render without clipping on
+ * anything but a wide desktop viewport. Stacked, each embed always gets the
+ * card's full width, on every screen size, with no breakpoint math needed.
+ *
  * `accessMode` (passed down from app/page.jsx's server-resolved PostHog
  * flag) controls what happens once the visitor has made their picks:
  *  - 'unlocked': hands off to the real /bracket page, same as always.
  *  - anything else (the 'hero-only' default): the app isn't open yet, so
  *    instead of navigating away this shows a "thanks for playing, join the
- *    waitlist" popup right on top of the still-visible teaser card.
+ *    waitlist" prompt scoped to just this card (not a full-screen modal),
+ *    so the rest of the hero and page stay visible and scrollable behind it.
  */
 export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID, accessMode = 'hero-only' }) {
   const router = useRouter();
@@ -100,6 +119,37 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
   const [isAnimatingPick, setIsAnimatingPick] = useState(null);
   const [embedLoadingA, setEmbedLoadingA] = useState(true);
   const [embedLoadingB, setEmbedLoadingB] = useState(true);
+
+  // Drives the card's motion in two chained steps instead of two separately
+  // time-guessed animations: it settles in with a spring, and only once
+  // that settle has *actually finished* does the idle float loop start.
+  // The previous version started the float on a hardcoded delay that
+  // assumed the spring above it would be done by then — close enough on a
+  // fast machine, but on anything slower the float's first loop landed
+  // mid-settle and the two fought each other, which is what read as a
+  // choppy, "weird" stutter.
+  const floatControls = useAnimationControls();
+
+  useEffect(() => {
+    let cancelled = false;
+    floatControls
+      .start({
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: { type: 'spring', stiffness: 260, damping: 22, delay: 0.3 },
+      })
+      .then(() => {
+        if (cancelled) return;
+        floatControls.start({
+          y: [0, -6, 0],
+          transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [floatControls]);
 
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
@@ -189,9 +239,9 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
     return (
       <div className="mx-auto w-full max-w-lg animate-pulse rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
         <div className="mx-auto mb-4 h-3 w-32 rounded-full bg-white/10" />
-        <div className="flex gap-3">
-          <div className="h-40 flex-1 rounded-2xl bg-white/10" />
-          <div className="h-40 flex-1 rounded-2xl bg-white/10" />
+        <div className="flex flex-col gap-3">
+          <div className="h-40 rounded-2xl bg-white/10" />
+          <div className="h-40 rounded-2xl bg-white/10" />
         </div>
       </div>
     );
@@ -210,61 +260,75 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
 
       <motion.div
         initial={{ opacity: 0, scale: 0.92, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.3 }}
+        animate={floatControls}
+        className="will-change-transform rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40"
       >
-        {/* Independent, continuous idle float — kept separate from the
-            one-time entrance animation above so it doesn't reset/jump on
-            every loop the way a single shared keyframe array would. */}
-        <motion.div
-          animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
-          className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40"
-        >
-          <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">
-            <Flame className="h-3.5 w-3.5 text-brand-light" />
-            {bracket.state.playlistName || 'Trending in the US'} · {bracket.roundLabel}
-          </p>
+        <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">
+          <Flame className="h-3.5 w-3.5 text-brand-light" />
+          {bracket.state.playlistName || 'Trending in the US'} · {bracket.roundLabel}
+        </p>
 
-          <div className="flex items-start gap-3">
-            <TeaserSide
-              side="a"
-              track={pendingA}
-              elRef={embedA.elRef}
-              loading={embedLoadingA}
-              height={embedA.height}
-              embedGradient="from-brand to-brand-light"
-              accent="brand"
-              onPick={handlePick}
-              isAnimatingPick={isAnimatingPick}
-            />
-            <span className="mt-20 flex-none font-display text-sm font-bold text-zinc-50">VS</span>
-            <TeaserSide
-              side="b"
-              track={pendingB}
-              elRef={embedB.elRef}
-              loading={embedLoadingB}
-              height={embedB.height}
-              embedGradient="from-sky-400 to-sky-600"
-              accent="sideB"
-              onPick={handlePick}
-              isAnimatingPick={isAnimatingPick}
-            />
-          </div>
-        </motion.div>
+        <div className="flex flex-col gap-3">
+          <TeaserSide
+            side="a"
+            track={pendingA}
+            elRef={embedA.elRef}
+            loading={embedLoadingA}
+            height={embedA.height}
+            embedGradient="from-brand to-brand-light"
+            accent="brand"
+            onPick={handlePick}
+            isAnimatingPick={isAnimatingPick}
+          />
+          <MatchupDivider />
+          <TeaserSide
+            side="b"
+            track={pendingB}
+            elRef={embedB.elRef}
+            loading={embedLoadingB}
+            height={embedB.height}
+            embedGradient="from-sky-400 to-sky-600"
+            accent="sideB"
+            onPick={handlePick}
+            isAnimatingPick={isAnimatingPick}
+          />
+        </div>
       </motion.div>
 
-      <Modal open={showWaitlistPrompt} onClose={() => setShowWaitlistPrompt(false)}>
-        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">Thanks for playing!</h3>
-        <p className="mt-2 text-sm text-zinc-400">
-          More coming soon — join our waitlist to be notified the moment full brackets open up.
-        </p>
-        <div className="mt-6 flex justify-center">
-          <GradientButton gradient="brand" onClick={() => router.push('/waitlist')}>
-            Join waitlist
-          </GradientButton>
-        </div>
-      </Modal>
+      {/* "Thanks for playing" prompt — scoped to just this card instead of
+          the app-wide fixed <Modal>, so it visually sits over the little
+          bracket widget while the rest of the hero (heading, nav, and
+          everything further down the page) stays visible and scrollable. */}
+      <AnimatePresence>
+        {showWaitlistPrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowWaitlistPrompt(false)}
+            className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-zinc-950/80 p-4 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900/90 p-6 text-center backdrop-blur-xl shadow-2xl"
+            >
+              <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">Thanks for playing!</h3>
+              <p className="mt-2 text-sm text-zinc-400">
+                More coming soon — join our waitlist to be notified the moment full brackets open up.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <GradientButton gradient="brand" onClick={() => router.push('/waitlist')}>
+                  Join waitlist
+                </GradientButton>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

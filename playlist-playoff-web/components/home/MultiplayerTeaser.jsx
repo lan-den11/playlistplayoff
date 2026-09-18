@@ -95,13 +95,6 @@ export default function MultiplayerTeaser() {
                   disabled={isSubmitting}
                   className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
                 />
-                {/* Gold, not the usual blue glass — this card already reads
-                    warm (amber "coming soon" glow), and a blue button here
-                    clashed against it. Gold is the design system's existing
-                    celebratory accent (see ChampionScreen), so it's a drop-in
-                    fit rather than a one-off color. `disabled` uses
-                    GradientButton's built-in state instead of an opacity
-                    override on className. */}
                 <GradientButton type="submit" gradient="gold" disabled={isSubmitting}>
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
                   {isSubmitting ? 'Joining…' : 'Get Notified'}

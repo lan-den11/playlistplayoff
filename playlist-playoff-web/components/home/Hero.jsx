@@ -21,11 +21,13 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
   const isOpen = accessMode === 'unlocked';
 
   return (
-    // No local GhostFibers layer here anymore — the ghost-fiber effect now
-    // lives in <PageBackground> at the page level, fixed behind the entire
-    // homepage instead of scoped to just this section's height.
-    <section className="relative px-6 pb-20 pt-14 md:px-8 md:pb-32 md:pt-28">
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-16">
+    // min-h-screen + flex centering means the hero always fills the fold on
+    // every viewport height, so the scroll-hint chevron below — absolutely
+    // positioned against this same box — always lands at the true bottom of
+    // the fold instead of just trailing wherever the content happens to end
+    // (which is what put it at a different spot on every screen size).
+    <section className="relative flex min-h-screen flex-col justify-center px-6 py-20 md:px-8">
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-16">
         <motion.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
           <motion.h1
             variants={item}
@@ -49,14 +51,14 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
         <HeroMatchup trendingPlaylistId={trendingPlaylistId} accessMode={accessMode} />
       </div>
 
-      {/* Scroll hint — encourages visitors to keep scrolling past the fold
-          rather than bouncing after just the hero. Fades in after the rest
-          of the hero has settled, then bounces gently forever. */}
+      {/* Scroll hint — pinned to the bottom of this section's own box
+          (which is never shorter than the viewport) so it sits in the same
+          spot on every screen, instead of drifting with content height. */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.6 }}
-        className="mt-14 flex justify-center"
+        className="absolute inset-x-0 bottom-6 flex justify-center md:bottom-10"
       >
         <motion.span
           animate={{ y: [0, 6, 0] }}

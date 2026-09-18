@@ -73,7 +73,12 @@ export default function Differentiator() {
         className="pointer-events-none absolute -top-10 right-0 h-80 w-[34rem] max-w-full rounded-full bg-brand/10 blur-[120px]"
       />
 
-      <div className="relative grid items-center gap-14 md:grid-cols-2 md:gap-20">
+      {/* mx-auto max-w-7xl was missing here — every sibling section (Hero,
+          HowItWorks, MultiplayerTeaser) caps at max-w-7xl and centers, so
+          without it this section stretched edge-to-edge on wide screens
+          while everything above and below it stayed centered — the exact
+          "goofy"/inconsistent layout this brings back in line. */}
+      <div className="relative mx-auto grid max-w-7xl items-center gap-14 md:grid-cols-2 md:gap-20">
         <motion.div
           initial={{ opacity: 0, x: -24 }}
           whileInView={{ opacity: 1, x: 0 }}
