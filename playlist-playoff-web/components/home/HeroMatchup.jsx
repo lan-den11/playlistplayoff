@@ -120,17 +120,28 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
   const [embedLoadingA, setEmbedLoadingA] = useState(true);
   const [embedLoadingB, setEmbedLoadingB] = useState(true);
 
+  const { pendingA, pendingB } = bracket;
+  const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
+
   // Drives the card's motion in two chained steps instead of two separately
   // time-guessed animations: it settles in with a spring, and only once
   // that settle has *actually finished* does the idle float loop start.
-  // The previous version started the float on a hardcoded delay that
-  // assumed the spring above it would be done by then — close enough on a
-  // fast machine, but on anything slower the float's first loop landed
-  // mid-settle and the two fought each other, which is what read as a
-  // choppy, "weird" stutter.
+  //
+  // Gated on `cardReady` (mirrors the render branch below) rather than
+  // firing unconditionally on mount: `floatControls.start()` only animates
+  // whatever motion.div is *currently subscribed* to it. The floating card
+  // doesn't mount until the playlist has loaded and the screen is
+  // 'battle' — starting the animation before that had nothing to attach
+  // to, so it resolved as a no-op, and by the time the real card mounted
+  // this effect (deps: [floatControls], a stable ref) never fired again.
+  // The card was rendered but permanently stuck at its `initial` values —
+  // opacity: 0 — which is exactly what "won't load" looks like.
+  const cardReady =
+    bracket.state.screen === 'battle' && !handingOff && !bracket.state.loadError && Boolean(pendingA) && Boolean(pendingB);
   const floatControls = useAnimationControls();
 
   useEffect(() => {
+    if (!cardReady) return;
     let cancelled = false;
     floatControls
       .start({
@@ -149,10 +160,7 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
     return () => {
       cancelled = true;
     };
-  }, [floatControls]);
-
-  const { pendingA, pendingB } = bracket;
-  const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
+  }, [cardReady, floatControls]);
 
   useEffect(() => {
     bracket.loadPlaylist(trendingPlaylistId);
