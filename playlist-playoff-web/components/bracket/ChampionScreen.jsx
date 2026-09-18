@@ -153,7 +153,7 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
         <div className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [&_iframe]:block [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0">
           <div
             ref={embed.elRef}
-            className="min-h-[80px] w-full sm:min-h-[152px]"
+            className="min-h-[80px] w-full"
             style={embed.height ? { height: `${embed.height}px`, minHeight: `${embed.height}px` } : undefined}
           />
         </div>

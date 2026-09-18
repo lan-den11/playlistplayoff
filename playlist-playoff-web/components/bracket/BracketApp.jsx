@@ -52,7 +52,13 @@ export default function BracketApp() {
   const { screen } = bracket.state;
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    // min-h-dvh instead of min-h-screen: on mobile, `100vh` is pinned to
+    // the browser chrome's *largest* collapsed state, so the page was
+    // sized taller than what's actually visible whenever the address bar
+    // was showing — part of "doesn't fit on mobile". `dvh` tracks the
+    // real, current visible viewport and updates as that chrome
+    // shows/hides, including on resize/orientation change.
+    <div className="min-h-dvh bg-zinc-950">
       <BracketHeader
         screen={screen}
         headerProgressPct={bracket.headerProgressPct}

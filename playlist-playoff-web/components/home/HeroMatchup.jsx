@@ -13,9 +13,6 @@ import EmbedPanel from '../bracket/EmbedPanel';
 const PICKS_BEFORE_HANDOFF = 2;
 const TEASER_BRACKET_SIZE = 8;
 
-// A plain "vs" divider between the two stacked matchup cards — lines
-// flanking the label instead of a bare floating word, so it reads as a
-// deliberate divider rather than an afterthought.
 function MatchupDivider() {
   return (
     <div className="flex items-center gap-3 px-1" aria-hidden="true">
@@ -27,11 +24,6 @@ function MatchupDivider() {
 }
 
 function StaticFallback() {
-  // Shown only if the live Spotify fetch fails entirely (e.g. missing
-  // credentials, an invalid/expired token, or a network error) — a
-  // non-interactive placeholder so the homepage never looks fully broken to
-  // a visitor. See the console.error in HeroMatchup for exactly why it's
-  // showing in any given case — this card itself never explains why.
   return (
     <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
       <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">Round of 8</p>
@@ -87,25 +79,6 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
   );
 }
 
-/**
- * The homepage's live, playable teaser. Runs a real 8-song bracket through
- * the exact same engine (useBracket) and the exact same Spotify embed
- * component (EmbedPanel / useSpotifyEmbed) as the full /bracket experience.
- *
- * The two songs are stacked vertically rather than side by side — this
- * card only ever gets up to `max-w-lg` (448px) of width, and split in half
- * that's not enough room for Spotify's embed to render without clipping on
- * anything but a wide desktop viewport. Stacked, each embed always gets the
- * card's full width, on every screen size, with no breakpoint math needed.
- *
- * `accessMode` (passed down from app/page.jsx's server-resolved PostHog
- * flag) controls what happens once the visitor has made their picks:
- *  - 'unlocked': hands off to the real /bracket page, same as always.
- *  - anything else (the 'hero-only' default): the app isn't open yet, so
- *    instead of navigating away this shows a "thanks for playing, join the
- *    waitlist" prompt scoped to just this card (not a full-screen modal),
- *    so the rest of the hero and page stay visible and scrollable behind it.
- */
 export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID, accessMode = 'hero-only' }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
@@ -123,19 +96,6 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
-  // Drives the card's motion in two chained steps instead of two separately
-  // time-guessed animations: it settles in with a spring, and only once
-  // that settle has *actually finished* does the idle float loop start.
-  //
-  // Gated on `cardReady` (mirrors the render branch below) rather than
-  // firing unconditionally on mount: `floatControls.start()` only animates
-  // whatever motion.div is *currently subscribed* to it. The floating card
-  // doesn't mount until the playlist has loaded and the screen is
-  // 'battle' — starting the animation before that had nothing to attach
-  // to, so it resolved as a no-op, and by the time the real card mounted
-  // this effect (deps: [floatControls], a stable ref) never fired again.
-  // The card was rendered but permanently stuck at its `initial` values —
-  // opacity: 0 — which is exactly what "won't load" looks like.
   const cardReady =
     bracket.state.screen === 'battle' && !handingOff && !bracket.state.loadError && Boolean(pendingA) && Boolean(pendingB);
   const floatControls = useAnimationControls();
@@ -257,8 +217,6 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
 
   return (
     <div className="relative mx-auto w-full max-w-lg">
-      {/* Ambient pulsing glow behind the card — a small, tasteful nudge that
-          this is the interactive, playable part of the page. */}
       <motion.div
         aria-hidden="true"
         className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-brand/30 via-brand/10 to-transparent blur-2xl"
@@ -303,10 +261,6 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
         </div>
       </motion.div>
 
-      {/* "Thanks for playing" prompt — scoped to just this card instead of
-          the app-wide fixed <Modal>, so it visually sits over the little
-          bracket widget while the rest of the hero (heading, nav, and
-          everything further down the page) stays visible and scrollable. */}
       <AnimatePresence>
         {showWaitlistPrompt && (
           <motion.div

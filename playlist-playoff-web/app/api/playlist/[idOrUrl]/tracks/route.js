@@ -8,11 +8,6 @@ export async function GET(_request, { params }) {
   try {
     const token = await getAppToken();
 
-    // Fired in parallel with track pagination below, not awaited until the
-    // very end — this is purely cosmetic (powers the homepage teaser's
-    // "<playlist name> · Round of 8" label) so a failure here must never
-    // break the actual track load. Kept to just the `name` field so it's a
-    // cheap request alongside the heavier paginated tracks call.
     const namePromise = axios
       .get(`https://api.spotify.com/v1/playlists/${playlistId}?fields=name`, {
         headers: { Authorization: `Bearer ${token}` },

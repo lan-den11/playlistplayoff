@@ -79,13 +79,22 @@ export default function MultiplayerTeaser() {
                 You're on the list
               </motion.div>
             ) : (
+              // Always a single row now — this used to stack (flex-col)
+              // below the sm: breakpoint, splitting the field and button
+              // onto two lines. `min-w-0` on the input is the part that
+              // actually makes the row work: flex items default to
+              // min-width: auto, which stops them from shrinking below
+              // their own content's width — without it, the input refuses
+              // to shrink and pushes the button into wrapping instead.
+              // `flex-none` + `size="sm"` on the button keep it compact
+              // and fixed, so it's always the input that gives way first.
               <motion.form
                 key="cta"
                 onSubmit={handleSubmit}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex w-full max-w-sm flex-col items-stretch gap-3 sm:flex-row"
+                className="flex w-full max-w-sm items-stretch gap-2"
               >
                 <input
                   value={email}
@@ -93,9 +102,9 @@ export default function MultiplayerTeaser() {
                   type="email"
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
+                  className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
                 />
-                <GradientButton type="submit" gradient="gold" disabled={isSubmitting}>
+                <GradientButton type="submit" gradient="gold" size="sm" disabled={isSubmitting} className="flex-none">
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
                   {isSubmitting ? 'Joining…' : 'Get Notified'}
                 </GradientButton>

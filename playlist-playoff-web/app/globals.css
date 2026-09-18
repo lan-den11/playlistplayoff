@@ -29,6 +29,26 @@ iframe {
   outline-offset: 3px;
 }
 
+/* Every "liquid glass" surface (GradientButton, GlassButton,
+   GlassIconBadge) boosts backdrop-saturate to 150% via
+   `backdrop-saturate-150` for extra vibrancy on browsers that render it
+   correctly. iOS Safari renders `backdrop-filter: blur() saturate()`
+   through what is effectively an extended/linear color pipeline that
+   pushes blue/indigo tones toward magenta-purple — and the shift scales
+   directly with the saturate() multiplier, which is why our indigo brand
+   color (#3437A0) reads as purple there specifically. This feature query
+   matches iOS Safari only (no other engine implements
+   -webkit-touch-callout), so it caps the saturate boost back to 100% —
+   effectively a no-op saturate — there, and leaves every other browser
+   (including desktop Safari) untouched. Tailwind composes backdrop-filter
+   from these custom properties, so overriding just this one leaves blur
+   and every other backdrop effect intact. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop-saturate-150 {
+    --tw-backdrop-saturate: saturate(1) !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

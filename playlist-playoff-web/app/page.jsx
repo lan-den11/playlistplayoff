@@ -9,11 +9,6 @@ import PageBackground from '../components/ui/PageBackground';
 import { getTrendingPlaylistId, getAppAccessMode } from '../lib/posthog-server';
 import { TRENDING_PLAYLIST_ID } from '../lib/spotifyAuth';
 
-// Without this, Next statically prerenders "/" once at build/deploy time —
-// getTrendingPlaylistId()/getAppAccessMode() would run exactly once,
-// forever, and toggling either PostHog flag afterward would do nothing
-// until the next deploy. See lib/posthog-server.js for the in-memory TTLs
-// that bound staleness on top of this.
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {

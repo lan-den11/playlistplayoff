@@ -72,7 +72,14 @@ export default function GradientButton({
         aria-hidden="true"
         className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors`}
       />
-      <span className={`relative z-10 inline-flex items-center gap-2 rounded-full font-semibold text-zinc-50 ${padding}`}>
+      {/* whitespace-nowrap: without it, a button squeezed by a flex
+          sibling (e.g. the email field in MultiplayerTeaser) can shrink
+          the text span below its content's natural width, wrapping the
+          icon and label onto two lines. GlassButton already had this; it
+          was just missing here. */}
+      <span
+        className={`relative z-10 inline-flex items-center gap-2 whitespace-nowrap rounded-full font-semibold text-zinc-50 ${padding}`}
+      >
         {children}
       </span>
     </motion.button>

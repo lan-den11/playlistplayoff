@@ -2,15 +2,7 @@ import { NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { getAppAccessMode } from './lib/posthog-server';
 
-// Always reachable no matter the access mode — the waitlist screen has to
-// render even when the mode IS "waitlist-only", and health checks shouldn't
-// depend on PostHog being reachable.
 const isAlwaysPublicRoute = createRouteMatcher(['/waitlist(.*)', '/api/health', '/api/debug(.*)']);
-
-// Only the actual gameplay page is ever gated behind sign-in. The homepage
-// teaser (HeroMatchup) and the API routes it calls (playlist/user/lastfm)
-// stay public in "hero-only" mode on purpose — that's the whole point of
-// that mode.
 const isGameplayRoute = createRouteMatcher(['/bracket(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -23,11 +15,9 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (mode === 'unlocked') {
-    return; // whole app open, no sign-in required anywhere
+    return;
   }
 
-  // mode === 'hero-only' (the default): homepage/marketing stays public,
-  // only the bracket gameplay itself requires sign-in / waitlist approval.
   if (isGameplayRoute(req)) {
     await auth.protect({ unauthenticatedUrl: new URL('/waitlist', req.url).toString() });
   }

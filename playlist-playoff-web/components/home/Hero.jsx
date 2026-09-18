@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -16,17 +17,42 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
 };
 
+// Real height of Navbar's own row: py-4 (32px) + the h-9 (36px) icon badge
+// + its 1px border ≈ 69px, rounded up. Hero used to size itself to
+// min-h-screen on its own, stacked *below* that navbar in normal flow —
+// so navbar height + a full screen of hero always added up to taller than
+// one screen, forcing a small scroll before the fold even without any
+// content overflowing. Subtracting it here means navbar + hero together
+// fill exactly one viewport.
+const NAVBAR_HEIGHT_PX = 70;
+
 export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
+  const [showScrollHint, setShowScrollHint] = useState(true);
+
+  // The hint used to be `absolute` inside this section, anchored to the
+  // section's own bottom edge. Once HeroMatchup swaps its loading skeleton
+  // for the real interactive card (taller, with two live embeds), the
+  // section grows to fit that content and drags the hint down with it —
+  // "isn't visible until it loads, then jumps" and can land below the
+  // fold entirely. Pinning it to the viewport instead means it always sits
+  // in the same spot regardless of how tall the hero's content gets, and
+  // it only ever disappears once the visitor actually scrolls past it.
+  useEffect(() => {
+    if (!showScrollHint) return;
+    function handleScroll() {
+      if (window.scrollY > 80) setShowScrollHint(false);
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showScrollHint]);
 
   return (
-    // min-h-screen + flex centering means the hero always fills the fold on
-    // every viewport height, so the scroll-hint chevron below — absolutely
-    // positioned against this same box — always lands at the true bottom of
-    // the fold instead of just trailing wherever the content happens to end
-    // (which is what put it at a different spot on every screen size).
-    <section className="relative flex min-h-screen flex-col justify-center px-6 py-20 md:px-8">
+    <section
+      className="relative flex flex-col justify-center px-6 py-20 md:px-8"
+      style={{ minHeight: `calc(100dvh - ${NAVBAR_HEIGHT_PX}px)` }}
+    >
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-16">
         <motion.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
           <motion.h1
@@ -51,14 +77,13 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
         <HeroMatchup trendingPlaylistId={trendingPlaylistId} accessMode={accessMode} />
       </div>
 
-      {/* Scroll hint — pinned to the bottom of this section's own box
-          (which is never shorter than the viewport) so it sits in the same
-          spot on every screen, instead of drifting with content height. */}
+      {/* Fixed to the viewport (not this section) so its position never
+          depends on how tall the hero's own content grows. */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.6 }}
-        className="absolute inset-x-0 bottom-6 flex justify-center md:bottom-10"
+        animate={{ opacity: showScrollHint ? 1 : 0 }}
+        transition={{ delay: showScrollHint ? 1 : 0, duration: 0.6 }}
+        className="pointer-events-none fixed inset-x-0 bottom-6 z-10 flex justify-center md:bottom-10"
       >
         <motion.span
           animate={{ y: [0, 6, 0] }}

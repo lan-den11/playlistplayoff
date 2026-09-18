@@ -30,3 +30,8 @@ export function saveProfile(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function fetchAlbumArt(artist, album) {
+  const params = new URLSearchParams({ artist, album });
+  return request(`/api/album-art?${params.toString()}`);
+}
