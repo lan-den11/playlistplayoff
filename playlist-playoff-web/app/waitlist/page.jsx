@@ -37,7 +37,7 @@ export default async function WaitlistPage() {
           Join the waitlist
         </h1>
         <p className="mb-8 max-w-sm text-sm text-zinc-400">
-          We're onboarding in waves — pop your email in and we'll let you know the second a spot opens up.
+          We're onboarding in waves- enter your email and we'll let you know the second a spot opens up.
         </p>
         <Waitlist />
       </div>

@@ -326,7 +326,7 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
             >
               <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">Thanks for playing!</h3>
               <p className="mt-2 text-sm text-zinc-400">
-                More coming soon — join our waitlist to be notified the moment full brackets open up.
+                More coming soon! Join the waitlist to be notified as soon as full brackets release.
               </p>
               <div className="mt-6 flex justify-center">
                 <GradientButton gradient="brand" onClick={() => router.push('/waitlist')}>
