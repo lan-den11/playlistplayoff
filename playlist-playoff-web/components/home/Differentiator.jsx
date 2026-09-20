@@ -5,7 +5,17 @@ import { motion } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 
-
+// "Homecoming" by Kanye West was previously missing from Spotify (a
+// long-standing Chris Martin/Coldplay clearance gap), so there was no real
+// cover art to fetch and this fell back to a stylized icon. That gap has
+// since closed — the track (and its parent album, Graduation) is back on
+// Spotify — so this now looks the real cover art up the same way every
+// other Spotify-backed piece of this app does: a client-credentials
+// search via /api/album-art, using the artist + album (not the single
+// track) since that's what has stable, guaranteed cover art either way.
+// If the lookup ever fails again (rate limit, credentials misconfigured,
+// re-delisted), it quietly falls back to the original icon treatment
+// rather than showing a broken image.
 function TrackDetailsMockup() {
   const [albumArt, setAlbumArt] = useState(null);
 
@@ -82,13 +92,17 @@ function TrackDetailsMockup() {
 
 export default function Differentiator() {
   return (
-    <section className="relative overflow-hidden px-6 py-24 md:px-8 md:py-32">
+    // overflow-x-clip + a -z-10 glow instead of overflow-hidden: the glow
+    // hangs above this section's top edge and overflow-hidden used to slice
+    // it off at the boundary (a hard tinted step between sections). See
+    // HowItWorks for the full reasoning.
+    <section className="relative overflow-x-clip px-6 py-24 md:px-8 md:py-32">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-10 right-0 h-80 w-[34rem] max-w-full rounded-full bg-brand/10 blur-[120px]"
+        className="pointer-events-none absolute -top-10 right-0 -z-10 h-80 w-[34rem] max-w-full rounded-full bg-brand/10 blur-[120px]"
       />
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-14 md:grid-cols-2 md:gap-20">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 md:grid-cols-2 md:gap-20">
         <motion.div
           initial={{ opacity: 0, x: -24 }}
           whileInView={{ opacity: 1, x: 0 }}

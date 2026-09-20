@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import GradientButton from '../ui/GradientButton';
+import FitToScreen from '../ui/FitToScreen';
 import HeroMatchup from './HeroMatchup';
 
 const container = {
@@ -17,14 +18,19 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
 };
 
-// Real height of the site header (components/ui/SiteHeader.jsx): its fixed
-// h-20 row (80px) + 1px bottom border = 81px, at every breakpoint. Hero used
-// to size itself to min-h-screen on its own, stacked *below* that navbar in
-// normal flow — so navbar height + a full screen of hero always added up to
-// taller than one screen, forcing a small scroll before the fold even
-// without any content overflowing. Subtracting it here means navbar + hero
-// together fill exactly one viewport. Keep in sync with SiteHeader.
+// The hero + matchup card must fit on the first screen at any viewport size
+// (FitToScreen scales them down if the natural layout is taller than the
+// space available). That space is one small-viewport screen minus everything
+// that isn't the hero content:
+//   - the site header (components/ui/SiteHeader.jsx): its fixed h-20 row
+//     (80px) + 1px border = 81px, at every breakpoint
+//   - this section's own padding: `pt-4` (16px) + `pb-14` (56px). The bottom
+//     is deliberately larger — it's where the "Scroll to see more" hint sits,
+//     so the hint can never overlap the card on a tight screen.
+// Keep these numbers in sync with SiteHeader and the section's padding.
 const NAVBAR_HEIGHT_PX = 81;
+const SECTION_PADDING_Y_PX = 16 + 56;
+const RESERVED_PX = NAVBAR_HEIGHT_PX + SECTION_PADDING_Y_PX;
 
 export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
   const router = useRouter();
@@ -49,46 +55,52 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
   }, [showScrollHint]);
 
   return (
-    <section
-      className="relative flex flex-col justify-center px-6 py-20 md:px-8"
-      style={{ minHeight: `calc(100dvh - ${NAVBAR_HEIGHT_PX}px)` }}
-    >
-      {/* grid-cols-1 (= minmax(0, 1fr)) instead of the implicit `auto` column:
-          an auto column is at least as wide as its widest unbreakable child,
-          so a long track title (nowrap + truncate) in the matchup card
-          stretched the whole column past the viewport on narrow phones —
-          the sideways scroll. minmax(0, …) lets `truncate` do its job. */}
-      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
-        <motion.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
-          <motion.h1
-            variants={item}
-            className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-6xl md:text-7xl xl:text-[5.5rem]"
-          >
-            Turn any playlist into a showdown.
-          </motion.h1>
+    <section className="relative px-6 pb-14 pt-4 md:px-8">
+      <FitToScreen reserve={RESERVED_PX}>
+        {/* grid-cols-1 (= minmax(0, 1fr)) instead of the implicit `auto` column:
+            an auto column is at least as wide as its widest unbreakable child,
+            so a long track title (nowrap + truncate) in the matchup card
+            stretched the whole column past the viewport on narrow phones —
+            the sideways scroll. minmax(0, …) lets `truncate` do its job.
+            Headline steps down a size at each breakpoint so the longest word
+            ("showdown.") always fits its column instead of spilling into the
+            card's. */}
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 md:grid-cols-2 md:gap-16">
+          <motion.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
+            <motion.h1
+              variants={item}
+              className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
+            >
+              Turn any playlist into a showdown.
+            </motion.h1>
 
-          <motion.p variants={item} className="mx-auto mt-5 max-w-lg text-base text-zinc-400 sm:text-lg md:mx-0">
-            Select winners per matchup until one song takes the crown while listening history influences your choices.
-          </motion.p>
+            <motion.p
+              variants={item}
+              className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
+            >
+              Select winners per matchup until one song takes the crown while listening history influences your choices.
+            </motion.p>
 
-          <motion.div variants={item} className="mt-8 flex justify-center md:justify-start">
-            <GradientButton gradient="brand" onClick={() => router.push(isOpen ? '/bracket' : '/waitlist')}>
-              {isOpen ? 'Start a bracket' : 'Join the waitlist'}
-              <ArrowRight className="h-4 w-4" />
-            </GradientButton>
+            <motion.div variants={item} className="mt-5 flex justify-center md:mt-8 md:justify-start">
+              <GradientButton gradient="brand" onClick={() => router.push(isOpen ? '/bracket' : '/waitlist')}>
+                {isOpen ? 'Start a bracket' : 'Join the waitlist'}
+                <ArrowRight className="h-4 w-4" />
+              </GradientButton>
+            </motion.div>
           </motion.div>
-        </motion.div>
 
-        <HeroMatchup trendingPlaylistId={trendingPlaylistId} accessMode={accessMode} />
-      </div>
+          <HeroMatchup trendingPlaylistId={trendingPlaylistId} accessMode={accessMode} />
+        </div>
+      </FitToScreen>
 
       {/* Fixed to the viewport (not this section) so its position never
-          depends on how tall the hero's own content grows. */}
+          depends on how tall the hero's own content grows. Sits inside the
+          section's 56px bottom padding (12–52px from the bottom). */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: showScrollHint ? 1 : 0 }}
         transition={{ delay: showScrollHint ? 1 : 0, duration: 0.6 }}
-        className="pointer-events-none fixed inset-x-0 bottom-6 z-10 flex justify-center md:bottom-10"
+        className="pointer-events-none fixed inset-x-0 bottom-3 z-10 flex justify-center md:bottom-4"
       >
         <motion.span
           animate={{ y: [0, 6, 0] }}

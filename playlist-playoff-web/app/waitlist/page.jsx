@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Waitlist } from '@clerk/nextjs';
 import Footer from '../../components/home/Footer';
 import SiteHeader from '../../components/ui/SiteHeader';
+import PageBackground from '../../components/ui/PageBackground';
 import { getAppAccessMode } from '../../lib/posthog-server';
 
 export const metadata = {
@@ -23,7 +24,8 @@ export default async function WaitlistPage() {
   const logoHref = mode === 'waitlist-only' ? '/waitlist' : '/';
 
   return (
-    <main className="min-h-screen overflow-x-clip bg-zinc-950">
+    <main className="relative isolate min-h-screen overflow-x-clip bg-zinc-950">
+      <PageBackground />
       <SiteHeader logoHref={logoHref} />
 
       <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 py-20 text-center md:px-8">

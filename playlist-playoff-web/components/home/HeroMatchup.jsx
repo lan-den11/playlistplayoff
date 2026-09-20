@@ -17,7 +17,7 @@ function MatchupDivider() {
   return (
     <div className="flex items-center gap-3 px-1" aria-hidden="true">
       <span className="h-px flex-1 bg-white/10" />
-      <span className="flex-none font-display text-xs font-bold uppercase tracking-widest text-zinc-500">vs</span>
+      <span className="flex-none font-display text-sm font-bold uppercase tracking-widest text-zinc-50">vs</span>
       <span className="h-px flex-1 bg-white/10" />
     </div>
   );
@@ -48,6 +48,9 @@ function StaticFallback() {
   );
 }
 
+// The title/artist row under each embed duplicates what Spotify's own card
+// already shows, so below `md` (where the hero stacks and vertical space is
+// the constraint) it's dropped to keep the whole matchup on the first screen.
 function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent, onPick, isAnimatingPick }) {
   const isWinner = isAnimatingPick === side;
 
@@ -62,7 +65,7 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
       className="flex w-full flex-col items-center gap-2.5"
     >
       <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} height={height} />
-      <div className="w-full text-center">
+      <div className="hidden w-full text-center md:block">
         <p className="truncate font-display text-sm font-semibold text-zinc-50">{track?.name}</p>
         <p className="truncate text-xs text-zinc-400">{track?.artists}</p>
       </div>
@@ -203,13 +206,18 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
     );
   }
 
+  // Loading skeleton. Its heights mirror the real card (p-4/md:p-5, 16px
+  // header, 128px/174px sides, 20px divider) so the swap doesn't change the
+  // hero's height — otherwise FitToScreen would re-scale the moment the real
+  // card arrives.
   if (bracket.state.screen !== 'battle' || !pendingA || !pendingB) {
     return (
-      <div className="mx-auto w-full max-w-lg animate-pulse rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
-        <div className="mx-auto mb-4 h-3 w-32 rounded-full bg-white/10" />
+      <div className="mx-auto w-full max-w-lg animate-pulse rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md md:p-5">
+        <div className="mx-auto mb-3 h-4 w-32 rounded-full bg-white/10 md:mb-4" />
         <div className="flex flex-col gap-3">
-          <div className="h-40 rounded-2xl bg-white/10" />
-          <div className="h-40 rounded-2xl bg-white/10" />
+          <div className="h-32 rounded-2xl bg-white/10 md:h-[174px]" />
+          <div className="h-5" />
+          <div className="h-32 rounded-2xl bg-white/10 md:h-[174px]" />
         </div>
       </div>
     );
@@ -227,9 +235,9 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
       <motion.div
         initial={{ opacity: 0, scale: 0.92, y: 12 }}
         animate={floatControls}
-        className="will-change-transform rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40"
+        className="will-change-transform rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:p-5"
       >
-        <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">
+        <p className="mb-3 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300 md:mb-4">
           <Flame className="h-3.5 w-3.5 text-brand-light" />
           {bracket.state.playlistName || 'Trending in the US'} · {bracket.roundLabel}
         </p>

@@ -9,7 +9,7 @@ export default function Navbar({ accessMode = 'hero-only' }) {
   const isOpen = accessMode === 'unlocked';
 
   return (
-    <SiteHeader sticky>
+    <SiteHeader>
       <GradientButton
         gradient="brand"
         className="hidden sm:inline-flex"

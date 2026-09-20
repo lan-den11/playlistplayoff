@@ -73,39 +73,46 @@ export default function Faq() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section className="relative overflow-hidden mx-auto max-w-3xl px-6 py-24 md:px-8 md:py-32">
+    // The section is now full-width and the max-w-3xl column moved to an
+    // inner div. Before, the section itself was the narrow column AND had
+    // overflow-hidden, so its glow was sliced along the column's top *and*
+    // side edges — visible tinted seams. overflow-x-clip + a -z-10 glow lets
+    // it fade out naturally (see HowItWorks for the full reasoning).
+    <section className="relative overflow-x-clip">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-16 left-1/2 h-64 w-[32rem] max-w-full -translate-x-1/2 rounded-full bg-brand-deep/40 blur-[110px]"
+        className="pointer-events-none absolute -top-16 left-1/2 -z-10 h-64 w-[32rem] max-w-full -translate-x-1/2 rounded-full bg-brand-deep/40 blur-[110px]"
       />
 
-      <motion.h2
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-        className="relative mb-12 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl"
-      >
-        Your questions, our answers
-      </motion.h2>
+      <div className="mx-auto max-w-3xl px-6 py-24 md:px-8 md:py-32">
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+          className="relative mb-12 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl"
+        >
+          Your questions, our answers
+        </motion.h2>
 
-      <motion.div
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
-        className="relative space-y-3"
-      >
-        {FAQS.map((item, i) => (
-          <motion.div
-            key={item.q}
-            variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
-            transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-          >
-            <FaqItem item={item} isOpen={openIndex === i} onToggle={() => setOpenIndex(openIndex === i ? -1 : i)} />
-          </motion.div>
-        ))}
-      </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+          className="relative space-y-3"
+        >
+          {FAQS.map((item, i) => (
+            <motion.div
+              key={item.q}
+              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+              transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            >
+              <FaqItem item={item} isOpen={openIndex === i} onToggle={() => setOpenIndex(openIndex === i ? -1 : i)} />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
     </section>
   );
 }

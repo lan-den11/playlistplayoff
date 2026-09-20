@@ -37,10 +37,16 @@ const card = {
 
 export default function HowItWorks() {
   return (
-    <section className="relative overflow-hidden px-6 py-24 md:px-8 md:py-32">
+    // overflow-x-clip (not overflow-hidden) + a -z-10 glow: the glow hangs
+    // above this section's top edge, and overflow-hidden used to slice it off
+    // right at the boundary — a hard tinted step between sections. Clipping
+    // only the x-axis lets it fade out naturally into the neighbouring
+    // sections; -z-10 keeps it behind their content (it still paints above
+    // PageBackground, which comes first in <main>).
+    <section className="relative overflow-x-clip px-6 py-24 md:px-8 md:py-32">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[40rem] max-w-full -translate-x-1/2 rounded-full bg-brand/15 blur-[110px]"
+        className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-72 w-[40rem] max-w-full -translate-x-1/2 rounded-full bg-brand/15 blur-[110px]"
       />
 
       <div className="mx-auto mb-16 max-w-2xl text-center">

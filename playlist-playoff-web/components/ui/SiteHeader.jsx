@@ -9,12 +9,10 @@ import GlassIconBadge from './GlassIconBadge';
 // wordmark sat ~6px lower on the homepage. A fixed row height (`h-20`) makes
 // the logo's vertical center identical no matter what — or whether anything
 // — sits on the right. Total header height = 80px + 1px border = 81px
-// (Hero's NAVBAR_HEIGHT_PX mirrors this).
-export default function SiteHeader({ logoHref = '/', sticky = false, children }) {
+// (Hero's NAVBAR_HEIGHT_PX mirrors this). Deliberately NOT sticky.
+export default function SiteHeader({ logoHref = '/', children }) {
   return (
-    <header
-      className={`border-b border-white/5 bg-zinc-950/70 backdrop-blur-md ${sticky ? 'sticky top-0 z-50' : ''}`}
-    >
+    <header className="border-b border-white/5 bg-zinc-950/70 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-8">
         <Link href={logoHref} className="flex items-center gap-2.5">
           <GlassIconBadge icon={Headphones} size="sm" />
