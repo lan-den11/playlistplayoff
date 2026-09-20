@@ -5,17 +5,7 @@ import { motion } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 
-// "Homecoming" by Kanye West was previously missing from Spotify (a
-// long-standing Chris Martin/Coldplay clearance gap), so there was no real
-// cover art to fetch and this fell back to a stylized icon. That gap has
-// since closed — the track (and its parent album, Graduation) is back on
-// Spotify — so this now looks the real cover art up the same way every
-// other Spotify-backed piece of this app does: a client-credentials
-// search via /api/album-art, using the artist + album (not the single
-// track) since that's what has stable, guaranteed cover art either way.
-// If the lookup ever fails again (rate limit, credentials misconfigured,
-// re-delisted), it quietly falls back to the original icon treatment
-// rather than showing a broken image.
+
 function TrackDetailsMockup() {
   const [albumArt, setAlbumArt] = useState(null);
 
