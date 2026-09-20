@@ -8,6 +8,7 @@ import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
 import { captureClientException, captureEvent } from '../../lib/posthog-client';
 import GradientButton from '../ui/GradientButton';
 import GlassButton from '../ui/GlassButton';
+import EmbedPanel from './EmbedPanel';
 
 const CONFETTI_COLORS = ['#3437A0', '#7B7DC1', '#f5b759', '#fafafa'];
 
@@ -150,12 +151,11 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
           We have a champion
         </div>
 
-        <div className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [&_iframe]:block [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0">
-          <div
-            ref={embed.elRef}
-            className="min-h-[80px] w-full"
-            style={embed.height ? { height: `${embed.height}px`, minHeight: `${embed.height}px` } : undefined}
-          />
+        {/* Same panel as the battle/hero embeds, so the champion embed gets
+            the explicit-height fix too (it had its own copy of the markup
+            and the same dead-space bug). */}
+        <div className="mb-6">
+          <EmbedPanel elRef={embed.elRef} loading={false} gradient="from-brand to-brand-light" height={embed.height} />
         </div>
 
         <h2 className="font-display text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">

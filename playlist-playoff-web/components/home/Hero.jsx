@@ -17,14 +17,14 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
 };
 
-// Real height of Navbar's own row: py-4 (32px) + the h-9 (36px) icon badge
-// + its 1px border ≈ 69px, rounded up. Hero used to size itself to
-// min-h-screen on its own, stacked *below* that navbar in normal flow —
-// so navbar height + a full screen of hero always added up to taller than
-// one screen, forcing a small scroll before the fold even without any
-// content overflowing. Subtracting it here means navbar + hero together
-// fill exactly one viewport.
-const NAVBAR_HEIGHT_PX = 70;
+// Real height of the site header (components/ui/SiteHeader.jsx): its fixed
+// h-20 row (80px) + 1px bottom border = 81px, at every breakpoint. Hero used
+// to size itself to min-h-screen on its own, stacked *below* that navbar in
+// normal flow — so navbar height + a full screen of hero always added up to
+// taller than one screen, forcing a small scroll before the fold even
+// without any content overflowing. Subtracting it here means navbar + hero
+// together fill exactly one viewport. Keep in sync with SiteHeader.
+const NAVBAR_HEIGHT_PX = 81;
 
 export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
   const router = useRouter();
@@ -53,7 +53,12 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
       className="relative flex flex-col justify-center px-6 py-20 md:px-8"
       style={{ minHeight: `calc(100dvh - ${NAVBAR_HEIGHT_PX}px)` }}
     >
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 md:grid-cols-2 md:gap-16">
+      {/* grid-cols-1 (= minmax(0, 1fr)) instead of the implicit `auto` column:
+          an auto column is at least as wide as its widest unbreakable child,
+          so a long track title (nowrap + truncate) in the matchup card
+          stretched the whole column past the viewport on narrow phones —
+          the sideways scroll. minmax(0, …) lets `truncate` do its job. */}
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
         <motion.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
           <motion.h1
             variants={item}

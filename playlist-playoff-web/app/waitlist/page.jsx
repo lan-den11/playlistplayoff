@@ -1,10 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { Headphones } from 'lucide-react';
 import { Waitlist } from '@clerk/nextjs';
 import Footer from '../../components/home/Footer';
-import GlassIconBadge from '../../components/ui/GlassIconBadge';
+import SiteHeader from '../../components/ui/SiteHeader';
 import { getAppAccessMode } from '../../lib/posthog-server';
 
 export const metadata = {
@@ -19,18 +17,14 @@ export default async function WaitlistPage() {
 
   if (userId && mode !== 'waitlist-only') redirect('/');
 
+  // hero-only (and unlocked, which redirects above) → the logo goes back to
+  // the hero. waitlist-only has no hero to return to: proxy.js redirects "/"
+  // straight back here, so link to this page instead of bouncing through it.
+  const logoHref = mode === 'waitlist-only' ? '/waitlist' : '/';
+
   return (
-    <main className="min-h-screen bg-zinc-950">
-      <header className="border-b border-white/5 bg-zinc-950/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center px-6 py-4 md:px-8">
-          <Link href="/waitlist" className="flex items-center gap-2.5">
-            <GlassIconBadge icon={Headphones} size="sm" />
-            <span className="font-display text-lg font-bold tracking-tight text-zinc-50">
-              Playlist Playoff
-            </span>
-          </Link>
-        </div>
-      </header>
+    <main className="min-h-screen overflow-x-clip bg-zinc-950">
+      <SiteHeader logoHref={logoHref} />
 
       <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 py-20 text-center md:px-8">
         <h1 className="mb-2 font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
@@ -39,7 +33,10 @@ export default async function WaitlistPage() {
         <p className="mb-8 max-w-sm text-sm text-zinc-400">
           We're onboarding in waves- enter your email and we'll let you know the second a spot opens up.
         </p>
-        <Waitlist />
+        {/* Clerk's card has a fixed rem width; capping it at 100% of this column keeps it from pushing past narrow screens. */}
+        <div className="flex w-full justify-center [&_.cl-cardBox]:max-w-full [&_.cl-rootBox]:min-w-0 [&_.cl-rootBox]:max-w-full">
+          <Waitlist />
+        </div>
       </div>
 
       <Footer />

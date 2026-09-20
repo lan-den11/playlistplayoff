@@ -17,21 +17,17 @@ function loadSpotifyIframeApi() {
   return iframeApiPromise;
 }
 
-// Spotify's own compact-vs-normal breakpoint is about the *embed's own*
-// width, not the viewport's. A two-up battle layout can put each embed in a
-// ~320–380px column even on a wide desktop window, so picking the layout
-// from window.innerWidth (the old approach) chose "normal" (152px, wider
-// content) for a column that was really only compact-sized — and the
-// Spotify iframe then needed its own internal scrollbar to fit everything.
-// Measuring the actual mounted container fixes this everywhere the embed
-// is used (homepage teaser and the real bracket) with one change.
-const COMPACT_BREAKPOINT = 380;
+// The ONE place the embed height is defined. It's given to Spotify's
+// createController AND returned as `height` so EmbedPanel sizes its own box
+// to match — the two must agree or the panel shows dead space (or clips the
+// card). 80px is Spotify's compact card, which reads fine at any width, so
+// there's no width measuring / 80-vs-152 switching anymore.
+export const EMBED_HEIGHT = 80;
 
 export function useSpotifyEmbed() {
   const [node, setNode] = useState(null);
   const controllerRef = useRef(null);
   const [ready, setReady] = useState(false);
-  const [height, setHeight] = useState(null);
 
   const elRef = useCallback((el) => {
     setNode(el);
@@ -45,10 +41,7 @@ export function useSpotifyEmbed() {
 
     loadSpotifyIframeApi().then((IFrameAPI) => {
       if (cancelled || !IFrameAPI) return;
-      const width = node.getBoundingClientRect().width || node.offsetWidth || window.innerWidth;
-      const embedHeight = width < COMPACT_BREAKPOINT ? '80' : '152';
-      setHeight(embedHeight);
-      IFrameAPI.createController(node, { width: '100%', height: embedHeight, uri: '' }, (controller) => {
+      IFrameAPI.createController(node, { width: '100%', height: String(EMBED_HEIGHT), uri: '' }, (controller) => {
         if (cancelled) return;
         controllerRef.current = controller;
         setReady(true);
@@ -64,5 +57,5 @@ export function useSpotifyEmbed() {
     if (controllerRef.current && uri) controllerRef.current.loadUri(uri);
   }, []);
 
-  return { elRef, ready, loadUri, height };
+  return { elRef, ready, loadUri, height: EMBED_HEIGHT };
 }

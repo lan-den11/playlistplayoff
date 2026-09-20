@@ -1,26 +1,24 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { EMBED_HEIGHT } from '../../hooks/useSpotifyEmbed';
 
-export default function EmbedPanel({ elRef, loading, gradient, height }) {
+// Root cause of the "blank space under the embed" bug: this panel used to be
+// auto-height while the iframe inside it is forced to `h-full`. A percentage
+// height against an auto-height parent resolves to `auto`, and for an
+// <iframe> that means the browser default of 150px — overriding the height
+// Spotify set on it. Spotify then drew its 80px compact card at the top of a
+// 150px iframe and left the rest empty. The panel now has an explicit height
+// (the same EMBED_HEIGHT handed to Spotify), so `h-full` resolves to exactly
+// the embed's height. `box-content` keeps the 1px borders out of that height
+// so the iframe gets the full EMBED_HEIGHT rather than 2px less.
+export default function EmbedPanel({ elRef, loading, gradient, height = EMBED_HEIGHT }) {
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [&_iframe]:block [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0">
-      <div
-        ref={elRef}
-        // Always start at the compact (80px) floor instead of switching to
-        // a 152px floor at the `sm:` viewport breakpoint. `sm:` only knows
-        // the *viewport* width, not this panel's actual column width — in
-        // the two-column battle layout (`md:` and up) each column is often
-        // under the true 380px compact threshold even though the viewport
-        // itself is well past `sm:`. That mismatch briefly reserved 152px
-        // of empty space before the real measurement (from
-        // useSpotifyEmbed) shrank it back down to 80px — the "too big at
-        // the bottom" jump. The inline style below still grows it to
-        // 152px immediately once the real width is measured, so nothing
-        // is lost — it just never over-reserves first.
-        className="min-h-[80px] w-full"
-        style={height ? { height: `${height}px`, minHeight: `${height}px` } : undefined}
-      />
+    <div
+      style={{ height }}
+      className="relative box-content w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [&_iframe]:block [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0"
+    >
+      <div ref={elRef} className="h-full w-full" />
       <AnimatePresence>
         {loading && (
           <motion.div

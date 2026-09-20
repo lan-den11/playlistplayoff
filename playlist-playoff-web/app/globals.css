@@ -4,11 +4,27 @@
 
 html {
   scroll-behavior: smooth;
+  /* Always reserve the scrollbar's width. Without this, pages that scroll
+     (homepage) and pages that don't (waitlist) have different content widths
+     on desktop, so centered content — the wordmark row — shifts ~8px between
+     them. */
+  scrollbar-gutter: stable;
 }
 
 html,
 body {
   overflow-x: hidden;
+}
+
+/* `clip` does what `hidden` was doing here (no sideways scroll) without
+   turning html/body into scroll containers — that's what let iOS Safari
+   still pan sideways and what stopped `position: sticky` headers from
+   sticking. `hidden` above stays as the fallback for browsers without it. */
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
 }
 
 body {
