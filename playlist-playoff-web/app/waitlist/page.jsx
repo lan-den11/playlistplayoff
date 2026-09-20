@@ -4,7 +4,6 @@ import { Waitlist } from '@clerk/nextjs';
 import Footer from '../../components/home/Footer';
 import SiteHeader from '../../components/ui/SiteHeader';
 import { getAppAccessMode } from '../../lib/posthog-server';
-import PageBackground from '../components/ui/PageBackground';
 
 export const metadata = {
   title: 'Playlist Playoff — Join the Waitlist',
@@ -37,7 +36,6 @@ export default async function WaitlistPage() {
         {/* Clerk's card has a fixed rem width; capping it at 100% of this column keeps it from pushing past narrow screens. */}
         <div className="flex w-full justify-center [&_.cl-cardBox]:max-w-full [&_.cl-rootBox]:min-w-0 [&_.cl-rootBox]:max-w-full">
           <Waitlist />
-	<PageBackground />
         </div>
       </div>
 
