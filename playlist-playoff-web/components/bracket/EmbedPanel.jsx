@@ -12,7 +12,29 @@ import { EMBED_HEIGHT } from '../../hooks/useSpotifyEmbed';
 // (the same EMBED_HEIGHT handed to Spotify), so `h-full` resolves to exactly
 // the embed's height. `box-content` keeps the 1px borders out of that height
 // so the iframe gets the full EMBED_HEIGHT rather than 2px less.
-export default function EmbedPanel({ elRef, loading, gradient, height = EMBED_HEIGHT }) {
+//
+// `variant` picks what covers the embed while `loading` is true:
+//   'spinner'  — the small spinner + "Loading…" (default; battle/champion)
+//   'skeleton' — a pulsing placeholder shaped like Spotify's compact card
+//                (art, two text lines, play button). Same box, so nothing
+//                shifts when it fades out onto the real embed.
+function EmbedSkeleton() {
+  return (
+    <>
+      <span className="h-14 w-14 flex-none animate-pulse rounded-lg bg-white/10" />
+      <span className="flex min-w-0 flex-1 flex-col gap-2.5">
+        <span className="h-3 w-3/5 animate-pulse rounded-full bg-white/10" />
+        <span className="h-2.5 w-2/5 animate-pulse rounded-full bg-white/[0.07]" />
+      </span>
+      <span className="h-9 w-9 flex-none animate-pulse rounded-full bg-white/10" />
+      <span className="sr-only">Loading…</span>
+    </>
+  );
+}
+
+export default function EmbedPanel({ elRef, loading, gradient, height = EMBED_HEIGHT, variant = 'spinner' }) {
+  const isSkeleton = variant === 'skeleton';
+
   return (
     <div
       style={{ height }}
@@ -22,12 +44,23 @@ export default function EmbedPanel({ elRef, loading, gradient, height = EMBED_HE
       <AnimatePresence>
         {loading && (
           <motion.div
+            key={variant}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-zinc-950/80 text-xs text-zinc-400"
+            className={`pointer-events-none absolute inset-0 flex items-center ${
+              isSkeleton
+                ? 'gap-3 bg-zinc-950/90 px-4'
+                : 'justify-center gap-2 bg-zinc-950/80 text-xs text-zinc-400'
+            }`}
           >
-            <span className={`h-3 w-3 animate-spin rounded-full border-2 border-t-transparent bg-gradient-to-r ${gradient}`} />
-            Loading…
+            {isSkeleton ? (
+              <EmbedSkeleton />
+            ) : (
+              <>
+                <span className={`h-3 w-3 animate-spin rounded-full border-2 border-t-transparent bg-gradient-to-r ${gradient}`} />
+                Loading…
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

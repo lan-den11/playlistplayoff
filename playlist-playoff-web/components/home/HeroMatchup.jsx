@@ -50,9 +50,11 @@ function StaticFallback() {
 // The title/artist row under each embed duplicates what Spotify's own card
 // already shows, so below `md` (where the hero stacks and vertical space is
 // the constraint) it's dropped to keep the whole matchup on the first screen.
-// `track` is null while the playlist is still loading: the row keeps its
-// height with a non-breaking space so the card never changes size when the
+// `track` is null while the playlist is still loading: the row shows pulsing
+// placeholder bars sized to the real lines (h-5 title + h-4 artist = the
+// text-sm / text-xs line boxes), so the card never changes size when the
 // real data arrives (FitToScreen would otherwise re-scale the whole hero).
+// The embed itself is covered by EmbedPanel's `skeleton` variant.
 function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent, onPick, isAnimatingPick }) {
   const isWinner = isAnimatingPick === side;
 
@@ -66,10 +68,23 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
       className="flex w-full flex-col items-center gap-2.5"
     >
-      <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} height={height} />
+      <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} height={height} variant="skeleton" />
       <div className="hidden w-full text-center md:block">
-        <p className="truncate font-display text-sm font-semibold text-zinc-50">{track?.name ?? '\u00A0'}</p>
-        <p className="truncate text-xs text-zinc-400">{track?.artists ?? '\u00A0'}</p>
+        {track ? (
+          <>
+            <p className="truncate font-display text-sm font-semibold text-zinc-50">{track.name}</p>
+            <p className="truncate text-xs text-zinc-400">{track.artists}</p>
+          </>
+        ) : (
+          <>
+            <div className="flex h-5 items-center justify-center">
+              <span className="h-3 w-2/5 animate-pulse rounded-full bg-white/10" />
+            </div>
+            <div className="flex h-4 items-center justify-center">
+              <span className="h-2.5 w-1/4 animate-pulse rounded-full bg-white/[0.07]" />
+            </div>
+          </>
+        )}
       </div>
       <GradientButton
         gradient={accent}

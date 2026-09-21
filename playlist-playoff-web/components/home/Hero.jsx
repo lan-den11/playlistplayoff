@@ -22,20 +22,28 @@ const item = {
 // (FitToScreen scales them down if the natural layout is taller than the
 // space available). That space is one small-viewport screen minus everything
 // that isn't the hero content:
-//   - the site header (components/ui/SiteHeader.jsx): its fixed h-20 row
-//     (80px) + 1px border = 81px, at every breakpoint
-//   - this section's own padding: `pt-4` (16px) + `pb-14` (56px). The bottom
-//     is deliberately larger — it's where the "Scroll to see more" hint sits,
-//     so the hint can never overlap the card on a tight screen.
-// Keep these numbers in sync with SiteHeader and the section's padding.
+//   - the site header, ONLY when it's rendered (`showNavbar`): its fixed h-20
+//     row (80px) + 1px border = 81px (components/ui/SiteHeader.jsx). With the
+//     header off, that whole strip goes to the hero, so it scales down less
+//     — i.e. renders bigger — on small screens.
+//   - this section's own padding: top is `pt-4` (16px) with the header, `pt-6`
+//     (24px) without it (nothing above the hero to breathe against). Bottom is
+//     always `pb-14` (56px), deliberately larger — it's where the "Scroll to
+//     see more" hint sits, so the hint can never overlap the card on a tight
+//     screen.
+// Keep these numbers in sync with SiteHeader and the section's padding classes.
 const NAVBAR_HEIGHT_PX = 81;
-const SECTION_PADDING_Y_PX = 16 + 56;
-const RESERVED_PX = NAVBAR_HEIGHT_PX + SECTION_PADDING_Y_PX;
+const PADDING_TOP_WITH_NAVBAR_PX = 16;
+const PADDING_TOP_NO_NAVBAR_PX = 24;
+const PADDING_BOTTOM_PX = 56;
 
-export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
+export default function Hero({ trendingPlaylistId, accessMode = 'hero-only', showNavbar = true }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const [showScrollHint, setShowScrollHint] = useState(true);
+
+  const reservedPx =
+    (showNavbar ? NAVBAR_HEIGHT_PX + PADDING_TOP_WITH_NAVBAR_PX : PADDING_TOP_NO_NAVBAR_PX) + PADDING_BOTTOM_PX;
 
   // The hint used to be `absolute` inside this section, anchored to the
   // section's own bottom edge. Once HeroMatchup swaps its loading skeleton
@@ -55,8 +63,8 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only' }) {
   }, [showScrollHint]);
 
   return (
-    <section className="relative px-6 pb-14 pt-4 md:px-8">
-      <FitToScreen reserve={RESERVED_PX}>
+    <section className={`relative px-6 pb-14 md:px-8 ${showNavbar ? 'pt-4' : 'pt-6'}`}>
+      <FitToScreen reserve={reservedPx}>
         {/* grid-cols-1 (= minmax(0, 1fr)) instead of the implicit `auto` column:
             an auto column is at least as wide as its widest unbreakable child,
             so a long track title (nowrap + truncate) in the matchup card
