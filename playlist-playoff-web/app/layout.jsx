@@ -25,7 +25,7 @@ export const metadata = {
 
 const clerkAppearance = {
   variables: {
-    colorPrimary: '#3437A0',
+    colorPrimary: '#1240EA',
     colorBackground: '#09090b',
     colorInput: '#18181b',
     colorInputForeground: '#fafafa',

@@ -101,7 +101,7 @@ function TreeBlock({ rounds, heading, isActiveBlock, activeRoundIdx, activeMatch
                     key={i}
                     data-match-idx={i}
                     className={`w-48 overflow-hidden rounded-xl border backdrop-blur-md ${
-                      isActive ? 'border-brand/50 bg-brand/15 shadow-[0_0_0_1px_rgba(52,55,160,0.35)]' : 'border-white/10 bg-white/5'
+                      isActive ? 'border-brand/50 bg-brand/15 shadow-[0_0_0_1px_rgba(18,64,234,0.35)]' : 'border-white/10 bg-white/5'
                     }`}
                   >
                     <div

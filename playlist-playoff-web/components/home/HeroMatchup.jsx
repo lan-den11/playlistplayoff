@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Flame, Loader2, Music2 } from 'lucide-react';
 import { useBracket, TRENDING_HANDOFF_STORAGE_KEY } from '../../hooks/useBracket';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
-import { TRENDING_PLAYLIST_ID } from '../../lib/spotifyAuth';
 import GradientButton from '../ui/GradientButton';
 import EmbedPanel from '../bracket/EmbedPanel';
 
@@ -51,6 +50,9 @@ function StaticFallback() {
 // The title/artist row under each embed duplicates what Spotify's own card
 // already shows, so below `md` (where the hero stacks and vertical space is
 // the constraint) it's dropped to keep the whole matchup on the first screen.
+// `track` is null while the playlist is still loading: the row keeps its
+// height with a non-breaking space so the card never changes size when the
+// real data arrives (FitToScreen would otherwise re-scale the whole hero).
 function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent, onPick, isAnimatingPick }) {
   const isWinner = isAnimatingPick === side;
 
@@ -66,14 +68,14 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
     >
       <EmbedPanel elRef={elRef} loading={loading} gradient={embedGradient} height={height} />
       <div className="hidden w-full text-center md:block">
-        <p className="truncate font-display text-sm font-semibold text-zinc-50">{track?.name}</p>
-        <p className="truncate text-xs text-zinc-400">{track?.artists}</p>
+        <p className="truncate font-display text-sm font-semibold text-zinc-50">{track?.name ?? '\u00A0'}</p>
+        <p className="truncate text-xs text-zinc-400">{track?.artists ?? '\u00A0'}</p>
       </div>
       <GradientButton
         gradient={accent}
         size="sm"
         onClick={() => onPick(side)}
-        disabled={Boolean(isAnimatingPick)}
+        disabled={Boolean(isAnimatingPick) || !track}
         className="mx-auto w-full max-w-xs"
       >
         Choose Song
@@ -82,7 +84,7 @@ function TeaserSide({ side, track, elRef, loading, height, embedGradient, accent
   );
 }
 
-export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID, accessMode = 'hero-only' }) {
+export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only' }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const bracket = useBracket({ storageKey: TRENDING_HANDOFF_STORAGE_KEY });
@@ -98,20 +100,21 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
 
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
-
-  const cardReady =
-    bracket.state.screen === 'battle' && !handingOff && !bracket.state.loadError && Boolean(pendingA) && Boolean(pendingB);
+  const ready = Boolean(matchKey);
   const floatControls = useAnimationControls();
 
+  // The card (and both Spotify embeds) mount immediately, so the iframe API
+  // and the two iframes load in parallel with the playlist request instead of
+  // waiting for it. Once the matchup is known, loadUri() just points the
+  // already-warm embeds at the two songs.
   useEffect(() => {
-    if (!cardReady) return;
     let cancelled = false;
     floatControls
       .start({
         opacity: 1,
         scale: 1,
         y: 0,
-        transition: { type: 'spring', stiffness: 260, damping: 22, delay: 0.3 },
+        transition: { type: 'spring', stiffness: 260, damping: 22 },
       })
       .then(() => {
         if (cancelled) return;
@@ -123,7 +126,7 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
     return () => {
       cancelled = true;
     };
-  }, [cardReady, floatControls]);
+  }, [floatControls]);
 
   useEffect(() => {
     bracket.loadPlaylist(trendingPlaylistId);
@@ -206,23 +209,6 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
     );
   }
 
-  // Loading skeleton. Its heights mirror the real card (p-4/md:p-5, 16px
-  // header, 128px/174px sides, 20px divider) so the swap doesn't change the
-  // hero's height — otherwise FitToScreen would re-scale the moment the real
-  // card arrives.
-  if (bracket.state.screen !== 'battle' || !pendingA || !pendingB) {
-    return (
-      <div className="mx-auto w-full max-w-lg animate-pulse rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md md:p-5">
-        <div className="mx-auto mb-3 h-4 w-32 rounded-full bg-white/10 md:mb-4" />
-        <div className="flex flex-col gap-3">
-          <div className="h-32 rounded-2xl bg-white/10 md:h-[174px]" />
-          <div className="h-5" />
-          <div className="h-32 rounded-2xl bg-white/10 md:h-[174px]" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative mx-auto w-full max-w-lg">
       <motion.div
@@ -239,7 +225,7 @@ export default function HeroMatchup({ trendingPlaylistId = TRENDING_PLAYLIST_ID,
       >
         <p className="mb-3 flex items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300 md:mb-4">
           <Flame className="h-3.5 w-3.5 text-brand-light" />
-          {bracket.state.playlistName || 'Trending in the US'} · {bracket.roundLabel}
+          {bracket.state.playlistName || 'Trending in the US'} · {ready ? bracket.roundLabel : `Round of ${TEASER_BRACKET_SIZE}`}
         </p>
 
         <div className="flex flex-col gap-3">

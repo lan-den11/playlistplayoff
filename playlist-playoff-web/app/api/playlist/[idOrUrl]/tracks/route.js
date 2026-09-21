@@ -1,48 +1,14 @@
-import axios from 'axios';
-import { getAppToken, extractPlaylistId } from '../../../../../lib/spotifyAuth';
+import { extractPlaylistId } from '../../../../../lib/spotifyAuth';
+import { getPlaylist } from '../../../../../lib/spotifyPlaylist';
 
 export async function GET(_request, { params }) {
   const { idOrUrl } = await params;
   const playlistId = extractPlaylistId(idOrUrl);
 
   try {
-    const token = await getAppToken();
-
-    const namePromise = axios
-      .get(`https://api.spotify.com/v1/playlists/${playlistId}?fields=name`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data.name)
-      .catch(() => null);
-
-    let items = [];
-    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&fields=next,items(added_at,track(id,uri,name,duration_ms,popularity,artists(name),album(name,release_date,images)))`;
-    while (url) {
-      const resp = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-      items = items.concat(resp.data.items);
-      url = resp.data.next;
-    }
-
-    const tracks = items
-      .map((i) => (i.track ? { ...i.track, addedAt: i.added_at } : null))
-      .filter((t) => t && t.id)
-      .map((t) => ({
-        id: t.id,
-        uri: t.uri,
-        name: t.name,
-        artists: t.artists.map((a) => a.name).join(', '),
-        image: t.album?.images?.[t.album.images.length - 1]?.url || t.album?.images?.[0]?.url || null,
-        popularity: t.popularity,
-        addedAt: t.addedAt,
-        albumName: t.album?.name || null,
-        releaseYear: t.album?.release_date ? t.album.release_date.slice(0, 4) : null,
-      }));
-
-    const playlistName = await namePromise;
-
+    const data = await getPlaylist(playlistId);
     return Response.json({
-      tracks,
-      playlistName,
+      ...data,
       lastfmEnabled: Boolean(process.env.LASTFM_API_KEY && process.env.LASTFM_USERNAME),
     });
   } catch (e) {
