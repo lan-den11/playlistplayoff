@@ -16,10 +16,10 @@ export const dynamic = 'force-dynamic';
 const SPOTIFY_EMBED_ORIGIN = 'https://open.spotify.com';
 const TRENDING_CACHE_TTL_MS = 10 * 60 * 1000;
 
-// The homepage topbar is off for now — set to true to bring it back. Hero
-// reads the same flag, so it gives the header's height back to the hero
-// (and takes it again) automatically; nothing else needs touching.
-const SHOW_NAVBAR = false;
+// Homepage topbar toggle — set to false to hide it. Hero reads the same
+// flag, so it gives the header's height to the hero (and takes it back)
+// automatically; nothing else needs touching.
+const SHOW_NAVBAR = true;
 
 export default async function HomePage() {
   // Hero matchup critical path, started as early as possible: open the

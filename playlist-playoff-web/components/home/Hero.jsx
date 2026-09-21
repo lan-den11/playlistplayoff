@@ -22,8 +22,8 @@ const item = {
 // (FitToScreen scales them down if the natural layout is taller than the
 // space available). That space is one small-viewport screen minus everything
 // that isn't the hero content:
-//   - the site header, ONLY when it's rendered (`showNavbar`): its fixed h-20
-//     row (80px) + 1px border = 81px (components/ui/SiteHeader.jsx). With the
+//   - the site header, ONLY when it's rendered (`showNavbar`): its fixed h-14
+//     row (56px) + 1px border = 57px (components/ui/SiteHeader.jsx). With the
 //     header off, that whole strip goes to the hero, so it scales down less
 //     — i.e. renders bigger — on small screens.
 //   - this section's own padding: top is `pt-4` (16px) with the header, `pt-6`
@@ -32,7 +32,7 @@ const item = {
 //     see more" hint sits, so the hint can never overlap the card on a tight
 //     screen.
 // Keep these numbers in sync with SiteHeader and the section's padding classes.
-const NAVBAR_HEIGHT_PX = 81;
+const NAVBAR_HEIGHT_PX = 57;
 const PADDING_TOP_WITH_NAVBAR_PX = 16;
 const PADDING_TOP_NO_NAVBAR_PX = 24;
 const PADDING_BOTTOM_PX = 56;

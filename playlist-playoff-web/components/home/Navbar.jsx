@@ -12,6 +12,7 @@ export default function Navbar({ accessMode = 'hero-only' }) {
     <SiteHeader>
       <GradientButton
         gradient="brand"
+        size="sm"
         className="hidden sm:inline-flex"
         onClick={() => router.push(isOpen ? '/bracket' : '/waitlist')}
       >
