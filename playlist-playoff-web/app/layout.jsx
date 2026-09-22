@@ -86,6 +86,8 @@ const clerkAppearance = {
   },
 };
 
+<meta name="google-site-verification" content="tSvSKefK9Ao4W1itiDP9uSkhh3zfhsUYmKh553X_Vq4" />
+
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider afterSignOutUrl="/" waitlistUrl="/waitlist" appearance={clerkAppearance}>
