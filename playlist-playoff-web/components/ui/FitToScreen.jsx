@@ -24,7 +24,8 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 // - The wrapper's height is set to the scaled height, so the page below flows
 //   up against the scaled content instead of leaving a hole.
 // - Hidden until first measured, so the server-rendered, unscaled layout
-//   never flashes before hydration applies the fit.
+//   never flashes before hydration applies the fit. The reveal is a short
+//   opacity fade (not an instant pop) so the hero settles in smoothly.
 export default function FitToScreen({ reserve = 0, minScale = 0.55, children }) {
   const probeRef = useRef(null);
   const contentRef = useRef(null);
@@ -54,10 +55,13 @@ export default function FitToScreen({ reserve = 0, minScale = 0.55, children }) 
   }, [measure]);
 
   const scaled = fit.scale < 1;
+  const measured = fit.avail !== null;
 
   return (
     <div
-      className={`relative flex w-full items-center justify-center ${fit.avail === null ? 'invisible' : ''}`}
+      className={`relative flex w-full items-center justify-center transition-opacity duration-500 ease-out ${
+        measured ? 'opacity-100' : 'pointer-events-none opacity-0'
+      }`}
       style={{ minHeight: fit.avail ?? `calc(100svh - ${reserve}px)` }}
     >
       <div ref={probeRef} aria-hidden="true" className="pointer-events-none invisible fixed left-0 top-0 h-[100svh] w-0" />

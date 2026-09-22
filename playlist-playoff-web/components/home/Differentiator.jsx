@@ -1,25 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { m, useInView } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
+import Glow from '../ui/Glow';
 
 // "Homecoming" by Kanye West was previously missing from Spotify (a
 // long-standing Chris Martin/Coldplay clearance gap), so there was no real
 // cover art to fetch and this fell back to a stylized icon. That gap has
 // since closed — the track (and its parent album, Graduation) is back on
-// Spotify — so this now looks the real cover art up the same way every
-// other Spotify-backed piece of this app does: a client-credentials
-// search via /api/album-art, using the artist + album (not the single
-// track) since that's what has stable, guaranteed cover art either way.
-// If the lookup ever fails again (rate limit, credentials misconfigured,
-// re-delisted), it quietly falls back to the original icon treatment
-// rather than showing a broken image.
+// Spotify — so this looks the real cover art up the same way every other
+// Spotify-backed piece of this app does: a client-credentials search via
+// /api/album-art, using the artist + album (not the single track) since
+// that's what has stable, guaranteed cover art either way. If the lookup
+// ever fails again (rate limit, credentials misconfigured, re-delisted), it
+// quietly falls back to the original icon treatment rather than showing a
+// broken image.
+//
+// The lookup waits until the mockup is (nearly) on screen: it sits far below
+// the fold, so firing it at page load only competed with the hero's playlist
+// request and cost a Spotify API call for every visitor who never scrolls.
 function TrackDetailsMockup() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '300px' });
   const [albumArt, setAlbumArt] = useState(null);
 
   useEffect(() => {
+    if (!inView) return;
     let cancelled = false;
     fetchAlbumArt('Kanye West', 'Graduation')
       .then((data) => {
@@ -31,10 +39,11 @@ function TrackDetailsMockup() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [inView]);
 
   return (
-    <motion.div
+    <m.div
+      ref={ref}
       initial={{ opacity: 0, x: 24 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.4 }}
@@ -51,9 +60,7 @@ function TrackDetailsMockup() {
           )}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-display text-base font-semibold tracking-tight text-zinc-50">
-            Homecoming
-          </p>
+          <p className="truncate font-display text-base font-semibold tracking-tight text-zinc-50">Homecoming</p>
           <p className="truncate text-sm text-zinc-400">Kanye West</p>
         </div>
       </div>
@@ -67,8 +74,16 @@ function TrackDetailsMockup() {
             </span>
             <span className="font-display font-bold text-zinc-50">247</span>
           </div>
+          {/* The bars grow in with scaleX (transform-only, no layout) once
+              the card scrolls into view. */}
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
-            <div className="h-full w-[88%] rounded-full bg-gradient-to-r from-brand to-brand-light" />
+            <m.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, amount: 0.8 }}
+              transition={{ type: 'spring', stiffness: 90, damping: 18, delay: 0.35 }}
+              className="h-full w-[88%] origin-left rounded-full bg-gradient-to-r from-brand to-brand-light"
+            />
           </div>
         </div>
 
@@ -78,7 +93,13 @@ function TrackDetailsMockup() {
             <span className="font-display font-bold text-zinc-500">34</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
-            <div className="h-full w-[24%] rounded-full bg-zinc-600" />
+            <m.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, amount: 0.8 }}
+              transition={{ type: 'spring', stiffness: 90, damping: 18, delay: 0.5 }}
+              className="h-full w-[24%] origin-left rounded-full bg-zinc-600"
+            />
           </div>
         </div>
       </div>
@@ -86,7 +107,7 @@ function TrackDetailsMockup() {
       <p className="mt-5 rounded-xl bg-white/5 px-3.5 py-2.5 text-xs leading-relaxed text-zinc-400">
         This one barely charts — but it's your most played track in the bracket!
       </p>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -96,14 +117,11 @@ export default function Differentiator() {
     // hangs above this section's top edge and overflow-hidden used to slice
     // it off at the boundary (a hard tinted step between sections). See
     // HowItWorks for the full reasoning.
-    <section className="relative overflow-x-clip px-6 py-24 md:px-8 md:py-32">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-10 right-0 -z-10 h-80 w-[34rem] max-w-full rounded-full bg-brand/10 blur-[120px]"
-      />
+    <section className="relative overflow-x-clip px-6 py-14 md:px-8 md:py-20">
+      <Glow tone="brand" className="-top-16 right-0 h-[28rem] w-[46rem] max-w-full opacity-70" />
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 md:grid-cols-2 md:gap-20">
-        <motion.div
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
+        <m.div
           initial={{ opacity: 0, x: -24 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.4 }}
@@ -117,7 +135,7 @@ export default function Differentiator() {
             Link your Last.fm account and every matchup turns personal with your listening data. See what you
             actually listen to, not just what's trending.
           </p>
-        </motion.div>
+        </m.div>
 
         <TrackDetailsMockup />
       </div>

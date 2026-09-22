@@ -1,7 +1,8 @@
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
-import { MotionConfig } from 'framer-motion';
+import MotionProvider from '../components/MotionProvider';
 import PostHogIdentity from '../components/PostHogIdentity';
+import { SITE_URL } from '../lib/site';
 import './globals.css';
 
 const inter = Inter({
@@ -17,10 +18,32 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
+const TITLE = 'Playlist Playoff — Turn any playlist into a showdown';
+const DESCRIPTION =
+  'Pick winners, song by song, until one track takes the crown — with your actual listening history built in.';
+
 export const metadata = {
-  title: 'Playlist Playoff — Turn any playlist into a showdown',
-  description:
-    'Pick winners, song by song, until one track takes the crown — with your actual listening history built in.',
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  applicationName: 'Playlist Playoff',
+  openGraph: {
+    type: 'website',
+    siteName: 'Playlist Playoff',
+    title: TITLE,
+    description: DESCRIPTION,
+    url: '/',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+};
+
+export const viewport = {
+  themeColor: '#09090b',
+  colorScheme: 'dark',
 };
 
 const clerkAppearance = {
@@ -69,7 +92,7 @@ export default function RootLayout({ children }) {
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
         <body className="font-sans antialiased">
           <PostHogIdentity />
-          <MotionConfig reducedMotion="user">{children}</MotionConfig>
+          <MotionProvider>{children}</MotionProvider>
         </body>
       </html>
     </ClerkProvider>

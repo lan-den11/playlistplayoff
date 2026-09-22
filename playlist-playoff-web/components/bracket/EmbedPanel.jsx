@@ -1,7 +1,8 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { EMBED_HEIGHT } from '../../hooks/useSpotifyEmbed';
+import Bone from '../ui/Bone';
 
 // Root cause of the "blank space under the embed" bug: this panel used to be
 // auto-height while the iframe inside it is forced to `h-full`. A percentage
@@ -15,18 +16,18 @@ import { EMBED_HEIGHT } from '../../hooks/useSpotifyEmbed';
 //
 // `variant` picks what covers the embed while `loading` is true:
 //   'spinner'  — the small spinner + "Loading…" (default; battle/champion)
-//   'skeleton' — a pulsing placeholder shaped like Spotify's compact card
+//   'skeleton' — a shimmering placeholder shaped like Spotify's compact card
 //                (art, two text lines, play button). Same box, so nothing
 //                shifts when it fades out onto the real embed.
 function EmbedSkeleton() {
   return (
     <>
-      <span className="h-14 w-14 flex-none animate-pulse rounded-lg bg-white/10" />
+      <Bone className="h-14 w-14 flex-none rounded-lg" />
       <span className="flex min-w-0 flex-1 flex-col gap-2.5">
-        <span className="h-3 w-3/5 animate-pulse rounded-full bg-white/10" />
-        <span className="h-2.5 w-2/5 animate-pulse rounded-full bg-white/[0.07]" />
+        <Bone className="h-3 w-3/5 rounded-full" />
+        <Bone className="h-2.5 w-2/5 rounded-full" />
       </span>
-      <span className="h-9 w-9 flex-none animate-pulse rounded-full bg-white/10" />
+      <Bone className="h-9 w-9 flex-none rounded-full" />
       <span className="sr-only">Loading…</span>
     </>
   );
@@ -43,10 +44,11 @@ export default function EmbedPanel({ elRef, loading, gradient, height = EMBED_HE
       <div ref={elRef} className="h-full w-full" />
       <AnimatePresence>
         {loading && (
-          <motion.div
+          <m.div
             key={variant}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
             className={`pointer-events-none absolute inset-0 flex items-center ${
               isSkeleton
                 ? 'gap-3 bg-zinc-950/90 px-4'
@@ -61,7 +63,7 @@ export default function EmbedPanel({ elRef, loading, gradient, height = EMBED_HE
                 Loading…
               </>
             )}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

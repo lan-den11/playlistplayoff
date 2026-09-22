@@ -1,8 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Link2, Play, Trophy } from 'lucide-react';
 import GlassIconBadge from '../ui/GlassIconBadge';
+import Glow from '../ui/Glow';
 
 const STEPS = [
   {
@@ -42,31 +43,36 @@ export default function HowItWorks() {
     // right at the boundary — a hard tinted step between sections. Clipping
     // only the x-axis lets it fade out naturally into the neighbouring
     // sections; -z-10 keeps it behind their content (it still paints above
-    // PageBackground, which comes first in <main>).
-    <section className="relative overflow-x-clip px-6 py-24 md:px-8 md:py-32">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-72 w-[40rem] max-w-full -translate-x-1/2 rounded-full bg-brand/15 blur-[110px]"
-      />
+    // PageBackground, which comes first in <main>). Top padding is smaller
+    // than the bottom because the hero above already ends in its own 56px.
+    <section className="relative overflow-x-clip px-6 pb-14 pt-8 md:px-8 md:pb-20 md:pt-12">
+      <Glow tone="brand" className="-top-28 left-1/2 h-[26rem] w-[56rem] max-w-full -translate-x-1/2" />
 
-      <div className="mx-auto mb-16 max-w-2xl text-center">
-        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
-          How it works
-        </h2>
-      </div>
+      <m.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+        className="mx-auto mb-10 max-w-2xl text-center md:mb-12"
+      >
+        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">How it works</h2>
+      </m.div>
 
-      <motion.div
+      <m.div
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={{ once: true, amount: 0.25 }}
         className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3"
       >
         {STEPS.map((step) => (
-          <motion.div
+          // `translate` (the individual CSS property) instead of `transform`
+          // for the hover lift: Framer owns the inline `transform` for the
+          // entrance spring, and a Tailwind transform utility would fight it.
+          <m.div
             key={step.number}
             variants={card}
-            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md"
+            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
           >
             <span className="font-display text-sm font-bold text-zinc-600">{step.number}</span>
 
@@ -74,13 +80,11 @@ export default function HowItWorks() {
               <GlassIconBadge icon={step.icon} size="lg" />
             </div>
 
-            <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50">
-              {step.title}
-            </h3>
+            <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50">{step.title}</h3>
             <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">{step.body}</p>
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
     </section>
   );
 }

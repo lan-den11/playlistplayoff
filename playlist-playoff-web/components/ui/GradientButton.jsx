@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 // Every accent lives in the same blue family now. 'brand' / 'sideB' are two
 // shades of blue used to tell the two songs in a matchup apart at a glance
@@ -48,7 +48,7 @@ export default function GradientButton({
   const padding = SIZES[size] ?? SIZES.md;
 
   return (
-    <motion.button
+    <m.button
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -57,12 +57,12 @@ export default function GradientButton({
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`group relative inline-flex items-center justify-center rounded-full disabled:opacity-60 ${className}`}
     >
-      {/* Ambient color glow — the brand identity bleeding through the glass */}
-      <motion.span
+      {/* Ambient color glow — the brand identity bleeding through the glass.
+          The pulse is a CSS keyframe (opacity only → compositor), not a JS
+          spring loop: five of these are on the homepage at once. */}
+      <span
         aria-hidden="true"
-        className={`absolute -inset-2.5 rounded-full bg-gradient-to-r ${glow} blur-xl opacity-80 transition-opacity group-hover:opacity-100`}
-        animate={{ opacity: [0.65, 0.9, 0.65] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        className={`absolute -inset-2.5 animate-glow-pulse rounded-full bg-gradient-to-r ${glow} blur-xl`}
       />
       {/* The frosted-glass pane — tinted per accent (top-lit, deeper at the
           bottom, like light catching a curved liquid surface), plus
@@ -73,15 +73,14 @@ export default function GradientButton({
         className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors`}
       />
       {/* whitespace-nowrap: without it, a button squeezed by a flex
-          sibling (e.g. the email field in MultiplayerTeaser) can shrink
-          the text span below its content's natural width, wrapping the
-          icon and label onto two lines. GlassButton already had this; it
-          was just missing here. */}
+          sibling (e.g. the email field in WaitlistForm) can shrink the text
+          span below its content's natural width, wrapping the icon and
+          label onto two lines. */}
       <span
         className={`relative z-10 inline-flex items-center gap-2 whitespace-nowrap rounded-full font-semibold text-zinc-50 ${padding}`}
       >
         {children}
       </span>
-    </motion.button>
+    </m.button>
   );
 }

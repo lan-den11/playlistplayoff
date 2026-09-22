@@ -1,56 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useWaitlist } from '@clerk/nextjs';
-import { Sparkles, Bell, Check, Loader2 } from 'lucide-react';
-import { captureEvent } from '../../lib/posthog-client';
-import GradientButton from '../ui/GradientButton';
+import { m } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
+import Glow from '../ui/Glow';
+import WaitlistForm from './WaitlistForm';
 
 export default function MultiplayerTeaser() {
-  const { waitlist, errors, fetchStatus } = useWaitlist();
-  const [email, setEmail] = useState('');
-  const [localError, setLocalError] = useState('');
-
-  const joined = Boolean(waitlist?.id);
-  const isSubmitting = fetchStatus === 'fetching';
-  const fieldError = errors?.fields?.emailAddress?.longMessage;
-  const errorText = localError || fieldError;
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const value = email.trim();
-    if (!value) {
-      setLocalError('Enter an email address first.');
-      return;
-    }
-    setLocalError('');
-    const { error } = await waitlist.join({ emailAddress: value });
-    if (error) {
-      captureEvent('waitlist_join_failed', { source: 'multiplayer_teaser' });
-      console.error('Failed to join waitlist:', error);
-      return;
-    }
-    captureEvent('waitlist_joined', { source: 'multiplayer_teaser' });
-  }
-
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24 md:px-8 md:py-32">
-      <motion.div
+    <section className="mx-auto max-w-7xl px-6 py-14 md:px-8 md:py-20">
+      <m.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.4 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-        className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-8 py-16 text-center backdrop-blur-md sm:px-14"
+        className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-8 py-12 text-center backdrop-blur-md sm:px-14 md:py-14"
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/15 blur-[100px]"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-24 right-0 h-64 w-[30rem] max-w-full rounded-full bg-brand/25 blur-[110px]"
-        />
+        <Glow tone="amber" className="-top-28 left-1/2 h-80 w-[46rem] max-w-[140%] -translate-x-1/2" />
+        <Glow tone="brand" className="-bottom-28 right-0 h-72 w-[40rem] max-w-full" />
 
         <div className="relative mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
           <Sparkles className="h-4 w-4" />
@@ -65,55 +31,8 @@ export default function MultiplayerTeaser() {
           surface insights on your taste.
         </p>
 
-        <div className="relative mt-9 flex justify-center">
-          <AnimatePresence mode="wait" initial={false}>
-            {joined ? (
-              <motion.div
-                key="confirmed"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-3 text-sm font-semibold text-emerald-300"
-              >
-                <Check className="h-4 w-4" />
-                You're on the list
-              </motion.div>
-            ) : (
-              // Always a single row now — this used to stack (flex-col)
-              // below the sm: breakpoint, splitting the field and button
-              // onto two lines. `min-w-0` on the input is the part that
-              // actually makes the row work: flex items default to
-              // min-width: auto, which stops them from shrinking below
-              // their own content's width — without it, the input refuses
-              // to shrink and pushes the button into wrapping instead.
-              // `flex-none` + `size="sm"` on the button keep it compact
-              // and fixed, so it's always the input that gives way first.
-              <motion.form
-                key="cta"
-                onSubmit={handleSubmit}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex w-full max-w-sm items-stretch gap-2"
-              >
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                  placeholder="you@example.com"
-                  disabled={isSubmitting}
-                  className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
-                />
-                <GradientButton type="submit" gradient="gold" size="sm" disabled={isSubmitting} className="flex-none">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
-                  {isSubmitting ? 'Joining…' : 'Get Notified'}
-                </GradientButton>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </div>
-        {errorText && !joined && <p className="relative mt-3 text-xs text-rose-400">{errorText}</p>}
-      </motion.div>
+        <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Get Notified" className="relative mt-9" />
+      </m.div>
     </section>
   );
 }

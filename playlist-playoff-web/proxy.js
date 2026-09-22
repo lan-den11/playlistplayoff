@@ -2,7 +2,18 @@ import { NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { getAppAccessMode } from './lib/posthog-server';
 
-const isAlwaysPublicRoute = createRouteMatcher(['/waitlist(.*)', '/api/health', '/api/debug(.*)']);
+// Crawler/social-preview endpoints must stay reachable in every access mode —
+// otherwise `waitlist-only` would redirect robots.txt and the share image to
+// /waitlist and link previews would break.
+const isAlwaysPublicRoute = createRouteMatcher([
+  '/waitlist(.*)',
+  '/api/health',
+  '/api/debug(.*)',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/opengraph-image(.*)',
+  '/twitter-image(.*)',
+]);
 const isGameplayRoute = createRouteMatcher(['/bracket(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {

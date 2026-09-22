@@ -31,12 +31,17 @@ function hexToRgb(hex) {
 }
 
 // Interactive dot-grid canvas (React Bits). Adapted for a full-viewport
-// background: no edge padding, pointer starts off-screen (the original lit
-// up the top-left corner until the first mouse move), touch drags are
+// background: no edge padding, pointer starts off-screen, touch drags are
 // ignored (a tap still fires the shockwave), and all dots that aren't near
-// the pointer are drawn as ONE batched path instead of one save/fill/restore
-// per dot — same look, a fraction of the per-frame cost next to the WebGL
-// fibers layer.
+// the pointer are drawn as ONE batched path.
+//
+// Draws on demand, not every frame. It used to redraw the full-viewport
+// canvas at 60fps forever, even with nothing moving — which keeps the layer
+// permanently "dirty", so the browser had to re-composite it (and re-blur
+// every glass panel above it) every frame while the page was idle. Now a
+// frame is only scheduled when something can actually change: pointer moved,
+// a dot is mid-physics (tween onUpdate), the grid was rebuilt, or props
+// changed. Idle page = zero canvas work.
 const DotGrid = ({
   dotSize = 16,
   gap = 32,
@@ -55,6 +60,8 @@ const DotGrid = ({
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
   const dotsRef = useRef([]);
+  const drawRef = useRef(null);
+  const frameRef = useRef(0);
   const pointerRef = useRef({
     x: OFFSCREEN,
     y: OFFSCREEN,
@@ -68,6 +75,14 @@ const DotGrid = ({
 
   const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
   const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
+
+  const requestDraw = useCallback(() => {
+    if (frameRef.current) return;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0;
+      drawRef.current?.();
+    });
+  }, []);
 
   const buildGrid = useCallback(() => {
     const wrap = wrapperRef.current;
@@ -101,16 +116,15 @@ const DotGrid = ({
       }
     }
     dotsRef.current = dots;
-  }, [dotSize, gap]);
+    requestDraw();
+  }, [dotSize, gap, requestDraw]);
 
   useEffect(() => {
     const radius = dotSize / 2;
     const proxSq = proximity * proximity;
-    const near = []; // flat [x, y, t, x, y, t, ...] — reused every frame, no per-frame allocation
-    let rafId = 0;
+    const near = []; // flat [x, y, t, x, y, t, ...] — reused every draw, no per-draw allocation
 
-    const draw = () => {
-      rafId = requestAnimationFrame(draw);
+    drawRef.current = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
       if (!ctx) return;
@@ -149,9 +163,13 @@ const DotGrid = ({
       }
     };
 
-    draw();
-    return () => cancelAnimationFrame(rafId);
-  }, [dotSize, proximity, baseColor, baseRgb, activeRgb]);
+    requestDraw();
+    return () => {
+      drawRef.current = null;
+    };
+  }, [dotSize, proximity, baseColor, baseRgb, activeRgb, requestDraw]);
+
+  useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
   useEffect(() => {
     buildGrid();
@@ -177,12 +195,14 @@ const DotGrid = ({
       gsap.killTweensOf(dot);
       gsap.to(dot, {
         inertia: { xOffset: pushX, yOffset: pushY, resistance },
+        onUpdate: requestDraw,
         onComplete: () => {
           gsap.to(dot, {
             xOffset: 0,
             yOffset: 0,
             duration: returnDuration,
             ease: 'elastic.out(1,0.75)',
+            onUpdate: requestDraw,
           });
           dot._inertiaApplied = false;
         },
@@ -224,6 +244,7 @@ const DotGrid = ({
           pushDot(dot, dot.cx - pr.x + vx * 0.005, dot.cy - pr.y + vy * 0.005);
         }
       }
+      requestDraw();
     };
 
     const onLeave = () => {
@@ -231,6 +252,7 @@ const DotGrid = ({
       pr.x = OFFSCREEN;
       pr.y = OFFSCREEN;
       pr.lastTime = 0;
+      requestDraw();
     };
 
     const onClick = (e) => {
@@ -248,7 +270,7 @@ const DotGrid = ({
       }
     };
 
-    const throttledMove = throttle(onMove, 50);
+    const throttledMove = throttle(onMove, 24);
     window.addEventListener('pointermove', throttledMove, { passive: true });
     window.addEventListener('click', onClick);
     document.documentElement.addEventListener('mouseleave', onLeave);
@@ -258,7 +280,7 @@ const DotGrid = ({
       window.removeEventListener('click', onClick);
       document.documentElement.removeEventListener('mouseleave', onLeave);
     };
-  }, [maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength]);
+  }, [maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength, requestDraw]);
 
   return (
     <div className={`relative flex h-full w-full items-center justify-center ${className}`} style={style}>

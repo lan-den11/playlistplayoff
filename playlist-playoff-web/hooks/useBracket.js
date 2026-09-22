@@ -145,8 +145,12 @@ function finishWildcard(state) {
   return beginMainPhase(state, state.doShuffle ? shuffleArray(combined) : combined);
 }
 
-function startTournament(state) {
-  const { bracketSize: size, doShuffle, wildcardEnabled, masterSortedTracks: sorted } = state;
+// `pool` (optional) replaces the recency-sorted master list as the source of
+// seeds — that's how the homepage teaser plays a random sample instead of the
+// most recently added songs.
+function startTournament(state, pool) {
+  const { bracketSize: size, doShuffle, wildcardEnabled } = state;
+  const sorted = pool ?? state.masterSortedTracks;
   let next = {
     ...state,
     historyStack: [],
@@ -185,6 +189,13 @@ function startTournament(state) {
   next.wildcardBracketRounds = buildTreeStructure(next.round);
   next = startRound(next);
   return advanceToNextMatch(next);
+}
+
+// Random `size`-song bracket drawn from the ENTIRE playlist (no recency bias,
+// no wildcard round).
+function startSample(state, size) {
+  const pool = shuffleArray(state.masterSortedTracks).slice(0, size);
+  return startTournament({ ...state, bracketSize: size, wildcardEnabled: false, doShuffle: true }, pool);
 }
 
 function pushHistory(state) {
@@ -302,7 +313,12 @@ function reducer(state, action) {
       return { ...state, screen: 'setup' };
     case 'START_TOURNAMENT':
       return startTournament(state);
+    case 'START_SAMPLE':
+      return startSample(state, action.size);
     case 'PICK':
+      // Pick cap (homepage trial): enforced here, inside the reducer, so it
+      // holds even against double clicks or stale closures — not just in UI.
+      if (action.limit != null && state.completedRealMatchesOverall >= action.limit) return state;
       return pickReducer(state, action.track);
     case 'UNDO':
       return undoReducer(state);
@@ -324,7 +340,9 @@ function reducer(state, action) {
   }
 }
 
-export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
+// `maxPicks`: optional cap on how many real matchups can be decided in this
+// hook instance (the homepage trial uses it). null = unlimited.
+export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = {}) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [userPlaylists, setUserPlaylists] = useState(null);
   const [findUserError, setFindUserError] = useState('');
@@ -435,7 +453,19 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
       });
       dispatch({ type: 'START_TOURNAMENT' });
     },
+    startSample: (size) => {
+      captureEvent('bracket_started', {
+        track_count: state.loadedTracks.length,
+        bracket_size: size,
+        shuffle_enabled: true,
+        wildcard_enabled: false,
+        random_sample: true,
+        source: analyticsSource,
+      });
+      dispatch({ type: 'START_SAMPLE', size });
+    },
     pick: (track) => {
+      if (maxPicks != null && state.completedRealMatchesOverall >= maxPicks) return;
       const completedMatchCount = state.completedRealMatchesOverall + 1;
       captureEvent('matchup_chosen', {
         phase: state.phase,
@@ -452,7 +482,7 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY } = {}) {
           source: analyticsSource,
         });
       }
-      dispatch({ type: 'PICK', track });
+      dispatch({ type: 'PICK', track, limit: maxPicks });
     },
     undo: () => dispatch({ type: 'UNDO' }),
     shuffleSwap: () => dispatch({ type: 'SHUFFLE_SWAP' }),

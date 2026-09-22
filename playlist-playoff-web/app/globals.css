@@ -66,6 +66,22 @@ iframe {
   }
 }
 
+/* Performance "lite" tier. PageBackground's frame-rate governor sets
+   <html data-perf="lite"> on devices that can't keep the animated
+   background + glass blur at a smooth frame rate. Every backdrop-filter has
+   to be re-blurred whenever the WebGL layer behind it repaints, which is the
+   single most expensive thing on the page for weak GPUs — so lite drops the
+   blur (the translucent tinted panes stay) and stops the decorative loops. */
+html[data-perf='lite'] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-perf='lite'] .animate-float,
+html[data-perf='lite'] .animate-glow-pulse {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
