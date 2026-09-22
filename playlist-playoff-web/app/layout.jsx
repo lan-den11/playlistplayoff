@@ -5,22 +5,6 @@ import PostHogIdentity from '../components/PostHogIdentity';
 import { SITE_URL } from '../lib/site';
 import './globals.css';
 
-export const metadata = {
-  title: 'Playlist Playoff',
-  description: 'Turn any playlist into a showdown. Select winners per matchup until one song takes the crown.',
-  verification: {
-    google: 'tSvSKefK9Ao4W1itiDP9uSkhh3zfhsUYmKh553X_Vq4',
-  },
-};
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -54,6 +38,10 @@ export const metadata = {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+  },
+  // Added Google Site Verification here
+  verification: {
+    google: 'tSvSKefK9Ao4W1itiDP9uSkhh3zfhsUYmKh553X_Vq4',
   },
 };
 
