@@ -13,9 +13,10 @@ export function fetchUserPlaylists(username) {
   return request(`/api/user/${encodeURIComponent(username)}/playlists`);
 }
 
-export function fetchAlbumArt(artist, album) {
-  const params = new URLSearchParams({ artist, album });
-  return request(`/api/album-art?${params.toString()}`);
+export function fetchLastfmPlaycount(artist, track, username) {
+  const params = new URLSearchParams({ artist, track });
+  if (username) params.set('username', username);
+  return request(`/api/lastfm/playcount?${params.toString()}`);
 }
 
 export function fetchProfile() {
@@ -28,6 +29,11 @@ export function saveProfile(payload) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
+
+export function fetchAlbumArt(artist, album) {
+  const params = new URLSearchParams({ artist, album });
+  return request(`/api/album-art?${params.toString()}`);
 }
 
 // Fire-and-forget global "matchups decided" counter. Never throws — a failed
