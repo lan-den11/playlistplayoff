@@ -17,9 +17,24 @@ export function getPool() {
           spotify_username TEXT,
           lastfm_username TEXT,
           updated_at TIMESTAMPTZ DEFAULT now()
-        )
+        );
+        CREATE TABLE IF NOT EXISTS site_counters (
+          name TEXT PRIMARY KEY,
+          value BIGINT NOT NULL DEFAULT 0
+        );
+        -- One row per referral code. owner_* identifies whose link it is, so
+        -- a launch script can sort by referred_count and priority-invite the
+        -- top referrers via Clerk's waitlistEntries.invite(id) — see
+        -- /api/admin/top-referrers.
+        CREATE TABLE IF NOT EXISTS referral_codes (
+          code TEXT PRIMARY KEY,
+          owner_email TEXT,
+          owner_waitlist_entry_id TEXT,
+          referred_count INT NOT NULL DEFAULT 0,
+          created_at TIMESTAMPTZ DEFAULT now()
+        );
       `)
-      .catch((e) => console.error('Failed to ensure user_profiles table exists:', e.message));
+      .catch((e) => console.error('Failed to ensure tables exist:', e.message));
   }
   return pool;
 }

@@ -55,7 +55,9 @@ export default function HowItWorks() {
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         className="mx-auto mb-10 max-w-2xl text-center md:mb-12"
       >
-        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">How it works</h2>
+        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-4xl">
+          How it works
+        </h2>
       </m.div>
 
       <m.div
@@ -72,16 +74,20 @@ export default function HowItWorks() {
           <m.div
             key={step.number}
             variants={card}
-            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
+            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px] [data-theme=light]:border-black/10 [data-theme=light]:bg-white [data-theme=light]:shadow-sm [data-theme=light]:hover:border-black/20 [data-theme=light]:hover:bg-zinc-50"
           >
-            <span className="font-display text-sm font-bold text-zinc-600">{step.number}</span>
+            <span className="font-display text-sm font-bold text-zinc-600 [data-theme=light]:text-zinc-400">
+              {step.number}
+            </span>
 
             <div className="mt-4 mb-5">
               <GlassIconBadge icon={step.icon} size="lg" />
             </div>
 
-            <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50">{step.title}</h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">{step.body}</p>
+            <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900">
+              {step.title}
+            </h3>
+            <p className="mt-2 text-[15px] leading-relaxed text-zinc-400 [data-theme=light]:text-zinc-500">{step.body}</p>
           </m.div>
         ))}
       </m.div>

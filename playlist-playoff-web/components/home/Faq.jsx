@@ -25,7 +25,7 @@ const FAQS = [
   {
     icon: CreditCard,
     q: 'Will this be free?',
-    a: 'Yes — a free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon.',
+    a: "Yes — a free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a Founding Member badge plus a free week of Premium the day we launch.",
   },
 ];
 
@@ -36,7 +36,7 @@ function FaqItem({ item, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [data-theme=light]:border-black/10 [data-theme=light]:bg-white">
       <button
         type="button"
         onClick={onToggle}
@@ -45,7 +45,9 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         className="flex w-full items-center gap-4 px-6 py-5 text-left"
       >
         <GlassIconBadge icon={item.icon} size="sm" />
-        <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50">{item.q}</span>
+        <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900">
+          {item.q}
+        </span>
         <span
           className={`flex-none text-zinc-500 transition-transform duration-300 ease-out ${isOpen ? 'rotate-180' : ''}`}
         >
@@ -62,7 +64,9 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="px-6 pb-5 pl-[3.75rem] text-[15px] leading-relaxed text-zinc-400">{item.a}</p>
+          <p className="px-6 pb-5 pl-[3.75rem] text-[15px] leading-relaxed text-zinc-400 [data-theme=light]:text-zinc-500">
+            {item.a}
+          </p>
         </div>
       </div>
     </div>
@@ -87,7 +91,7 @@ export default function Faq() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
+          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-4xl md:mb-10"
         >
           Your questions, our answers
         </m.h2>

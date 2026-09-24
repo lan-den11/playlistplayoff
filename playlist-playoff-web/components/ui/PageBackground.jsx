@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import GhostFibers from './GhostFibers';
 import DotGrid from './DotGrid';
+import { subscribeTheme } from '../../lib/theme';
 
 // Sits behind the entire page, pinned to the viewport with `fixed` (not tied
 // to document height) so the ghost-fiber effect stays visible everywhere as
@@ -74,6 +75,12 @@ export default function PageBackground() {
   // weak device never spins up a full-quality WebGL context just to tear it
   // down a frame later.
   const [tier, setTier] = useState(null);
+  // The animated fibers/dots are tuned for dark; in light mode they're
+  // replaced with a plain soft gradient (see the render below) — cheaper
+  // too, since neither the WebGL context nor the canvas loop run at all.
+  const [isLight, setIsLight] = useState(false);
+
+  useEffect(() => subscribeTheme((theme) => setIsLight(theme === 'light')), []);
 
   useEffect(() => {
     setTier(Math.max(deviceStartTier(), readStoredTier()));
@@ -130,15 +137,27 @@ export default function PageBackground() {
 
   const config = tier === null ? null : TIERS[tier];
 
+  const wrapperClass = 'fixed left-0 top-0 -z-10 h-screen w-full supports-[height:100lvh]:h-[100lvh]';
+
+  if (isLight) {
+    // A clean, soft gradient rather than tuning the shader's palette for
+    // light: cheaper (no WebGL context, no per-frame canvas work at all)
+    // and reads as calm/premium rather than trying to force a dark-authored
+    // effect to work in daylight.
+    return (
+      <div aria-hidden="true" className={wrapperClass}>
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-zinc-50 to-zinc-100" />
+        <div className="absolute -top-40 left-1/2 h-[36rem] w-[60rem] max-w-[160%] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(18,64,234,0.10),transparent_70%)]" />
+      </div>
+    );
+  }
+
   return (
     // h-screen with an `lvh` upgrade: `inset-0` on a fixed layer tracks the
     // *visible* viewport, so on phones every time the URL bar collapses the
     // layer resized → the WebGL canvas and the dot grid were rebuilt mid-scroll.
     // The large-viewport height never changes.
-    <div
-      aria-hidden="true"
-      className="fixed left-0 top-0 -z-10 h-screen w-full supports-[height:100lvh]:h-[100lvh]"
-    >
+    <div aria-hidden="true" className={wrapperClass}>
       {config && (
         <GhostFibers
           lineColor="#0A1A6B"

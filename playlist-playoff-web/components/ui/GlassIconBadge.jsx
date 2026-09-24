@@ -4,6 +4,11 @@
 // pill button. Used everywhere a blue glass icon container is needed (the
 // logo, How It Works step icons, FAQ icons) so every glass surface in the
 // app reads as the same material — no separate one-off icon treatment.
+//
+// Light mode swaps the glow-on-dark-glass look for a flatter, softer tinted
+// chip (a bright glow reads as "glare" rather than "depth" on a light
+// background), via the `[data-theme=light]:` variant — no separate
+// component needed since dark stays the unprefixed default.
 const SIZES = {
   sm: { box: 'h-9 w-9 rounded-2xl', icon: 'h-4 w-4' },
   md: { box: 'h-11 w-11 rounded-2xl', icon: 'h-5 w-5' },
@@ -17,11 +22,11 @@ export default function GlassIconBadge({ icon: Icon, size = 'md', className = ''
     <span className={`relative inline-flex flex-none items-center justify-center ${s.box} ${className}`}>
       <span
         aria-hidden="true"
-        className="absolute -inset-1.5 rounded-[inherit] bg-gradient-to-br from-brand/60 via-brand/25 to-transparent blur-md opacity-80"
+        className="absolute -inset-1.5 rounded-[inherit] bg-gradient-to-br from-brand/60 via-brand/25 to-transparent blur-md opacity-80 [data-theme=light]:opacity-40"
       />
       <span
         aria-hidden="true"
-        className="absolute inset-0 rounded-[inherit] border border-white/25 bg-gradient-to-b from-brand/45 via-brand/25 to-brand-deep/40 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(255,255,255,0.08),0_6px_16px_rgba(0,0,0,0.3)]"
+        className="absolute inset-0 rounded-[inherit] border border-white/25 bg-gradient-to-b from-brand/45 via-brand/25 to-brand-deep/40 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(255,255,255,0.08),0_6px_16px_rgba(0,0,0,0.3)] [data-theme=light]:border-brand/20 [data-theme=light]:from-brand/90 [data-theme=light]:via-brand [data-theme=light]:to-brand-deep [data-theme=light]:shadow-[0_6px_16px_rgba(18,64,234,0.25)]"
       />
       <Icon className={`relative z-10 text-zinc-50 ${s.icon}`} strokeWidth={2.5} />
     </span>

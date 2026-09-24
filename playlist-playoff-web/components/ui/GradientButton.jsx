@@ -14,6 +14,11 @@ import { m } from 'framer-motion';
 // button just reads as plain grey glass. Tinting the pane itself guarantees
 // genuine "blue liquid glass" regardless of what's behind it; the glow
 // (ACCENT_GLOW) still adds extra ambient bleed and depth on top of that.
+//
+// Light mode ([data-theme=light]:) turns the translucent glow-glass into a
+// solid, saturated pill (a soft ambient glow reads as haze in daylight, not
+// depth) with a matching solid text color and a plain drop shadow standing
+// in for the glow.
 const ACCENT_GLOW = {
   brand: 'from-brand/70 via-brand/30 to-transparent',
   sideB: 'from-sky-400/70 via-sky-500/30 to-transparent',
@@ -22,11 +27,11 @@ const ACCENT_GLOW = {
 
 const ACCENT_GLASS = {
   brand:
-    'from-brand/50 via-brand/30 to-brand-deep/40 group-hover:from-brand/60 group-hover:via-brand/40 group-hover:to-brand-deep/45',
+    'from-brand/50 via-brand/30 to-brand-deep/40 group-hover:from-brand/60 group-hover:via-brand/40 group-hover:to-brand-deep/45 [data-theme=light]:from-brand [data-theme=light]:via-brand [data-theme=light]:to-brand-deep [data-theme=light]:group-hover:from-brand-deep [data-theme=light]:group-hover:via-brand-deep [data-theme=light]:group-hover:to-brand-deep',
   sideB:
-    'from-sky-400/45 via-sky-500/30 to-sky-950/40 group-hover:from-sky-400/55 group-hover:via-sky-500/40 group-hover:to-sky-950/45',
+    'from-sky-400/45 via-sky-500/30 to-sky-950/40 group-hover:from-sky-400/55 group-hover:via-sky-500/40 group-hover:to-sky-950/45 [data-theme=light]:from-sky-500 [data-theme=light]:via-sky-600 [data-theme=light]:to-sky-800 [data-theme=light]:group-hover:from-sky-600 [data-theme=light]:group-hover:to-sky-900',
   gold:
-    'from-amber-400/45 via-orange-400/30 to-orange-950/40 group-hover:from-amber-400/55 group-hover:via-orange-400/40 group-hover:to-orange-950/45',
+    'from-amber-400/45 via-orange-400/30 to-orange-950/40 group-hover:from-amber-400/55 group-hover:via-orange-400/40 group-hover:to-orange-950/45 [data-theme=light]:from-amber-500 [data-theme=light]:via-orange-500 [data-theme=light]:to-orange-700 [data-theme=light]:group-hover:from-amber-600 [data-theme=light]:group-hover:to-orange-800',
 };
 
 const SIZES = {
@@ -59,10 +64,11 @@ export default function GradientButton({
     >
       {/* Ambient color glow — the brand identity bleeding through the glass.
           The pulse is a CSS keyframe (opacity only → compositor), not a JS
-          spring loop: five of these are on the homepage at once. */}
+          spring loop: five of these are on the homepage at once. Hidden in
+          light mode, where the pill itself is already fully saturated. */}
       <span
         aria-hidden="true"
-        className={`absolute -inset-2.5 animate-glow-pulse rounded-full bg-gradient-to-r ${glow} blur-xl`}
+        className={`absolute -inset-2.5 animate-glow-pulse rounded-full bg-gradient-to-r ${glow} blur-xl [data-theme=light]:hidden`}
       />
       {/* The frosted-glass pane — tinted per accent (top-lit, deeper at the
           bottom, like light catching a curved liquid surface), plus
@@ -70,7 +76,7 @@ export default function GradientButton({
           over real content. */}
       <span
         aria-hidden="true"
-        className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors`}
+        className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors [data-theme=light]:border-transparent [data-theme=light]:shadow-[0_6px_16px_rgba(18,64,234,0.3)]`}
       />
       {/* whitespace-nowrap: without it, a button squeezed by a flex
           sibling (e.g. the email field in WaitlistForm) can shrink the text

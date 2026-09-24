@@ -32,6 +32,22 @@ body {
   color: #fafafa;
 }
 
+/* Light mode. Dark (above) is the unprefixed default everywhere in this
+   app; `[data-theme="light"]` is the explicit opt-in, set by
+   components/ui/ThemeToggle.jsx and persisted via lib/theme.js. Most
+   surfaces use the `[data-theme=light]:` arbitrary-variant classes inline
+   on the element itself (see GradientButton, GlassIconBadge, SiteHeader,
+   etc.); this block only covers the page-level base that isn't a
+   component. */
+[data-theme='light'] body {
+  background-color: #fafafa; /* zinc-50 */
+  color: #18181b; /* zinc-900 */
+}
+
+[data-theme='light'] :focus-visible {
+  outline-color: rgba(18, 64, 234, 0.65); /* brand */
+}
+
 /* Defensive reset for the Spotify-injected iframes (embed panels): some
    browsers add a default border/outline to bare iframes, which — stacked
    on top of our own rounded glass panel border — was part of what made the

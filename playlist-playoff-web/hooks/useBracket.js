@@ -11,7 +11,7 @@ import {
   computeWildcardSplit,
   roundLabelText,
 } from '../lib/bracketEngine';
-import { fetchPlaylistTracks, fetchUserPlaylists } from '../lib/api';
+import { fetchPlaylistTracks, fetchUserPlaylists, bumpMatchupCounter } from '../lib/api';
 import { captureClientException, captureEvent } from '../lib/posthog-client';
 
 export const DEFAULT_SAVE_KEY = 'spotifyBracketSave_v1';
@@ -467,6 +467,11 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = 
     pick: (track) => {
       if (maxPicks != null && state.completedRealMatchesOverall >= maxPicks) return;
       const completedMatchCount = state.completedRealMatchesOverall + 1;
+      // Feeds the homepage's "live matchups decided" counter (shared across
+      // every visitor, trial and real bracket alike — see
+      // components/ui/LiveCounter.jsx). Fire-and-forget: never blocks or can
+      // fail the actual pick.
+      bumpMatchupCounter();
       captureEvent('matchup_chosen', {
         phase: state.phase,
         round_size: state.round.length,

@@ -20,32 +20,36 @@ const SPRING = { type: 'spring', stiffness: 260, damping: 22 };
 function MatchupDivider() {
   return (
     <div className="flex items-center gap-3 px-1" aria-hidden="true">
-      <span className="h-px flex-1 bg-white/10" />
-      <span className="flex-none font-display text-sm font-bold uppercase tracking-widest text-zinc-50">vs</span>
-      <span className="h-px flex-1 bg-white/10" />
+      <span className="h-px flex-1 bg-white/10 [data-theme=light]:bg-black/10" />
+      <span className="flex-none font-display text-sm font-bold uppercase tracking-widest text-zinc-50 [data-theme=light]:text-zinc-800">
+        vs
+      </span>
+      <span className="h-px flex-1 bg-white/10 [data-theme=light]:bg-black/10" />
     </div>
   );
 }
 
 function StaticFallback() {
   return (
-    <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40">
-      <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">Round of 8</p>
+    <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-2xl shadow-black/40 [data-theme=light]:border-black/10 [data-theme=light]:bg-white [data-theme=light]:shadow-xl [data-theme=light]:shadow-black/10">
+      <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300 [data-theme=light]:text-zinc-500">
+        Round of 8
+      </p>
       <div className="flex flex-col gap-3">
         <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-brand/30 bg-brand/10 p-4 backdrop-blur-md">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
             <Music2 className="h-6 w-6 text-brand-light" />
           </div>
-          <p className="truncate text-sm font-semibold text-zinc-50">Night Drive</p>
-          <p className="truncate text-xs text-zinc-400">Nocturn</p>
+          <p className="truncate text-sm font-semibold text-zinc-50 [data-theme=light]:text-zinc-900">Night Drive</p>
+          <p className="truncate text-xs text-zinc-400 [data-theme=light]:text-zinc-500">Nocturn</p>
         </div>
         <MatchupDivider />
         <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 backdrop-blur-md">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-md">
             <Music2 className="h-6 w-6 text-sky-400" />
           </div>
-          <p className="truncate text-sm font-semibold text-zinc-50">Golden Hour</p>
-          <p className="truncate text-xs text-zinc-400">Marlowe</p>
+          <p className="truncate text-sm font-semibold text-zinc-50 [data-theme=light]:text-zinc-900">Golden Hour</p>
+          <p className="truncate text-xs text-zinc-400 [data-theme=light]:text-zinc-500">Marlowe</p>
         </div>
       </div>
     </div>
@@ -83,8 +87,10 @@ function TeaserSide({ side, track, revealed, elRef, height, embedGradient, accen
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
           >
-            <p className="truncate font-display text-sm font-semibold leading-5 text-zinc-50">{track.name}</p>
-            <p className="truncate text-xs leading-4 text-zinc-400">{track.artists}</p>
+            <p className="truncate font-display text-sm font-semibold leading-5 text-zinc-50 [data-theme=light]:text-zinc-900">
+              {track.name}
+            </p>
+            <p className="truncate text-xs leading-4 text-zinc-400 [data-theme=light]:text-zinc-500">{track.artists}</p>
           </m.div>
         ) : (
           <>
@@ -110,7 +116,7 @@ function TeaserSide({ side, track, revealed, elRef, height, embedGradient, accen
   );
 }
 
-export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only' }) {
+export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only', referredBy = null }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   // maxPicks makes the trial's pick limit part of the bracket state machine
@@ -125,6 +131,10 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   const gameHeightRef = useRef(0);
   const [isAnimatingPick, setIsAnimatingPick] = useState(null);
   const [introDone, setIntroDone] = useState(false);
+  // The most recently decided matchup (winner + loser) — by the time the
+  // trial ends this is the FINAL pick, which is exactly what the share card
+  // shows off.
+  const [lastResult, setLastResult] = useState(null);
 
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
@@ -201,8 +211,11 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   function handlePick(side) {
     if (trialDone || isAnimatingPick || !revealed) return;
     setIsAnimatingPick(side);
+    const winner = side === 'a' ? pendingA : pendingB;
+    const loser = side === 'a' ? pendingB : pendingA;
     pickTimerRef.current = setTimeout(() => {
-      bracket.pick(side === 'a' ? pendingA : pendingB);
+      setLastResult({ winner, loser });
+      bracket.pick(winner);
     }, PICK_ANIMATION_MS);
   }
 
@@ -214,7 +227,7 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     <div className="relative mx-auto w-full max-w-lg">
       <div
         aria-hidden="true"
-        className="absolute -inset-3 -z-10 animate-glow-pulse rounded-[2rem] bg-gradient-to-br from-brand/30 via-brand/10 to-transparent blur-2xl"
+        className="absolute -inset-3 -z-10 animate-glow-pulse rounded-[2rem] bg-gradient-to-br from-brand/30 via-brand/10 to-transparent blur-2xl [data-theme=light]:opacity-40"
       />
 
       <m.div
@@ -222,12 +235,12 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={SPRING}
       >
-        <div className="animate-float rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:p-5">
+        <div className="animate-float rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:p-5 [data-theme=light]:border-black/10 [data-theme=light]:bg-white [data-theme=light]:shadow-xl [data-theme=light]:shadow-black/10">
           <AnimatePresence mode="wait" initial={false}>
             {view === 'game' && (
               <m.div key="game" ref={gameRef} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                <p className="mb-3 flex h-4 items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300 md:mb-4">
-                  <Flame className="h-3.5 w-3.5 flex-none text-brand-light" />
+                <p className="mb-3 flex h-4 items-center justify-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300 [data-theme=light]:text-zinc-500 md:mb-4">
+                  <Flame className="h-3.5 w-3.5 flex-none text-brand-light [data-theme=light]:text-brand" />
                   {label ? <span className="min-w-0 truncate">{label}</span> : <Bone className="h-2.5 w-36 rounded-full" />}
                 </p>
 
@@ -259,7 +272,9 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
               </m.div>
             )}
 
-            {view === 'gate' && <TrialGate key="gate" minHeight={gameHeightRef.current} />}
+            {view === 'gate' && (
+              <TrialGate key="gate" minHeight={gameHeightRef.current} lastResult={lastResult} referredBy={referredBy} />
+            )}
 
             {view === 'handoff' && (
               <m.div
@@ -270,7 +285,9 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
                 className="flex flex-col items-center justify-center gap-3 text-center"
               >
                 <Loader2 className="h-6 w-6 animate-spin text-brand-light" />
-                <p className="font-display text-sm font-semibold text-zinc-50">Setting up your full bracket…</p>
+                <p className="font-display text-sm font-semibold text-zinc-50 [data-theme=light]:text-zinc-900">
+                  Setting up your full bracket…
+                </p>
               </m.div>
             )}
           </AnimatePresence>

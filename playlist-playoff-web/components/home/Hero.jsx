@@ -1,12 +1,14 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import GradientButton from '../ui/GradientButton';
 import FitToScreen from '../ui/FitToScreen';
+import LiveCounter from '../ui/LiveCounter';
 import HeroMatchup from './HeroMatchup';
+import GenreToggle from './GenreToggle';
 
 const HEADLINE_WORDS = 'Turn any playlist into a showdown.'.split(' ');
 
@@ -52,10 +54,29 @@ const PADDING_TOP_WITH_NAVBAR_PX = 16;
 const PADDING_TOP_NO_NAVBAR_PX = 24;
 const PADDING_BOTTOM_PX = 56;
 
-export default function Hero({ trendingPlaylistId, accessMode = 'hero-only', showNavbar = true }) {
+const TRENDING_GENRE = { key: 'trending', label: 'Trending', playlistId: null };
+
+export default function Hero({
+  trendingPlaylistId,
+  genres = [],
+  accessMode = 'hero-only',
+  showNavbar = true,
+  referredBy = null,
+}) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const [showScrollHint, setShowScrollHint] = useState(true);
+
+  // Trending always leads the list and always uses the resolved trending
+  // playlist (flag payload, or the hardcoded fallback — see app/page.jsx);
+  // any genre tabs after it come from PostHog flags and only appear once
+  // configured (see lib/posthog-server.js `getGenrePlaylists`).
+  const allGenres = useMemo(
+    () => [{ ...TRENDING_GENRE, playlistId: trendingPlaylistId }, ...genres],
+    [trendingPlaylistId, genres]
+  );
+  const [selectedKey, setSelectedKey] = useState('trending');
+  const selected = allGenres.find((g) => g.key === selectedKey) ?? allGenres[0];
 
   const reservedPx =
     (showNavbar ? NAVBAR_HEIGHT_PX + PADDING_TOP_WITH_NAVBAR_PX : PADDING_TOP_NO_NAVBAR_PX) + PADDING_BOTTOM_PX;
@@ -88,7 +109,7 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only', sho
           <m.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
             <m.h1
               variants={headline}
-              className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
+              className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
             >
               {HEADLINE_WORDS.map((w, i) => (
                 <Fragment key={i}>
@@ -102,7 +123,7 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only', sho
 
             <m.p
               variants={item}
-              className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
+              className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 [data-theme=light]:text-zinc-500 sm:text-base md:mx-0 md:mt-5 md:text-lg"
             >
               Select winners per matchup until one song takes the crown while listening history influences your choices.
             </m.p>
@@ -113,9 +134,21 @@ export default function Hero({ trendingPlaylistId, accessMode = 'hero-only', sho
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </GradientButton>
             </m.div>
+
+            <m.div variants={item} className="mt-4 flex justify-center md:justify-start">
+              <LiveCounter />
+            </m.div>
           </m.div>
 
-          <HeroMatchup trendingPlaylistId={trendingPlaylistId} accessMode={accessMode} />
+          <div>
+            <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
+            <HeroMatchup
+              key={selected.playlistId}
+              trendingPlaylistId={selected.playlistId}
+              accessMode={accessMode}
+              referredBy={referredBy}
+            />
+          </div>
         </div>
       </FitToScreen>
 

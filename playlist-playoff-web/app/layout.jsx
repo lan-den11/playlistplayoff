@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import MotionProvider from '../components/MotionProvider';
 import PostHogIdentity from '../components/PostHogIdentity';
 import { SITE_URL } from '../lib/site';
+import { NO_FLASH_SCRIPT } from '../lib/theme';
 import './globals.css';
 
 const inter = Inter({
@@ -38,10 +39,6 @@ export const metadata = {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-  },
-  // Added Google Site Verification here
-  verification: {
-    google: 'tSvSKefK9Ao4W1itiDP9uSkhh3zfhsUYmKh553X_Vq4',
   },
 };
 
@@ -93,7 +90,19 @@ const clerkAppearance = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider afterSignOutUrl="/" waitlistUrl="/waitlist" appearance={clerkAppearance}>
-      <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      {/* suppressHydrationWarning: the inline script below can set
+          data-theme="light" on the html element before React hydrates,
+          which would otherwise be flagged as a server/client mismatch —
+          it's an intentional, one-time pre-paint sync, not a real one. */}
+      <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
+        <head>
+          {/* Runs before first paint so a returning visitor who chose light
+              mode never sees a flash of dark first. Always defaults to dark
+              (nothing runs) when there's no stored preference — see
+              lib/theme.js, which is the single source of truth this string
+              is copied from. */}
+          <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
+        </head>
         <body className="font-sans antialiased">
           <PostHogIdentity />
           <MotionProvider>{children}</MotionProvider>
