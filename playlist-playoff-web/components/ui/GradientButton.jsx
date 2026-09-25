@@ -2,23 +2,6 @@
 
 import { m } from 'framer-motion';
 
-// Every accent lives in the same blue family now. 'brand' / 'sideB' are two
-// shades of blue used to tell the two songs in a matchup apart at a glance
-// (see BattleScreen / HeroMatchup) — no more violet-vs-teal. 'gold' stays
-// the one deliberate exception, reserved for champion / celebratory moments.
-//
-// The glass pane (ACCENT_GLASS) carries its own tinted gradient rather than
-// a flat translucent white. Previously the only color came from the glow
-// bleeding through backdrop-blur, which is fragile and browser-dependent —
-// on a flat background, or if backdrop-filter is even slightly off, the
-// button just reads as plain grey glass. Tinting the pane itself guarantees
-// genuine "blue liquid glass" regardless of what's behind it; the glow
-// (ACCENT_GLOW) still adds extra ambient bleed and depth on top of that.
-//
-// Light mode ([data-theme=light]:) turns the translucent glow-glass into a
-// solid, saturated pill (a soft ambient glow reads as haze in daylight, not
-// depth) with a matching solid text color and a plain drop shadow standing
-// in for the glow.
 const ACCENT_GLOW = {
   brand: 'from-brand/70 via-brand/30 to-transparent',
   sideB: 'from-sky-400/70 via-sky-500/30 to-transparent',
@@ -27,11 +10,11 @@ const ACCENT_GLOW = {
 
 const ACCENT_GLASS = {
   brand:
-    'from-brand/50 via-brand/30 to-brand-deep/40 group-hover:from-brand/60 group-hover:via-brand/40 group-hover:to-brand-deep/45 [data-theme=light]:from-brand [data-theme=light]:via-brand [data-theme=light]:to-brand-deep [data-theme=light]:group-hover:from-brand-deep [data-theme=light]:group-hover:via-brand-deep [data-theme=light]:group-hover:to-brand-deep',
+    'from-brand/50 via-brand/30 to-brand-deep/40 group-hover:from-brand/60 group-hover:via-brand/40 group-hover:to-brand-deep/45',
   sideB:
-    'from-sky-400/45 via-sky-500/30 to-sky-950/40 group-hover:from-sky-400/55 group-hover:via-sky-500/40 group-hover:to-sky-950/45 [data-theme=light]:from-sky-500 [data-theme=light]:via-sky-600 [data-theme=light]:to-sky-800 [data-theme=light]:group-hover:from-sky-600 [data-theme=light]:group-hover:to-sky-900',
+    'from-sky-400/45 via-sky-500/30 to-sky-950/40 group-hover:from-sky-400/55 group-hover:via-sky-500/40 group-hover:to-sky-950/45',
   gold:
-    'from-amber-400/45 via-orange-400/30 to-orange-950/40 group-hover:from-amber-400/55 group-hover:via-orange-400/40 group-hover:to-orange-950/45 [data-theme=light]:from-amber-500 [data-theme=light]:via-orange-500 [data-theme=light]:to-orange-700 [data-theme=light]:group-hover:from-amber-600 [data-theme=light]:group-hover:to-orange-800',
+    'from-amber-400/45 via-orange-400/30 to-orange-950/40 group-hover:from-amber-400/55 group-hover:via-orange-400/40 group-hover:to-orange-950/45',
 };
 
 const SIZES = {
@@ -62,26 +45,14 @@ export default function GradientButton({
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`group relative inline-flex items-center justify-center rounded-full disabled:opacity-60 ${className}`}
     >
-      {/* Ambient color glow — the brand identity bleeding through the glass.
-          The pulse is a CSS keyframe (opacity only → compositor), not a JS
-          spring loop: five of these are on the homepage at once. Hidden in
-          light mode, where the pill itself is already fully saturated. */}
       <span
         aria-hidden="true"
-        className={`absolute -inset-2.5 animate-glow-pulse rounded-full bg-gradient-to-r ${glow} blur-xl [data-theme=light]:hidden`}
+        className={`absolute -inset-2.5 animate-glow-pulse rounded-full bg-gradient-to-r ${glow} blur-xl`}
       />
-      {/* The frosted-glass pane — tinted per accent (top-lit, deeper at the
-          bottom, like light catching a curved liquid surface), plus
-          backdrop-blur/saturate for the frosted quality wherever it sits
-          over real content. */}
       <span
         aria-hidden="true"
-        className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors [data-theme=light]:border-transparent [data-theme=light]:shadow-[0_6px_16px_rgba(18,64,234,0.3)]`}
+        className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors`}
       />
-      {/* whitespace-nowrap: without it, a button squeezed by a flex
-          sibling (e.g. the email field in WaitlistForm) can shrink the text
-          span below its content's natural width, wrapping the icon and
-          label onto two lines. */}
       <span
         className={`relative z-10 inline-flex items-center gap-2 whitespace-nowrap rounded-full font-semibold text-zinc-50 ${padding}`}
       >

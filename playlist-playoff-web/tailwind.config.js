@@ -8,13 +8,10 @@ module.exports = {
     extend: {
       colors: {
         // True electric blue, hue locked to ~227-231deg with the red channel
-        // kept near zero. The old indigo family (hue ~238-250deg, red >= green)
-        // read as blue on wide-gamut/unmanaged monitors but as violet on
-        // color-managed screens (iPhone, Mac, Safari). Authoring the hue this
-        // far from violet means it stays blue everywhere.
-        // Keep in sync with: GhostFibers defaults, PageBackground, app/layout.jsx
-        // (Clerk colorPrimary), components/ui/Glow.jsx, and the rgba(18,64,234,…)
-        // shadows in BracketTree / BracketHeader.
+        // kept near zero. Keep in sync with: GhostFibers defaults,
+        // PageBackground, app/layout.jsx (Clerk colorPrimary),
+        // components/ui/Glow.jsx, and the rgba(18,64,234,…) shadows in
+        // BracketTree / BracketHeader.
         brand: {
           DEFAULT: '#1240EA',
           light: '#7C9CFF',
@@ -26,8 +23,7 @@ module.exports = {
         display: ['var(--font-space-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       // Ambient loops run as CSS keyframes (compositor thread, zero JS per
-      // frame) instead of Framer Motion `repeat: Infinity` — they keep running
-      // smoothly while the main thread is busy hydrating or loading embeds.
+      // frame) instead of Framer Motion `repeat: Infinity`.
       keyframes: {
         'glow-pulse': {
           '0%, 100%': { opacity: '0.65' },

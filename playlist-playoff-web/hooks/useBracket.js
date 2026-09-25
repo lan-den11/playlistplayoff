@@ -341,7 +341,8 @@ function reducer(state, action) {
 }
 
 // `maxPicks`: optional cap on how many real matchups can be decided in this
-// hook instance (the homepage trial uses it). null = unlimited.
+// hook instance. null = unlimited (the trending teaser now plays its mini
+// bracket to a natural champion instead of being cut off — see HeroMatchup).
 export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = {}) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [userPlaylists, setUserPlaylists] = useState(null);

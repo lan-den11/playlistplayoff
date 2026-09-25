@@ -4,21 +4,6 @@ import { AnimatePresence, m } from 'framer-motion';
 import { EMBED_HEIGHT } from '../../hooks/useSpotifyEmbed';
 import Bone from '../ui/Bone';
 
-// Root cause of the "blank space under the embed" bug: this panel used to be
-// auto-height while the iframe inside it is forced to `h-full`. A percentage
-// height against an auto-height parent resolves to `auto`, and for an
-// <iframe> that means the browser default of 150px — overriding the height
-// Spotify set on it. Spotify then drew its 80px compact card at the top of a
-// 150px iframe and left the rest empty. The panel now has an explicit height
-// (the same EMBED_HEIGHT handed to Spotify), so `h-full` resolves to exactly
-// the embed's height. `box-content` keeps the 1px borders out of that height
-// so the iframe gets the full EMBED_HEIGHT rather than 2px less.
-//
-// `variant` picks what covers the embed while `loading` is true:
-//   'spinner'  — the small spinner + "Loading…" (default; battle/champion)
-//   'skeleton' — a shimmering placeholder shaped like Spotify's compact card
-//                (art, two text lines, play button). Same box, so nothing
-//                shifts when it fades out onto the real embed.
 function EmbedSkeleton() {
   return (
     <>

@@ -2,12 +2,6 @@
 
 import { m } from 'framer-motion';
 
-// Secondary button — same liquid-glass construction as GradientButton, just
-// a quieter brand-tinted pane and no colored ambient glow, so it reads as
-// the calmer action without going fully neutral/colorless like before.
-// Light mode swaps the translucent tint for a plain, bordered white-ish
-// pill — the "quiet secondary" reading Light needs is a subtle outline, not
-// a subtle tint.
 export default function GlassButton({ children, onClick, type = 'button', className = '' }) {
   return (
     <m.button
@@ -20,9 +14,9 @@ export default function GlassButton({ children, onClick, type = 'button', classN
     >
       <span
         aria-hidden="true"
-        className="absolute inset-0 rounded-full border border-white/25 bg-gradient-to-b from-brand/20 via-white/5 to-brand-deep/15 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-1px_0_rgba(255,255,255,0.08),0_6px_18px_rgba(0,0,0,0.3)] transition-colors group-hover:from-brand/30 group-hover:to-brand-deep/20 [data-theme=light]:border-black/10 [data-theme=light]:bg-white [data-theme=light]:shadow-sm [data-theme=light]:group-hover:bg-zinc-50"
+        className="absolute inset-0 rounded-full border border-white/25 bg-gradient-to-b from-brand/20 via-white/5 to-brand-deep/15 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-1px_0_rgba(255,255,255,0.08),0_6px_18px_rgba(0,0,0,0.3)] transition-colors group-hover:from-brand/30 group-hover:to-brand-deep/20"
       />
-      <span className="relative z-10 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-zinc-50 whitespace-nowrap [data-theme=light]:text-zinc-800">
+      <span className="relative z-10 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-zinc-50 whitespace-nowrap">
         {children}
       </span>
     </m.button>

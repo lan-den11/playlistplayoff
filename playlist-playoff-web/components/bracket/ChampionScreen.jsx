@@ -151,9 +151,6 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
           We have a champion
         </div>
 
-        {/* Same panel as the battle/hero embeds, so the champion embed gets
-            the explicit-height fix too (it had its own copy of the markup
-            and the same dead-space bug). */}
         <div className="mb-6">
           <EmbedPanel elRef={embed.elRef} loading={false} gradient="from-brand to-brand-light" height={embed.height} />
         </div>

@@ -156,11 +156,6 @@ export default function BattleScreen({
       </AnimatePresence>
 
       <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-8">
-        {/* grid-cols-1 and minmax(0,1fr) instead of the implicit `auto` /
-            plain `1fr` tracks: both are at least as wide as their widest
-            unbreakable child, so a long album/track line (nowrap + truncate
-            in TrackMeta) stretched the columns past the viewport on narrow
-            screens. minmax(0, …) lets `truncate` do its job. */}
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-8">
           <motion.div
             animate={

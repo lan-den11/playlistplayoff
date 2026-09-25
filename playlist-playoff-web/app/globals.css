@@ -4,10 +4,8 @@
 
 html {
   scroll-behavior: smooth;
-  /* Always reserve the scrollbar's width. Without this, pages that scroll
-     (homepage) and pages that don't (waitlist) have different content widths
-     on desktop, so centered content — the wordmark row — shifts ~8px between
-     them. */
+  /* Always reserve the scrollbar's width so scrolling and non-scrolling
+     pages don't differ in content width. */
   scrollbar-gutter: stable;
 }
 
@@ -32,22 +30,6 @@ body {
   color: #fafafa;
 }
 
-/* Light mode. Dark (above) is the unprefixed default everywhere in this
-   app; `[data-theme="light"]` is the explicit opt-in, set by
-   components/ui/ThemeToggle.jsx and persisted via lib/theme.js. Most
-   surfaces use the `[data-theme=light]:` arbitrary-variant classes inline
-   on the element itself (see GradientButton, GlassIconBadge, SiteHeader,
-   etc.); this block only covers the page-level base that isn't a
-   component. */
-[data-theme='light'] body {
-  background-color: #fafafa; /* zinc-50 */
-  color: #18181b; /* zinc-900 */
-}
-
-[data-theme='light'] :focus-visible {
-  outline-color: rgba(18, 64, 234, 0.65); /* brand */
-}
-
 /* Defensive reset for the Spotify-injected iframes (embed panels): some
    browsers add a default border/outline to bare iframes, which — stacked
    on top of our own rounded glass panel border — was part of what made the
@@ -67,15 +49,13 @@ iframe {
    correctly. WebKit renders `backdrop-filter: blur() saturate()` through
    an extended/linear color pipeline that pushes blue tones toward
    magenta-purple — and the shift scales directly with the saturate()
-   multiplier. That is true on iOS Safari AND desktop Safari on P3 Macs
-   (the previous query matched iOS only, so desktop Safari kept the 150%
-   boost and still drifted purple). Every iOS browser is WebKit too, so
-   this matches: iOS (-webkit-touch-callout) OR any Safari
-   (-apple-system-body is WebKit-only). It caps the boost back to 100% —
-   effectively a no-op saturate — and leaves Chrome/Firefox/Edge
-   untouched. Tailwind composes backdrop-filter from these custom
-   properties, so overriding just this one leaves blur and every other
-   backdrop effect intact. */
+   multiplier. That is true on iOS Safari AND desktop Safari on P3 Macs.
+   Every iOS browser is WebKit too, so this matches: iOS
+   (-webkit-touch-callout) OR any Safari (-apple-system-body is
+   WebKit-only). It caps the boost back to 100% — effectively a no-op
+   saturate — and leaves Chrome/Firefox/Edge untouched. Tailwind composes
+   backdrop-filter from these custom properties, so overriding just this one
+   leaves blur and every other backdrop effect intact. */
 @supports (-webkit-touch-callout: none) or ((font: -apple-system-body) and (-webkit-appearance: none)) {
   .backdrop-saturate-150 {
     --tw-backdrop-saturate: saturate(1) !important;

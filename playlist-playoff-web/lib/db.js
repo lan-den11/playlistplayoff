@@ -25,7 +25,8 @@ export function getPool() {
         -- One row per referral code. owner_* identifies whose link it is, so
         -- a launch script can sort by referred_count and priority-invite the
         -- top referrers via Clerk's waitlistEntries.invite(id) — see
-        -- /api/admin/top-referrers.
+        -- /api/admin/top-referrers. The same referred_count also powers the
+        -- public top-5 leaderboard at /api/referral/leaderboard.
         CREATE TABLE IF NOT EXISTS referral_codes (
           code TEXT PRIMARY KEY,
           owner_email TEXT,

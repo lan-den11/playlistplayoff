@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, Copy, Users } from 'lucide-react';
+import { Check, Copy, Share2, Users } from 'lucide-react';
 import { fetchReferralCount } from '../../lib/api';
 import { SITE_URL } from '../../lib/site';
 import { captureEvent } from '../../lib/posthog-client';
+import ReferralLeaderboard from './ReferralLeaderboard';
 
-// Shown once someone has joined the waitlist — their own shareable link,
-// plus a live count of friends who've joined through it when a database is
-// configured (see app/api/referral/[code]/route.js). Reused wherever
-// WaitlistForm's "joined" state appears (the homepage teaser and the trial
-// end card), so a signup from either spot gets the same referral push.
+// Shown once someone has joined the waitlist — their own shareable link, a
+// live count of friends who've joined through it, and the top-5 leaderboard
+// (see ReferralLeaderboard.jsx). Reused wherever WaitlistForm's "joined"
+// state appears (homepage teasers, the trial end card, and now the
+// dedicated /waitlist page too), so a signup from any of them gets the same
+// referral push.
 export default function ReferralShare({ code, source }) {
   const [count, setCount] = useState(null);
   const [configured, setConfigured] = useState(false);
@@ -46,30 +48,56 @@ export default function ReferralShare({ code, source }) {
     }
   }
 
+  async function handleShare() {
+    const shareData = { title: 'Playlist Playoff', text: 'Join me on Playlist Playoff!', url: link };
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData);
+        captureEvent('waitlist_referral_link_shared', { source, method: 'native_share' });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+      }
+    }
+    handleCopy();
+  }
+
   return (
-    <div className="mt-4 w-full max-w-sm">
-      <p className="text-xs text-zinc-500 [data-theme=light]:text-zinc-500">
-        Invite friends to move up the list:
-      </p>
-      <div className="mt-2 flex items-stretch gap-2">
-        <div className="min-w-0 flex-1 truncate rounded-full border border-white/10 bg-white/5 px-4 py-2 text-left text-xs text-zinc-300 [data-theme=light]:border-black/10 [data-theme=light]:bg-black/5 [data-theme=light]:text-zinc-700">
+    <div className="mt-4 flex w-full max-w-sm flex-col items-center gap-4">
+      <div className="w-full">
+        <p className="mb-2 text-center text-sm font-semibold text-zinc-300">
+          Invite friends to move up the list — and the leaderboard below:
+        </p>
+        <div className="rounded-2xl border border-brand/30 bg-brand/10 px-4 py-3 text-center text-base font-bold text-zinc-50 sm:text-lg">
           {link}
         </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          aria-label="Copy referral link"
-          className="flex-none rounded-full border border-white/10 bg-white/5 p-2 text-zinc-300 transition-colors hover:bg-white/10 [data-theme=light]:border-black/10 [data-theme=light]:bg-black/5 [data-theme=light]:text-zinc-700 [data-theme=light]:hover:bg-black/10"
-        >
-          {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-        </button>
+        <div className="mt-2.5 flex items-stretch gap-2">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:bg-white/10"
+          >
+            {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:bg-white/10"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </button>
+        </div>
+        {configured && count !== null && count > 0 && (
+          <p className="mt-2.5 flex items-center justify-center gap-1.5 text-xs font-medium text-brand-light">
+            <Users className="h-3.5 w-3.5" />
+            {count} {count === 1 ? 'friend has' : 'friends have'} joined through your link
+          </p>
+        )}
       </div>
-      {configured && count !== null && count > 0 && (
-        <p className="mt-2.5 flex items-center justify-center gap-1.5 text-xs font-medium text-brand-light [data-theme=light]:text-brand">
-          <Users className="h-3.5 w-3.5" />
-          {count} {count === 1 ? 'friend has' : 'friends have'} joined through your link
-        </p>
-      )}
+
+      <ReferralLeaderboard />
     </div>
   );
 }

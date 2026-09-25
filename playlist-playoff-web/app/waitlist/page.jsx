@@ -1,10 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { Waitlist } from '@clerk/nextjs';
-import { Award } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Footer from '../../components/home/Footer';
 import SiteHeader from '../../components/ui/SiteHeader';
 import PageBackground from '../../components/ui/PageBackground';
+import WaitlistForm from '../../components/home/WaitlistForm';
 import { getAppAccessMode } from '../../lib/posthog-server';
 
 export const metadata = {
@@ -12,8 +12,8 @@ export const metadata = {
   description: "Register your interest — we'll let you know the moment Playlist Playoff opens up.",
 };
 
-export default async function WaitlistPage() {
-  const [{ userId }, mode] = await Promise.all([auth(), getAppAccessMode()]);
+export default async function WaitlistPage({ searchParams }) {
+  const [{ userId }, mode, params] = await Promise.all([auth(), getAppAccessMode(), searchParams]);
 
   if (mode === 'unlocked') redirect('/');
 
@@ -24,26 +24,36 @@ export default async function WaitlistPage() {
   // straight back here, so link to this page instead of bouncing through it.
   const logoHref = mode === 'waitlist-only' ? '/waitlist' : '/';
 
+  // Same `?ref=CODE` handoff the homepage uses (see app/page.jsx) — this
+  // page is a real join point too (arrived at directly, or bounced here by
+  // proxy.js), so a referral link landing here must still credit its owner.
+  const rawRef = params?.ref;
+  const referredBy = (Array.isArray(rawRef) ? rawRef[0] : rawRef)?.trim().slice(0, 32) || null;
+
   return (
-    <main className="relative isolate min-h-screen overflow-x-clip bg-zinc-950 [data-theme=light]:bg-zinc-50">
+    <main className="relative isolate min-h-screen overflow-x-clip bg-zinc-950">
       <PageBackground />
       <SiteHeader logoHref={logoHref} />
 
       <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 py-20 text-center md:px-8">
-        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-300 [data-theme=light]:bg-amber-50 [data-theme=light]:text-amber-700">
-          <Award className="h-3.5 w-3.5" />
-          Founding members get a badge + 1 week of Premium free at launch
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-5 py-2.5 text-sm font-bold text-amber-300 md:text-base">
+          <Sparkles className="h-4 w-4 flex-none md:h-5 md:w-5" />
+          1 week of Premium free + a Founding Member badge
         </div>
-        <h1 className="mb-2 font-display text-3xl font-bold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-4xl">
+        <h1 className="mb-2 font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
           Join the waitlist
         </h1>
-        <p className="mb-8 max-w-sm text-sm text-zinc-400 [data-theme=light]:text-zinc-500">
-          We're onboarding in waves- enter your email and we'll let you know the second a spot opens up.
+        <p className="mb-8 max-w-sm text-sm text-zinc-400">
+          We're onboarding in waves — enter your email and we'll let you know the second a spot opens up, plus give
+          you a link to move up the list.
         </p>
-        {/* Clerk's card has a fixed rem width; capping it at 100% of this column keeps it from pushing past narrow screens. */}
-        <div className="flex w-full justify-center [&_.cl-cardBox]:max-w-full [&_.cl-rootBox]:min-w-0 [&_.cl-rootBox]:max-w-full">
-          <Waitlist />
-        </div>
+
+        {/* Our own form (not Clerk's prebuilt <Waitlist /> widget): joining
+            here now registers a referral code and tracks the email the same
+            way every other waitlist entry point on the site does, and shows
+            the referral link + leaderboard right after signup instead of a
+            dead end. */}
+        <WaitlistForm source="waitlist_page" gradient="gold" label="Join the waitlist" referredBy={referredBy} />
       </div>
 
       <Footer />

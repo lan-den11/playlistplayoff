@@ -38,13 +38,6 @@ const card = {
 
 export default function HowItWorks() {
   return (
-    // overflow-x-clip (not overflow-hidden) + a -z-10 glow: the glow hangs
-    // above this section's top edge, and overflow-hidden used to slice it off
-    // right at the boundary — a hard tinted step between sections. Clipping
-    // only the x-axis lets it fade out naturally into the neighbouring
-    // sections; -z-10 keeps it behind their content (it still paints above
-    // PageBackground, which comes first in <main>). Top padding is smaller
-    // than the bottom because the hero above already ends in its own 56px.
     <section className="relative overflow-x-clip px-6 pb-14 pt-8 md:px-8 md:pb-20 md:pt-12">
       <Glow tone="brand" className="-top-28 left-1/2 h-[26rem] w-[56rem] max-w-full -translate-x-1/2" />
 
@@ -55,7 +48,7 @@ export default function HowItWorks() {
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         className="mx-auto mb-10 max-w-2xl text-center md:mb-12"
       >
-        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-4xl">
+        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
           How it works
         </h2>
       </m.div>
@@ -68,15 +61,12 @@ export default function HowItWorks() {
         className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3"
       >
         {STEPS.map((step) => (
-          // `translate` (the individual CSS property) instead of `transform`
-          // for the hover lift: Framer owns the inline `transform` for the
-          // entrance spring, and a Tailwind transform utility would fight it.
           <m.div
             key={step.number}
             variants={card}
-            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px] [data-theme=light]:border-black/10 [data-theme=light]:bg-white [data-theme=light]:shadow-sm [data-theme=light]:hover:border-black/20 [data-theme=light]:hover:bg-zinc-50"
+            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
           >
-            <span className="font-display text-sm font-bold text-zinc-600 [data-theme=light]:text-zinc-400">
+            <span className="font-display text-sm font-bold text-zinc-600">
               {step.number}
             </span>
 
@@ -84,10 +74,10 @@ export default function HowItWorks() {
               <GlassIconBadge icon={step.icon} size="lg" />
             </div>
 
-            <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900">
+            <h3 className="font-display text-xl font-semibold tracking-tight text-zinc-50">
               {step.title}
             </h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-zinc-400 [data-theme=light]:text-zinc-500">{step.body}</p>
+            <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">{step.body}</p>
           </m.div>
         ))}
       </m.div>

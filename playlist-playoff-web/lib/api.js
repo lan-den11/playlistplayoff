@@ -5,8 +5,23 @@ async function request(path, options = {}) {
   return data;
 }
 
+// Per-tab playlist cache, keyed by playlist id/url. This is the other half
+// of the genre-tab fix (see hooks/useBracket.js / HeroMatchup.jsx, which no
+// longer remount on tab switch): the server already warms + caches each
+// genre's tracks (lib/spotifyPlaylist.js), but that still costs a network
+// round trip on every switch. Caching client-side means flipping back to a
+// genre you've already opened this session is instant, with zero requests —
+// no reload, no gray box. Failures are never cached, same rule as the
+// server-side cache.
+const playlistCache = new Map();
+
 export function fetchPlaylistTracks(idOrUrl) {
-  return request(`/api/playlist/${encodeURIComponent(idOrUrl)}/tracks`);
+  const cached = playlistCache.get(idOrUrl);
+  if (cached) return Promise.resolve(cached);
+  return request(`/api/playlist/${encodeURIComponent(idOrUrl)}/tracks`).then((data) => {
+    playlistCache.set(idOrUrl, data);
+    return data;
+  });
 }
 
 export function fetchUserPlaylists(username) {
@@ -71,4 +86,10 @@ export function joinReferral(code) {
 
 export function fetchReferralCount(code) {
   return request(`/api/referral/${encodeURIComponent(code)}`);
+}
+
+// Public top-5 referrers, for the leaderboard shown after joining. Never
+// exposes a raw email — the API route masks it server-side.
+export function fetchReferralLeaderboard() {
+  return request('/api/referral/leaderboard');
 }

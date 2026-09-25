@@ -10,12 +10,6 @@ export default function BracketHeader({ screen, headerProgressPct, onExit, onEdi
   const showProgress = screen === 'battle' || screen === 'champion';
 
   return (
-    // Always sticky, on every screen including 'battle'. It used to drop
-    // `sticky top-0` specifically during battle, which meant the header
-    // scrolled away as soon as you scrolled down to see the bracket tree,
-    // then popped back the instant the screen changed — the "disappears
-    // then jumps back" behavior. There's no upside to it not following you
-    // during gameplay, so it's unconditional now.
     <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/70 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
         <Link href="/" className="flex items-center gap-2.5">

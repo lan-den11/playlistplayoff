@@ -25,18 +25,15 @@ const FAQS = [
   {
     icon: CreditCard,
     q: 'Will this be free?',
-    a: "Yes — a free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a Founding Member badge plus a free week of Premium the day we launch.",
+    a: "Yes — a free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a free week of Premium plus a Founding Member badge the day we launch.",
   },
 ];
 
-// The answer panel opens with a CSS grid-rows transition (0fr → 1fr) instead
-// of animating `height: auto` from JS: same smooth reveal, no per-frame
-// measuring, and it keeps working when the main thread is busy.
 function FaqItem({ item, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md [data-theme=light]:border-black/10 [data-theme=light]:bg-white">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
       <button
         type="button"
         onClick={onToggle}
@@ -45,7 +42,7 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         className="flex w-full items-center gap-4 px-6 py-5 text-left"
       >
         <GlassIconBadge icon={item.icon} size="sm" />
-        <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900">
+        <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50">
           {item.q}
         </span>
         <span
@@ -64,7 +61,7 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="px-6 pb-5 pl-[3.75rem] text-[15px] leading-relaxed text-zinc-400 [data-theme=light]:text-zinc-500">
+          <p className="px-6 pb-5 pl-[3.75rem] text-[15px] leading-relaxed text-zinc-400">
             {item.a}
           </p>
         </div>
@@ -77,11 +74,6 @@ export default function Faq() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    // The section is full-width and the max-w-3xl column lives on an inner
-    // div. Before, the section itself was the narrow column AND had
-    // overflow-hidden, so its glow was sliced along the column's top *and*
-    // side edges — visible tinted seams. overflow-x-clip + a -z-10 glow lets
-    // it fade out naturally (see HowItWorks for the full reasoning).
     <section className="relative overflow-x-clip">
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
@@ -91,7 +83,7 @@ export default function Faq() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-4xl md:mb-10"
+          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
         >
           Your questions, our answers
         </m.h2>

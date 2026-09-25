@@ -26,9 +26,6 @@ void main() {
 }
 `;
 
-// Backdrop is a blue-black (hue ~225deg) rather than the old purple-black
-// (0.0706, 0.0588, 0.0902 — red > green, i.e. violet), which tinted every
-// dark region of the page violet on color-managed screens.
 const fragment = `#version 300 es
 precision highp float;
 
@@ -197,14 +194,6 @@ const GhostFibers = ({
     });
     const gl = renderer.gl;
 
-    // Safari (especially iOS) has, at various points, defaulted a WebGL
-    // canvas's drawing-buffer color space to the display's wide-gamut P3
-    // profile instead of sRGB, while Chrome/Firefox default to sRGB. Since
-    // this shader's colors are authored and reasoned about in sRGB, that
-    // mismatch is exactly why the same blue reads as purple/magenta on
-    // Safari but correct everywhere else. Forcing sRGB here (feature-
-    // detected, since older browsers don't expose the property at all)
-    // makes every browser composite the canvas the same way.
     if ('drawingBufferColorSpace' in gl) gl.drawingBufferColorSpace = 'srgb';
 
     const canvas = gl.canvas;

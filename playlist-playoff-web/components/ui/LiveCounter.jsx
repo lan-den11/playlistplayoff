@@ -1,47 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchMatchupCounter } from '../../lib/api';
+import OdometerNumber from './OdometerNumber';
 
 const POLL_MS = 10_000;
-const TWEEN_MS = 600;
 
-// Ticks smoothly from one integer to the next over TWEEN_MS instead of
-// snapping — pure requestAnimationFrame, no extra dependency.
-function useTweenedNumber(target) {
-  const [display, setDisplay] = useState(target);
-  const fromRef = useRef(target);
-  const rafRef = useRef(0);
-
-  useEffect(() => {
-    if (target === fromRef.current) return;
-    const from = fromRef.current;
-    const start = performance.now();
-
-    const step = (now) => {
-      const t = Math.min(1, (now - start) / TWEEN_MS);
-      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
-      setDisplay(Math.round(from + (target - from) * eased));
-      if (t < 1) rafRef.current = requestAnimationFrame(step);
-      else fromRef.current = target;
-    };
-
-    rafRef.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [target]);
-
-  return display;
-}
-
-// Social-proof pill for the hero: a pulsing "live" dot + a matchups-decided
-// count that ticks up as it polls. Counts real picks from EVERY visitor
-// (trial and, later, real brackets — see hooks/useBracket.js), so it hides
-// itself entirely rather than show a number when DATABASE_URL isn't
+// Social-proof counter: matchups decided across EVERY visitor (trial and,
+// later, real brackets — see hooks/useBracket.js), polling every 10s.
+// Hides itself entirely rather than show a number when DATABASE_URL isn't
 // configured (see app/api/counters/matchup/route.js) — no fake urgency.
-export default function LiveCounter({ className = '' }) {
+//
+// `compact`: a plain inline "1,204 decided" reading with no pill/border,
+// sized to sit inline in the trial card's header row next to the playlist
+// name and round label (see HeroMatchup.jsx). Default (false) keeps the
+// original standalone pill used elsewhere on the homepage.
+export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
-  const displayValue = useTweenedNumber(value ?? 0);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,16 +45,29 @@ export default function LiveCounter({ className = '' }) {
 
   if (!configured || value === null) return null;
 
+  if (compact) {
+    return (
+      <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 ${className}`}>
+        <span className="relative flex h-1.5 w-1.5 flex-none">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        </span>
+        <OdometerNumber value={value} className="text-zinc-200" />
+        <span className="hidden sm:inline">decided</span>
+      </span>
+    );
+  }
+
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md [data-theme=light]:border-black/10 [data-theme=light]:bg-black/5 [data-theme=light]:text-zinc-600 ${className}`}
+      className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md ${className}`}
     >
       <span className="relative flex h-2 w-2 flex-none">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
       </span>
-      <span className="font-semibold text-zinc-200 [data-theme=light]:text-zinc-800">
-        {displayValue.toLocaleString()}
+      <span className="font-semibold text-zinc-200">
+        <OdometerNumber value={value} />
       </span>
       matchups decided
     </div>

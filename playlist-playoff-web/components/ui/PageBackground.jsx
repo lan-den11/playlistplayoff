@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import GhostFibers from './GhostFibers';
 import DotGrid from './DotGrid';
-import { subscribeTheme } from '../../lib/theme';
 
 // Sits behind the entire page, pinned to the viewport with `fixed` (not tied
 // to document height) so the ghost-fiber effect stays visible everywhere as
@@ -12,16 +11,7 @@ import { subscribeTheme } from '../../lib/theme';
 // doubles as the "depth" pass for sections lower on the page.
 //
 // Layer order is explicit (z-0 → z-10 → z-20) rather than left to DOM order:
-// fibers (WebGL) → interactive dot grid → scrim. The dots are guaranteed to
-// paint in front of the fibers; the scrim sits over both so the dots fade
-// with the same vignette, and the grid wrapper's opacity keeps the resting
-// dots a texture, not a pattern.
-//
-// Colors: fibers use brand-deep / brand (#0A1A6B / #1240EA). The dots are
-// deliberately a lighter, softer blue than the fibers' glow so they read as
-// their own layer instead of blending into it — resting #5C80F7, lit
-// (near the pointer) #B4C8FF. All hue ~225-231deg (true blue, no violet).
-// Keep in sync with the `brand` tokens in tailwind.config.js.
+// fibers (WebGL) → interactive dot grid → scrim.
 //
 // PERFORMANCE GOVERNOR. The shader repaints the layer under every glass
 // (backdrop-blur) panel, so its cost multiplies across the whole page. The
@@ -29,17 +19,9 @@ import { subscribeTheme } from '../../lib/theme';
 //   - starts at a tier picked from the device (cores / memory / data-saver),
 //   - steps DOWN if the page can't hold a smooth frame rate for a sustained
 //     stretch (never back up, so it can't flap),
-//   - remembers the result for the rest of the session (sessionStorage),
-//     so /waitlist doesn't re-learn what the homepage already found out.
+//   - remembers the result for the rest of the session (sessionStorage).
 // The two lowest tiers also flip <html data-perf="lite"> (see globals.css),
 // which drops backdrop blur; the last tier freezes the shader to one frame.
-//
-// `fps` values sit just above the intended rate (31 → 30fps, 21 → 20,
-// 16 → 15): GhostFibers' limiter needs each gap to be ≥ 1000/fps − 0.5ms, and
-// at 60Hz two vsyncs are 33.3ms — a plain "30" (32.83ms threshold) can miss
-// on timestamp jitter and silently halve to 20fps.
-// `dpr` is the shader's render scale: it renders at that fraction of CSS
-// pixels and the browser upscales it, which is invisible on soft fibers.
 const TIERS = [
   { dpr: 0.75, fps: 31, lite: false, paused: false },
   { dpr: 0.6, fps: 21, lite: false, paused: false },
@@ -75,12 +57,6 @@ export default function PageBackground() {
   // weak device never spins up a full-quality WebGL context just to tear it
   // down a frame later.
   const [tier, setTier] = useState(null);
-  // The animated fibers/dots are tuned for dark; in light mode they're
-  // replaced with a plain soft gradient (see the render below) — cheaper
-  // too, since neither the WebGL context nor the canvas loop run at all.
-  const [isLight, setIsLight] = useState(false);
-
-  useEffect(() => subscribeTheme((theme) => setIsLight(theme === 'light')), []);
 
   useEffect(() => {
     setTier(Math.max(deviceStartTier(), readStoredTier()));
@@ -139,24 +115,7 @@ export default function PageBackground() {
 
   const wrapperClass = 'fixed left-0 top-0 -z-10 h-screen w-full supports-[height:100lvh]:h-[100lvh]';
 
-  if (isLight) {
-    // A clean, soft gradient rather than tuning the shader's palette for
-    // light: cheaper (no WebGL context, no per-frame canvas work at all)
-    // and reads as calm/premium rather than trying to force a dark-authored
-    // effect to work in daylight.
-    return (
-      <div aria-hidden="true" className={wrapperClass}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-zinc-50 to-zinc-100" />
-        <div className="absolute -top-40 left-1/2 h-[36rem] w-[60rem] max-w-[160%] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(18,64,234,0.10),transparent_70%)]" />
-      </div>
-    );
-  }
-
   return (
-    // h-screen with an `lvh` upgrade: `inset-0` on a fixed layer tracks the
-    // *visible* viewport, so on phones every time the URL bar collapses the
-    // layer resized → the WebGL canvas and the dot grid were rebuilt mid-scroll.
-    // The large-viewport height never changes.
     <div aria-hidden="true" className={wrapperClass}>
       {config && (
         <GhostFibers

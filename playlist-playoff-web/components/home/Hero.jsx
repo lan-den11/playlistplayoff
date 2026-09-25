@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import GradientButton from '../ui/GradientButton';
 import FitToScreen from '../ui/FitToScreen';
-import LiveCounter from '../ui/LiveCounter';
 import HeroMatchup from './HeroMatchup';
 import GenreToggle from './GenreToggle';
 
@@ -22,9 +21,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
 };
 
-// The headline is the h1 itself staggering its own words in (a child variant
-// set inside the container's orchestration), so it reads as one line landing
-// word by word instead of a block fading up.
 const headline = {
   hidden: {},
   show: { transition: { staggerChildren: 0.07 } },
@@ -35,20 +31,6 @@ const word = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 18 } },
 };
 
-// The hero + matchup card must fit on the first screen at any viewport size
-// (FitToScreen scales them down if the natural layout is taller than the
-// space available). That space is one small-viewport screen minus everything
-// that isn't the hero content:
-//   - the site header, ONLY when it's rendered (`showNavbar`): its fixed h-14
-//     row (56px) + 1px border = 57px (components/ui/SiteHeader.jsx). With the
-//     header off, that whole strip goes to the hero, so it scales down less
-//     — i.e. renders bigger — on small screens.
-//   - this section's own padding: top is `pt-4` (16px) with the header, `pt-6`
-//     (24px) without it (nothing above the hero to breathe against). Bottom is
-//     always `pb-14` (56px), deliberately larger — it's where the "Scroll to
-//     see more" hint sits, so the hint can never overlap the card on a tight
-//     screen.
-// Keep these numbers in sync with SiteHeader and the section's padding classes.
 const NAVBAR_HEIGHT_PX = 57;
 const PADDING_TOP_WITH_NAVBAR_PX = 16;
 const PADDING_TOP_NO_NAVBAR_PX = 24;
@@ -67,10 +49,6 @@ export default function Hero({
   const isOpen = accessMode === 'unlocked';
   const [showScrollHint, setShowScrollHint] = useState(true);
 
-  // Trending always leads the list and always uses the resolved trending
-  // playlist (flag payload, or the hardcoded fallback — see app/page.jsx);
-  // any genre tabs after it come from PostHog flags and only appear once
-  // configured (see lib/posthog-server.js `getGenrePlaylists`).
   const allGenres = useMemo(
     () => [{ ...TRENDING_GENRE, playlistId: trendingPlaylistId }, ...genres],
     [trendingPlaylistId, genres]
@@ -81,10 +59,6 @@ export default function Hero({
   const reservedPx =
     (showNavbar ? NAVBAR_HEIGHT_PX + PADDING_TOP_WITH_NAVBAR_PX : PADDING_TOP_NO_NAVBAR_PX) + PADDING_BOTTOM_PX;
 
-  // The hint is pinned to the viewport (not this section) so it always sits
-  // in the same spot however tall the hero's content grows, and it goes away
-  // for good — unmounted, so its bounce stops running — once the visitor has
-  // scrolled past it.
   useEffect(() => {
     if (!showScrollHint) return;
     function handleScroll() {
@@ -97,19 +71,11 @@ export default function Hero({
   return (
     <section className={`relative px-6 pb-14 md:px-8 ${showNavbar ? 'pt-4' : 'pt-6'}`}>
       <FitToScreen reserve={reservedPx}>
-        {/* grid-cols-1 (= minmax(0, 1fr)) instead of the implicit `auto` column:
-            an auto column is at least as wide as its widest unbreakable child,
-            so a long track title (nowrap + truncate) in the matchup card
-            stretched the whole column past the viewport on narrow phones —
-            the sideways scroll. minmax(0, …) lets `truncate` do its job.
-            Headline steps down a size at each breakpoint so the longest word
-            ("showdown.") always fits its column instead of spilling into the
-            card's. */}
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 md:grid-cols-2 md:gap-16">
           <m.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
             <m.h1
               variants={headline}
-              className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-50 [data-theme=light]:text-zinc-900 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
+              className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
             >
               {HEADLINE_WORDS.map((w, i) => (
                 <Fragment key={i}>
@@ -123,7 +89,7 @@ export default function Hero({
 
             <m.p
               variants={item}
-              className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 [data-theme=light]:text-zinc-500 sm:text-base md:mx-0 md:mt-5 md:text-lg"
+              className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
             >
               Select winners per matchup until one song takes the crown while listening history influences your choices.
             </m.p>
@@ -134,27 +100,30 @@ export default function Hero({
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </GradientButton>
             </m.div>
-
-            <m.div variants={item} className="mt-4 flex justify-center md:justify-start">
-              <LiveCounter />
-            </m.div>
           </m.div>
 
-          <div>
-            <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
-            <HeroMatchup
-              key={selected.playlistId}
-              trendingPlaylistId={selected.playlistId}
-              accessMode={accessMode}
-              referredBy={referredBy}
-            />
+          {/* Explicit flex-col + order classes (not just DOM order) so the
+              genre tabs are guaranteed above the trial bracket card at every
+              breakpoint — items 1 & 2 of the requested fixes. HeroMatchup no
+              longer takes a `key` here: remounting it on every tab switch was
+              what tore down its live Spotify embeds and forced a full
+              reload/gray-box on genre change (see HeroMatchup.jsx, which now
+              resets its own bracket state in place instead). */}
+          <div className="flex flex-col">
+            <div className="order-1">
+              <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
+            </div>
+            <div className="order-2">
+              <HeroMatchup
+                trendingPlaylistId={selected.playlistId}
+                accessMode={accessMode}
+                referredBy={referredBy}
+              />
+            </div>
           </div>
         </div>
       </FitToScreen>
 
-      {/* Fixed to the viewport (not this section) so its position never
-          depends on how tall the hero's own content grows. Sits inside the
-          section's 56px bottom padding (12–52px from the bottom). */}
       <AnimatePresence>
         {showScrollHint && (
           <m.div

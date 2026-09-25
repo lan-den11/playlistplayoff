@@ -1,9 +1,3 @@
-// Soft ambient section glow. These used to be big `rounded-full blur-[110px]`
-// blobs — a 100px+ gaussian blur on a ~600px element is expensive to
-// rasterize and to keep in GPU memory on phones. A radial gradient paints the
-// same soft falloff with no filter at all, so it costs effectively nothing.
-// Positioning and size come from `className`; keep tones in sync with the
-// brand tokens in tailwind.config.js.
 const TONES = {
   brand:
     'bg-[radial-gradient(closest-side,rgba(18,64,234,0.17),rgba(18,64,234,0.07)_55%,transparent)]',

@@ -30,18 +30,6 @@ function hexToRgb(hex) {
   };
 }
 
-// Interactive dot-grid canvas (React Bits). Adapted for a full-viewport
-// background: no edge padding, pointer starts off-screen, touch drags are
-// ignored (a tap still fires the shockwave), and all dots that aren't near
-// the pointer are drawn as ONE batched path.
-//
-// Draws on demand, not every frame. It used to redraw the full-viewport
-// canvas at 60fps forever, even with nothing moving — which keeps the layer
-// permanently "dirty", so the browser had to re-composite it (and re-blur
-// every glass panel above it) every frame while the page was idle. Now a
-// frame is only scheduled when something can actually change: pointer moved,
-// a dot is mid-physics (tween onUpdate), the grid was rebuilt, or props
-// changed. Idle page = zero canvas work.
 const DotGrid = ({
   dotSize = 16,
   gap = 32,
@@ -122,7 +110,7 @@ const DotGrid = ({
   useEffect(() => {
     const radius = dotSize / 2;
     const proxSq = proximity * proximity;
-    const near = []; // flat [x, y, t, x, y, t, ...] — reused every draw, no per-draw allocation
+    const near = [];
 
     drawRef.current = () => {
       const canvas = canvasRef.current;
@@ -187,7 +175,6 @@ const DotGrid = ({
   }, [buildGrid]);
 
   useEffect(() => {
-    // Users who asked for less motion get the static grid — no pointer physics.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const pushDot = (dot, pushX, pushY) => {

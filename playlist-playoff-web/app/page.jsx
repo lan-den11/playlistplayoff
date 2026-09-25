@@ -54,7 +54,7 @@ export default async function HomePage({ searchParams }) {
   genres.forEach((genre) => warmPlaylist(genre.playlistId, TRENDING_CACHE_TTL_MS));
 
   return (
-    <main className="relative isolate min-h-screen overflow-x-hidden bg-zinc-950 [data-theme=light]:bg-zinc-50">
+    <main className="relative isolate min-h-screen overflow-x-hidden bg-zinc-950">
       <PageBackground />
       {SHOW_NAVBAR && <Navbar accessMode={accessMode} />}
       <Hero
