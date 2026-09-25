@@ -55,8 +55,6 @@ export default function BattleScreen({
   const embedB = useSpotifyEmbed();
 
   const [isAnimatingPick, setIsAnimatingPick] = useState(null); // 'a' | 'b' | null
-  const [embedLoadingA, setEmbedLoadingA] = useState(true);
-  const [embedLoadingB, setEmbedLoadingB] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [flashText, setFlashText] = useState(null);
@@ -64,18 +62,13 @@ export default function BattleScreen({
 
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
+  // Skeletons are driven directly by each embed's real `loaded` state (see
+  // useSpotifyEmbed.js — backed by the iframe's own `ready` event) instead of
+  // a fixed timer, so they disappear exactly when the embed is actually
+  // ready: not before, not after, not never.
   useEffect(() => {
     if (!pendingA || !pendingB) return;
     setIsAnimatingPick(null);
-    setEmbedLoadingA(true);
-    setEmbedLoadingB(true);
-
-    const t1 = setTimeout(() => setEmbedLoadingA(false), 550);
-    const t2 = setTimeout(() => setEmbedLoadingB(false), 550);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
   }, [matchKey, pendingA, pendingB]);
 
   useEffect(() => {
@@ -166,7 +159,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedA.elRef} loading={embedLoadingA} gradient="from-brand to-brand-light" height={embedA.height} />
+            <EmbedPanel elRef={embedA.elRef} loading={!embedA.loaded} gradient="from-brand to-brand-light" height={embedA.height} />
             <AnimatePresence mode="wait">
               <motion.div
                 key={pendingA.id}
@@ -249,7 +242,7 @@ export default function BattleScreen({
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
             className="flex flex-col items-center"
           >
-            <EmbedPanel elRef={embedB.elRef} loading={embedLoadingB} gradient="from-sky-400 to-sky-600" height={embedB.height} />
+            <EmbedPanel elRef={embedB.elRef} loading={!embedB.loaded} gradient="from-sky-400 to-sky-600" height={embedB.height} />
             <AnimatePresence mode="wait">
               <motion.div
                 key={pendingB.id}

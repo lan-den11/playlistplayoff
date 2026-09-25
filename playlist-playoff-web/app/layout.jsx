@@ -88,7 +88,7 @@ const clerkAppearance = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider afterSignOutUrl="/" waitlistUrl="/waitlist" appearance={clerkAppearance}>
+    <ClerkProvider afterSignOutUrl="/" waitlistUrl="/#waitlist" appearance={clerkAppearance}>
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
         <body className="font-sans antialiased">
           <PostHogIdentity />

@@ -1,6 +1,8 @@
 import { PostHog } from 'posthog-node';
 
-export function getPostHogClient() {
+let cachedClient; // undefined = not attempted yet, null = not configured, PostHog = ready
+
+function buildClient() {
   const token = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 
@@ -23,26 +25,39 @@ export function getPostHogClient() {
   });
 }
 
+// One PostHog client for the whole process, reused across every request.
+// This used to construct-and-shut-down a fresh client for every single flag
+// check (5+ per homepage render: access mode, trending, 3 genres — each its
+// own client init + network flush), which was real, measurable per-request
+// latency. Render runs this as a long-lived Node process, so a singleton is
+// safe and removes that overhead entirely.
+export function getPostHogClient() {
+  if (cachedClient === undefined) cachedClient = buildClient();
+  return cachedClient;
+}
+
+let shutdownHooked = false;
+function hookShutdown() {
+  if (shutdownHooked) return;
+  shutdownHooked = true;
+  const shutdown = () => cachedClient?.shutdown().catch(() => {});
+  process.once('beforeExit', shutdown);
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
+}
+
 export async function captureServerEvent({ distinctId, event, properties }) {
   const posthog = getPostHogClient();
   if (!posthog) return;
-
-  try {
-    posthog.capture({ distinctId, event, properties });
-  } finally {
-    await posthog.shutdown();
-  }
+  hookShutdown();
+  posthog.capture({ distinctId, event, properties });
 }
 
 export async function captureServerException(error, distinctId, properties) {
   const posthog = getPostHogClient();
   if (!posthog) return;
-
-  try {
-    posthog.captureException(error, distinctId, properties);
-  } finally {
-    await posthog.shutdown();
-  }
+  hookShutdown();
+  posthog.captureException(error, distinctId, properties);
 }
 
 const GLOBAL_CONFIG_DISTINCT_ID = 'app-global-config';
@@ -50,12 +65,6 @@ const GLOBAL_CONFIG_DISTINCT_ID = 'app-global-config';
 export const APP_ACCESS_MODE_FLAG_KEY = 'app-access-mode';
 export const TRENDING_PLAYLIST_FLAG_KEY = 'homepage-trending-playlist';
 
-// One flag per genre tab. Each flag's payload is just the playlist's Spotify
-// URL or bare ID, pasted in as plain text — same format as the trending
-// flag already uses. A genre only appears in the homepage toggle once its
-// flag has a non-empty payload; leave a flag unset (or its payload blank) to
-// keep that tab hidden. "Trending" is not in this list because it always
-// shows, with TRENDING_PLAYLIST_ID as its hardcoded fallback.
 export const GENRE_PLAYLIST_FLAGS = [
   { key: 'hiphop', label: 'Hip-Hop', flagKey: 'homepage-genre-hiphop-playlist' },
   { key: 'pop', label: 'Pop', flagKey: 'homepage-genre-pop-playlist' },
@@ -69,8 +78,6 @@ const ACCESS_MODE_CACHE_MS = 30_000;
 const PLAYLIST_CACHE_MS = 60_000;
 
 let accessModeCache = { value: null, expiresAt: 0 };
-// One cache entry per flag key (trending + each genre), same TTL/shape as
-// the old single `playlistCache` this replaces.
 const playlistCaches = new Map();
 
 function safeGetPostHogClient() {
@@ -87,13 +94,12 @@ async function evaluateFlag(flagKey) {
   if (clientOrError.error) return { error: `PostHog client failed to initialize: ${clientOrError.error}` };
 
   const posthog = clientOrError;
+  hookShutdown();
   try {
     const flags = await posthog.evaluateFlags(GLOBAL_CONFIG_DISTINCT_ID, { flagKeys: [flagKey] });
     return { raw: flags.getFlag(flagKey), payload: flags.getFlagPayload(flagKey) };
   } catch (e) {
     return { error: e.message };
-  } finally {
-    await posthog.shutdown().catch(() => {});
   }
 }
 
@@ -117,10 +123,6 @@ function parsePlaylistPayload(payload) {
   return id || null;
 }
 
-// Shared resolver behind getTrendingPlaylistId and getGenrePlaylists. Returns
-// the raw playlist ID/URL string from the flag's payload, or null if the
-// flag is unset/empty/erroring — callers decide what null means for them
-// (trending falls back to a hardcoded ID; genres just get hidden).
 async function resolveFlagPlaylistId(flagKey, { bypassCache = false } = {}) {
   const cached = playlistCaches.get(flagKey);
   if (!bypassCache && cached && Date.now() < cached.expiresAt) return cached.value;
@@ -137,9 +139,6 @@ export async function getTrendingPlaylistId(fallbackPlaylistId, { bypassCache = 
   return id || fallbackPlaylistId;
 }
 
-// Resolves every genre flag in parallel and returns only the ones an admin
-// has actually configured — that's what makes an unset flag disappear from
-// the homepage toggle instead of showing an empty/broken tab.
 export async function getGenrePlaylists({ bypassCache = false } = {}) {
   const resolved = await Promise.all(
     GENRE_PLAYLIST_FLAGS.map(async (genre) => ({

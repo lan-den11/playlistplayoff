@@ -5,10 +5,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 // One digit column: a fixed-height window that a new digit slides up into
 // while the old one slides up and out, instead of the value just popping.
 // `tabular-nums` on the parent keeps every digit the same width so nothing
-// jitters horizontally as digits swap.
+// jitters horizontally as digits swap. Column width is a touch wider than
+// the digit itself (0.7ch, not 0.62ch) so bolder/display fonts don't clip.
 function Digit({ char }) {
   return (
-    <span className="relative inline-block h-[1.1em] w-[0.62ch] overflow-hidden align-top">
+    <span className="relative inline-block h-[1.1em] w-[0.7ch] overflow-hidden align-top">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={char}
@@ -27,7 +28,8 @@ function Digit({ char }) {
 
 // Renders `value` with each digit animating independently (comma separators
 // and any other non-digit characters render as plain static text, since
-// only digits actually "count").
+// only digits actually "count"). Inherits font/weight/size from its
+// `className` — callers set the type treatment, this just animates it.
 export default function OdometerNumber({ value, className = '' }) {
   const chars = Number(value ?? 0).toLocaleString().split('');
 

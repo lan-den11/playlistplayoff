@@ -8,6 +8,7 @@ import GradientButton from '../ui/GradientButton';
 import FitToScreen from '../ui/FitToScreen';
 import HeroMatchup from './HeroMatchup';
 import GenreToggle from './GenreToggle';
+import { scrollToWaitlist } from '../../lib/scroll';
 
 const HEADLINE_WORDS = 'Turn any playlist into a showdown.'.split(' ');
 
@@ -38,13 +39,7 @@ const PADDING_BOTTOM_PX = 56;
 
 const TRENDING_GENRE = { key: 'trending', label: 'Trending', playlistId: null };
 
-export default function Hero({
-  trendingPlaylistId,
-  genres = [],
-  accessMode = 'hero-only',
-  showNavbar = true,
-  referredBy = null,
-}) {
+export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'hero-only', showNavbar = true }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const [showScrollHint, setShowScrollHint] = useState(true);
@@ -95,30 +90,21 @@ export default function Hero({
             </m.p>
 
             <m.div variants={item} className="mt-5 flex justify-center md:mt-8 md:justify-start">
-              <GradientButton gradient="brand" onClick={() => router.push(isOpen ? '/bracket' : '/waitlist')}>
+              <GradientButton gradient="brand" onClick={() => (isOpen ? router.push('/bracket') : scrollToWaitlist())}>
                 {isOpen ? 'Start a bracket' : 'Join the waitlist'}
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </GradientButton>
             </m.div>
           </m.div>
 
-          {/* Explicit flex-col + order classes (not just DOM order) so the
-              genre tabs are guaranteed above the trial bracket card at every
-              breakpoint — items 1 & 2 of the requested fixes. HeroMatchup no
-              longer takes a `key` here: remounting it on every tab switch was
-              what tore down its live Spotify embeds and forced a full
-              reload/gray-box on genre change (see HeroMatchup.jsx, which now
-              resets its own bracket state in place instead). */}
+          {/* flex-col + explicit order (not just DOM order) keeps the genre
+              toggle above the trial bracket card at every breakpoint. */}
           <div className="flex flex-col">
-            <div className="order-1">
+            <div className="order-1 w-full">
               <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
             </div>
-            <div className="order-2">
-              <HeroMatchup
-                trendingPlaylistId={selected.playlistId}
-                accessMode={accessMode}
-                referredBy={referredBy}
-              />
+            <div className="order-2 w-full">
+              <HeroMatchup trendingPlaylistId={selected.playlistId} accessMode={accessMode} />
             </div>
           </div>
         </div>

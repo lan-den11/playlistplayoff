@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Copy, Download, RotateCcw } from 'lucide-react';
+import { Trophy, Copy, RotateCcw } from 'lucide-react';
 import { useSpotifyEmbed } from '../../hooks/useSpotifyEmbed';
 import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
 import { captureClientException, captureEvent } from '../../lib/posthog-client';
@@ -41,56 +41,14 @@ function Confetti() {
   );
 }
 
-function ShareCard({ standings, cardRef }) {
-  const champ = standings.find((s) => s.label === 'Champion');
-  const rest = standings.filter((s) => s.label !== 'Champion');
-
-  return (
-    <div
-      ref={cardRef}
-      className="fixed left-[-9999px] top-0 w-[420px] bg-zinc-950 p-8 font-sans text-zinc-50"
-    >
-      <p className="mb-6 text-center font-display text-lg font-bold">🏆 Playlist Playoff Results</p>
-      {champ && (
-        <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
-          <div className="mb-2 text-2xl">👑</div>
-          {champ.tracks[0].image && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={champ.tracks[0].image}
-              crossOrigin="anonymous"
-              alt=""
-              className="mx-auto mb-3 h-24 w-24 rounded-xl object-cover"
-            />
-          )}
-          <p className="font-display text-base font-bold">{champ.tracks[0].name}</p>
-          <p className="text-sm text-zinc-400">{champ.tracks[0].artists}</p>
-        </div>
-      )}
-      {rest.map((s) => (
-        <div key={s.label} className="mb-4">
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-zinc-500">{s.label}</p>
-          {s.roundSize > 8 ? (
-            <p className="text-sm text-zinc-400">{s.tracks.length} songs eliminated here</p>
-          ) : (
-            s.tracks.map((t) => (
-              <div key={t.id} className="flex justify-between text-sm text-zinc-300">
-                <span className="truncate">{t.name}</span>
-                <span className="ml-2 flex-none text-zinc-500">{t.artists}</span>
-              </div>
-            ))
-          )}
-        </div>
-      ))}
-      <p className="mt-6 text-center text-xs text-zinc-600">Made with Playlist Playoff</p>
-    </div>
-  );
-}
-
+// Full bracket champion screen (real, signed-in brackets via /bracket) — not
+// to be confused with the homepage trial's TrialGate. The share-as-image
+// feature (html2canvas) has been removed site-wide: it was fragile
+// (cross-origin album art could block capture) and the resulting image
+// formatted awkwardly. "Copy results as text" is simpler and always works.
 export default function ChampionScreen({ championTrack, mainBracketRounds, onRestart }) {
   const embed = useSpotifyEmbed();
   const [shareStatus, setShareStatus] = useState('');
-  const [cardEl, setCardEl] = useState(null);
 
   const standings = useMemo(() => computeStandings(mainBracketRounds), [mainBracketRounds]);
   const preview = standings.filter((s) => s.label !== 'Champion' && s.roundSize <= 8);
@@ -108,24 +66,6 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
     } catch (error) {
       setShareStatus('Could not copy — clipboard permission blocked?');
       captureClientException(error, { flow: 'results_copy' });
-    }
-  }
-
-  async function handleDownload() {
-    if (!cardEl) return;
-    setShareStatus('Generating image…');
-    try {
-      const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(cardEl, { backgroundColor: '#09090b', useCORS: true });
-      const link = document.createElement('a');
-      link.download = 'playlist-playoff-results.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      setShareStatus('Results image downloaded!');
-      captureEvent('results_image_downloaded', { standing_group_count: standings.length });
-    } catch (error) {
-      setShareStatus('Could not generate image — album art may be blocking cross-origin capture.');
-      captureClientException(error, { flow: 'results_image_download' });
     }
   }
 
@@ -152,7 +92,7 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
         </div>
 
         <div className="mb-6">
-          <EmbedPanel elRef={embed.elRef} loading={false} gradient="from-brand to-brand-light" height={embed.height} />
+          <EmbedPanel elRef={embed.elRef} loading={!embed.loaded} gradient="from-brand to-brand-light" height={embed.height} />
         </div>
 
         <h2 className="font-display text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">
@@ -180,10 +120,6 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
             <Copy className="h-4 w-4" />
             Copy results as text
           </GlassButton>
-          <GlassButton onClick={handleDownload}>
-            <Download className="h-4 w-4" />
-            Download results image
-          </GlassButton>
         </div>
         {shareStatus && <p className="mt-3 text-xs text-zinc-500">{shareStatus}</p>}
 
@@ -194,8 +130,6 @@ export default function ChampionScreen({ championTrack, mainBracketRounds, onRes
           </GradientButton>
         </div>
       </motion.div>
-
-      <ShareCard standings={standings} cardRef={setCardEl} />
     </div>
   );
 }

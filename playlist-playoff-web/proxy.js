@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { getAppAccessMode } from './lib/posthog-server';
 
-// Crawler/social-preview endpoints must stay reachable in every access mode —
-// otherwise `waitlist-only` would redirect robots.txt and the share image to
-// /waitlist and link previews would break.
+// Crawler/social-preview endpoints must stay reachable in every access mode.
+// The home page is included too — it's now the only waitlist entry point
+// (see lib/scroll.js, MultiplayerTeaser's #waitlist section), so it can
+// never redirect to itself.
 const isAlwaysPublicRoute = createRouteMatcher([
-  '/waitlist(.*)',
+  '/',
   '/api/health',
   '/api/debug(.*)',
   '/robots.txt',
@@ -22,7 +23,7 @@ export default clerkMiddleware(async (auth, req) => {
   const mode = await getAppAccessMode();
 
   if (mode === 'waitlist-only') {
-    return NextResponse.redirect(new URL('/waitlist', req.url));
+    return NextResponse.redirect(new URL('/#waitlist', req.url));
   }
 
   if (mode === 'unlocked') {
@@ -30,7 +31,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isGameplayRoute(req)) {
-    await auth.protect({ unauthenticatedUrl: new URL('/waitlist', req.url).toString() });
+    await auth.protect({ unauthenticatedUrl: new URL('/#waitlist', req.url).toString() });
   }
 });
 

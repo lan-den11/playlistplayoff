@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { m, useInView } from 'framer-motion';
+import { m, useInView, useMotionValue, useTransform } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 import Glow from '../ui/Glow';
@@ -10,6 +10,25 @@ function TrackDetailsMockup() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '300px' });
   const [albumArt, setAlbumArt] = useState(null);
+
+  // Subtle "tilt toward the cursor" micro-interaction — purely decorative,
+  // driven by motion values so it never fights the whileInView entrance
+  // animation above, and skipped entirely for prefers-reduced-motion.
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+  const rotateX = useTransform(mouseY, [0, 1], [6, -6]);
+  const rotateY = useTransform(mouseX, [0, 1], [-6, 6]);
+
+  function handleMouseMove(e) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width);
+    mouseY.set((e.clientY - rect.top) / rect.height);
+  }
+  function handleMouseLeave() {
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  }
 
   useEffect(() => {
     if (!inView) return;
@@ -31,6 +50,9 @@ function TrackDetailsMockup() {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.4 }}
       transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
       className="relative mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md shadow-2xl shadow-black/40"
     >
       <div className="flex items-center gap-3 border-b border-white/10 pb-5">
@@ -50,6 +72,9 @@ function TrackDetailsMockup() {
         </div>
       </div>
 
+      {/* Driven off the single `inView` ref above (once:true) instead of
+          each bar having its own `whileInView` + IntersectionObserver, which
+          is what was breaking this animation on window resize. */}
       <div className="mt-5 space-y-4">
         <div>
           <div className="mb-1.5 flex items-center justify-between text-xs">
@@ -62,8 +87,7 @@ function TrackDetailsMockup() {
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
             <m.div
               initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, amount: 0.8 }}
+              animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
               transition={{ type: 'spring', stiffness: 90, damping: 18, delay: 0.35 }}
               className="h-full w-[88%] origin-left rounded-full bg-gradient-to-r from-brand to-brand-light"
             />
@@ -78,8 +102,7 @@ function TrackDetailsMockup() {
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
             <m.div
               initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, amount: 0.8 }}
+              animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
               transition={{ type: 'spring', stiffness: 90, damping: 18, delay: 0.5 }}
               className="h-full w-[24%] origin-left rounded-full bg-zinc-600"
             />

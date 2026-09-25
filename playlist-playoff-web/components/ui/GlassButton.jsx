@@ -16,6 +16,11 @@ export default function GlassButton({ children, onClick, type = 'button', classN
         aria-hidden="true"
         className="absolute inset-0 rounded-full border border-white/25 bg-gradient-to-b from-brand/20 via-white/5 to-brand-deep/15 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-1px_0_rgba(255,255,255,0.08),0_6px_18px_rgba(0,0,0,0.3)] transition-colors group-hover:from-brand/30 group-hover:to-brand-deep/20"
       />
+      {/* Same diagonal light-sweep hover as GradientButton, kept subtler
+          (lower opacity) since this is the secondary/glass button style. */}
+      <span aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-full">
+        <span className="absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[350%]" />
+      </span>
       <span className="relative z-10 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-zinc-50 whitespace-nowrap">
         {children}
       </span>

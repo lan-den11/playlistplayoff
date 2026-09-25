@@ -6,15 +6,16 @@ import OdometerNumber from './OdometerNumber';
 
 const POLL_MS = 10_000;
 
-// Social-proof counter: matchups decided across EVERY visitor (trial and,
-// later, real brackets — see hooks/useBracket.js), polling every 10s.
-// Hides itself entirely rather than show a number when DATABASE_URL isn't
-// configured (see app/api/counters/matchup/route.js) — no fake urgency.
+// Social-proof counter: matchups decided across EVERY visitor (trial and
+// real brackets alike), polling every 10s. Hides itself entirely rather than
+// show a number when DATABASE_URL isn't configured — no fake urgency.
 //
-// `compact`: a plain inline "1,204 decided" reading with no pill/border,
-// sized to sit inline in the trial card's header row next to the playlist
-// name and round label (see HeroMatchup.jsx). Default (false) keeps the
-// original standalone pill used elsewhere on the homepage.
+// `compact`: sized to sit inline in the trial card's header row next to the
+// playlist name + round label (see HeroMatchup.jsx). It now shares that
+// label's exact type treatment — font-display, bold, uppercase, tracking-
+// widest, text-xs — instead of the plain sans-serif digits it had before,
+// which is what made it read as a mismatched, oddly-sized "image number"
+// that didn't fit the row.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
@@ -47,7 +48,9 @@ export default function LiveCounter({ className = '', compact = false }) {
 
   if (compact) {
     return (
-      <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 ${className}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-widest text-zinc-400 ${className}`}
+      >
         <span className="relative flex h-1.5 w-1.5 flex-none">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />

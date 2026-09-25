@@ -7,6 +7,7 @@ import MultiplayerTeaser from '../components/home/MultiplayerTeaser';
 import Faq from '../components/home/Faq';
 import Footer from '../components/home/Footer';
 import PageBackground from '../components/ui/PageBackground';
+import BackToTop from '../components/ui/BackToTop';
 import { getTrendingPlaylistId, getAppAccessMode, getGenrePlaylists } from '../lib/posthog-server';
 import { TRENDING_PLAYLIST_ID, getAppToken } from '../lib/spotifyAuth';
 import { warmPlaylist } from '../lib/spotifyPlaylist';
@@ -21,7 +22,7 @@ const TRENDING_CACHE_TTL_MS = 10 * 60 * 1000;
 // automatically; nothing else needs touching.
 const SHOW_NAVBAR = true;
 
-export default async function HomePage({ searchParams }) {
+export default async function HomePage() {
   // Hero matchup critical path, started as early as possible: open the
   // connection to Spotify's embed host, begin downloading its iframe API, and
   // grab a Spotify token while the PostHog flags below are still resolving.
@@ -29,18 +30,11 @@ export default async function HomePage({ searchParams }) {
   preload(`${SPOTIFY_EMBED_ORIGIN}/embed/iframe-api/v1`, { as: 'script' });
   getAppToken().catch(() => {});
 
-  const [trendingPlaylistId, accessMode, genres, params] = await Promise.all([
+  const [trendingPlaylistId, accessMode, genres] = await Promise.all([
     getTrendingPlaylistId(TRENDING_PLAYLIST_ID),
     getAppAccessMode(),
     getGenrePlaylists(),
-    searchParams,
   ]);
-
-  // Whoever's link this visitor arrived through — threaded down to every
-  // WaitlistForm instance so a signup can credit the right referral code.
-  // See hooks/useReferralCode.js and lib/db.js `referral_codes`.
-  const rawRef = params?.ref;
-  const referredBy = (Array.isArray(rawRef) ? rawRef[0] : rawRef)?.trim().slice(0, 32) || null;
 
   // Fetch the trending playlist server-side now, and tell the browser to
   // request the same URL the hero will use during HTML parse — before any JS
@@ -57,18 +51,13 @@ export default async function HomePage({ searchParams }) {
     <main className="relative isolate min-h-screen overflow-x-hidden bg-zinc-950">
       <PageBackground />
       {SHOW_NAVBAR && <Navbar accessMode={accessMode} />}
-      <Hero
-        trendingPlaylistId={trendingPlaylistId}
-        genres={genres}
-        accessMode={accessMode}
-        showNavbar={SHOW_NAVBAR}
-        referredBy={referredBy}
-      />
+      <Hero trendingPlaylistId={trendingPlaylistId} genres={genres} accessMode={accessMode} showNavbar={SHOW_NAVBAR} />
       <HowItWorks />
       <Differentiator />
-      <MultiplayerTeaser referredBy={referredBy} />
+      <MultiplayerTeaser />
       <Faq />
       <Footer />
+      <BackToTop />
     </main>
   );
 }

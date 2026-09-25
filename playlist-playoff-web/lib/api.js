@@ -5,14 +5,9 @@ async function request(path, options = {}) {
   return data;
 }
 
-// Per-tab playlist cache, keyed by playlist id/url. This is the other half
-// of the genre-tab fix (see hooks/useBracket.js / HeroMatchup.jsx, which no
-// longer remount on tab switch): the server already warms + caches each
-// genre's tracks (lib/spotifyPlaylist.js), but that still costs a network
-// round trip on every switch. Caching client-side means flipping back to a
-// genre you've already opened this session is instant, with zero requests —
-// no reload, no gray box. Failures are never cached, same rule as the
-// server-side cache.
+// Per-tab playlist cache, keyed by playlist id/url — flipping back to a
+// genre you've already opened this session is instant, with zero requests.
+// Failures are never cached, same rule as the server-side cache.
 const playlistCache = new Map();
 
 export function fetchPlaylistTracks(idOrUrl) {
@@ -62,34 +57,13 @@ export function fetchMatchupCounter() {
   return request('/api/counters/matchup');
 }
 
-// Attaches this visitor's own email + Clerk waitlist entry id to the
-// referral code they'll be sharing, so a launch-day script can look up whose
-// entry to priority-invite for a given code (see /api/admin/top-referrers).
-export function registerReferralCode({ code, email, waitlistEntryId }) {
-  return request('/api/referral/register', {
+// Fire-and-forget copy of a waitlist signup into our own Supabase-backed
+// table (see app/api/waitlist/route.js) — a plain list of emails + when
+// they signed up, independent of Clerk's own waitlist records.
+export function saveWaitlistSignup({ email, source }) {
+  return request('/api/waitlist', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, email, waitlistEntryId }),
+    body: JSON.stringify({ email, source }),
   }).catch(() => {});
-}
-
-// Credits a referral code with one more signup. Fire-and-forget for the same
-// reason as bumpMatchupCounter — a tracking hiccup should never block someone
-// from joining the waitlist.
-export function joinReferral(code) {
-  return request('/api/referral/join', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  }).catch(() => {});
-}
-
-export function fetchReferralCount(code) {
-  return request(`/api/referral/${encodeURIComponent(code)}`);
-}
-
-// Public top-5 referrers, for the leaderboard shown after joining. Never
-// exposes a raw email — the API route masks it server-side.
-export function fetchReferralLeaderboard() {
-  return request('/api/referral/leaderboard');
 }

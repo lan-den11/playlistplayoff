@@ -33,7 +33,11 @@ function FaqItem({ item, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
+    <div
+      className={`rounded-2xl border backdrop-blur-md transition-colors duration-300 ${
+        isOpen ? 'border-brand/30 bg-brand/5' : 'border-white/10 bg-white/5'
+      }`}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -41,12 +45,20 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         aria-controls={panelId}
         className="flex w-full items-center gap-4 px-6 py-5 text-left"
       >
-        <GlassIconBadge icon={item.icon} size="sm" />
-        <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50">
+        <m.div animate={{ scale: isOpen ? 1.08 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }}>
+          <GlassIconBadge icon={item.icon} size="sm" />
+        </m.div>
+        <span
+          className={`flex-1 font-display text-[15px] font-semibold tracking-tight transition-colors duration-300 ${
+            isOpen ? 'text-brand-light' : 'text-zinc-50'
+          }`}
+        >
           {item.q}
         </span>
         <span
-          className={`flex-none text-zinc-500 transition-transform duration-300 ease-out ${isOpen ? 'rotate-180' : ''}`}
+          className={`flex-none transition-all duration-300 ease-out ${
+            isOpen ? 'rotate-180 text-brand-light' : 'text-zinc-500'
+          }`}
         >
           <ChevronDown className="h-5 w-5" />
         </span>

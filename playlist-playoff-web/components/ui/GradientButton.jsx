@@ -53,6 +53,14 @@ export default function GradientButton({
         aria-hidden="true"
         className={`absolute inset-0 rounded-full border border-white/30 bg-gradient-to-b ${glass} backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)] transition-colors`}
       />
+      {/* Diagonal light sweep on hover — a small "premium glass" glare
+          instead of a flat scale-only hover. Clipped to the pill shape,
+          skipped entirely when disabled since there's no hover state then. */}
+      {!disabled && (
+        <span aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-full">
+          <span className="absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[350%]" />
+        </span>
+      )}
       <span
         className={`relative z-10 inline-flex items-center gap-2 whitespace-nowrap rounded-full font-semibold text-zinc-50 ${padding}`}
       >

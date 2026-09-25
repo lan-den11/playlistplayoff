@@ -14,7 +14,7 @@ import EmbedPanel from '../bracket/EmbedPanel';
 import TrialGate from './TrialGate';
 
 // Semifinal x2 + Final x1 + champion — a real mini bracket instead of a
-// generic "top 8" teaser that got cut off after two arbitrary picks (#6).
+// generic "top 8" teaser that got cut off after two arbitrary picks.
 const TEASER_BRACKET_SIZE = 4;
 const PICK_ANIMATION_MS = 300;
 const HANDOFF_REVEAL_MS = 1600;
@@ -113,8 +113,9 @@ function TeaserSide({ side, track, revealed, elRef, height, embedGradient, accen
 // Shown once the mini bracket crowns a champion — before the waitlist CTA
 // (gated) or the handoff to a full bracket (unlocked). Reuses embedA (still
 // a live iframe from the final matchup) rather than spinning up a third
-// Spotify embed just to replay the champion once.
-function ChampionReveal({ championTrack, elRef, height }) {
+// Spotify embed just to replay the champion once. `loading` is driven by the
+// embed's real `loaded` state, not a guess.
+function ChampionReveal({ championTrack, elRef, height, loading }) {
   return (
     <m.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -127,7 +128,7 @@ function ChampionReveal({ championTrack, elRef, height }) {
         Your champion
       </span>
       <div className="w-full">
-        <EmbedPanel elRef={elRef} loading={false} gradient="from-brand to-brand-light" height={height} />
+        <EmbedPanel elRef={elRef} loading={loading} gradient="from-brand to-brand-light" height={height} />
       </div>
       {championTrack && (
         <div className="min-w-0">
@@ -139,7 +140,7 @@ function ChampionReveal({ championTrack, elRef, height }) {
   );
 }
 
-export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only', referredBy = null }) {
+export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only' }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const bracket = useBracket({ storageKey: TRENDING_HANDOFF_STORAGE_KEY });
@@ -163,13 +164,6 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
 
   const revealed = Boolean(matchKey) && embedA.loaded && embedB.loaded;
 
-  // (Re)load a playlist WITHOUT remounting this component — the `key` this
-  // used to sit under on genre switch was what tore the two Spotify embeds
-  // down and rebuilt them from scratch (the actual source of the "reload /
-  // gray box" on tab switch). `restart()` resets the bracket's own reducer
-  // state in place; the embeds are left alone entirely and just get
-  // re-pointed at the new tracks once they resolve, via the loadUri effects
-  // below — so nothing visibly reloads.
   useEffect(() => {
     autoStartedRef.current = false;
     setIsAnimatingPick(null);
@@ -187,8 +181,6 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     }
   }, [bracket.state.loadError]);
 
-  // The trial is a random 4-song sample of the WHOLE playlist (not the most
-  // recently added), reshuffled on every load — semifinal x2, final x1.
   useEffect(() => {
     if (bracket.state.screen === 'options' && !autoStartedRef.current) {
       autoStartedRef.current = true;
@@ -232,6 +224,14 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trialDone, bracket.state.championTrack, embedA.ready]);
 
+  // Locks the matchup card to the height it had while the game was being
+  // played, so crowning a champion (which swaps in a much shorter gate/
+  // handoff view) can't shrink the card's DOM footprint. FitToScreen scales
+  // the ENTIRE hero off that footprint, so any change here used to cascade
+  // into the whole hero — headline included — visibly resizing the instant
+  // the trial finished. The wrapper below applies this as a fixed height +
+  // overflow-hidden, so it holds even if the shorter views' natural content
+  // is a little taller than expected.
   useEffect(() => {
     if (view === 'game' && gameRef.current) gameHeightRef.current = gameRef.current.offsetHeight;
   });
@@ -253,6 +253,8 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     ? `${bracket.state.playlistName || 'Trending in the US'} · ${trialDone ? 'Champion' : bracket.roundLabel}`
     : null;
 
+  const lockedHeight = view !== 'game' ? gameHeightRef.current || undefined : undefined;
+
   return (
     <div className="relative mx-auto w-full max-w-lg">
       <div
@@ -266,72 +268,64 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
         transition={SPRING}
       >
         <div className="animate-float rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:p-5">
-          {/* Item #4: the live "matchups decided" counter now lives right in
-              this header row, next to the playlist name + round label,
-              instead of down in the hero's left column. */}
-          <div className="mb-3 flex h-4 items-center justify-between gap-2 md:mb-4">
-            <p className="flex min-w-0 items-center gap-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-300">
+          <div className="mb-3 flex min-h-[1.35rem] items-center justify-between gap-2 md:mb-4">
+            <p className="flex min-w-0 items-center gap-1.5 text-center font-display text-xs font-bold uppercase tracking-widest text-zinc-300">
               <Flame className="h-3.5 w-3.5 flex-none text-brand-light" />
               {label ? <span className="min-w-0 truncate">{label}</span> : <Bone className="h-2.5 w-36 rounded-full" />}
             </p>
             <LiveCounter compact className="flex-none" />
           </div>
 
-          <AnimatePresence mode="wait" initial={false}>
-            {view === 'game' && (
-              <m.div key="game" ref={gameRef} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                <div className="flex flex-col gap-3">
-                  <TeaserSide
-                    side="a"
-                    track={pendingA}
-                    revealed={revealed}
+          <div style={lockedHeight ? { height: lockedHeight, overflow: 'hidden' } : undefined}>
+            <AnimatePresence mode="wait" initial={false}>
+              {view === 'game' && (
+                <m.div key="game" ref={gameRef} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
+                  <div className="flex flex-col gap-3">
+                    <TeaserSide
+                      side="a"
+                      track={pendingA}
+                      revealed={revealed}
+                      elRef={embedA.elRef}
+                      height={embedA.height}
+                      embedGradient="from-brand to-brand-light"
+                      accent="brand"
+                      onPick={handlePick}
+                      isAnimatingPick={isAnimatingPick}
+                    />
+                    <MatchupDivider />
+                    <TeaserSide
+                      side="b"
+                      track={pendingB}
+                      revealed={revealed}
+                      elRef={embedB.elRef}
+                      height={embedB.height}
+                      embedGradient="from-sky-400 to-sky-600"
+                      accent="sideB"
+                      onPick={handlePick}
+                      isAnimatingPick={isAnimatingPick}
+                    />
+                  </div>
+                </m.div>
+              )}
+
+              {view === 'gate' && <TrialGate key="gate" championTrack={bracket.state.championTrack} />}
+
+              {view === 'handoff' && (
+                <m.div key="handoff" className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                  <ChampionReveal
+                    championTrack={bracket.state.championTrack}
                     elRef={embedA.elRef}
                     height={embedA.height}
-                    embedGradient="from-brand to-brand-light"
-                    accent="brand"
-                    onPick={handlePick}
-                    isAnimatingPick={isAnimatingPick}
+                    loading={!embedA.loaded}
                   />
-                  <MatchupDivider />
-                  <TeaserSide
-                    side="b"
-                    track={pendingB}
-                    revealed={revealed}
-                    elRef={embedB.elRef}
-                    height={embedB.height}
-                    embedGradient="from-sky-400 to-sky-600"
-                    accent="sideB"
-                    onPick={handlePick}
-                    isAnimatingPick={isAnimatingPick}
-                  />
-                </div>
-              </m.div>
-            )}
-
-            {view === 'gate' && (
-              <TrialGate
-                key="gate"
-                minHeight={gameHeightRef.current}
-                championTrack={bracket.state.championTrack}
-                mainBracketRounds={bracket.state.mainBracketRounds}
-                referredBy={referredBy}
-              />
-            )}
-
-            {view === 'handoff' && (
-              <m.div
-                key="handoff"
-                style={gameHeightRef.current ? { minHeight: gameHeightRef.current } : undefined}
-                className="flex flex-col items-center justify-center gap-4 text-center"
-              >
-                <ChampionReveal championTrack={bracket.state.championTrack} elRef={embedA.elRef} height={embedA.height} />
-                <p className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-light" />
-                  Setting up your full bracket…
-                </p>
-              </m.div>
-            )}
-          </AnimatePresence>
+                  <p className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-light" />
+                    Setting up your full bracket…
+                  </p>
+                </m.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </m.div>
     </div>

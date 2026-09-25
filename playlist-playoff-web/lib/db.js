@@ -22,16 +22,14 @@ export function getPool() {
           name TEXT PRIMARY KEY,
           value BIGINT NOT NULL DEFAULT 0
         );
-        -- One row per referral code. owner_* identifies whose link it is, so
-        -- a launch script can sort by referred_count and priority-invite the
-        -- top referrers via Clerk's waitlistEntries.invite(id) — see
-        -- /api/admin/top-referrers. The same referred_count also powers the
-        -- public top-5 leaderboard at /api/referral/leaderboard.
-        CREATE TABLE IF NOT EXISTS referral_codes (
-          code TEXT PRIMARY KEY,
-          owner_email TEXT,
-          owner_waitlist_entry_id TEXT,
-          referred_count INT NOT NULL DEFAULT 0,
+        -- Plain record of every waitlist signup — email, where they signed
+        -- up from, and when. Independent of Clerk's own waitlist entries;
+        -- this is what you'd query in Supabase for a straight list of
+        -- emails (order of signup falls out of id / created_at).
+        CREATE TABLE IF NOT EXISTS waitlist_signups (
+          id SERIAL PRIMARY KEY,
+          email TEXT NOT NULL,
+          source TEXT,
           created_at TIMESTAMPTZ DEFAULT now()
         );
       `)

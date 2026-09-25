@@ -1,6 +1,17 @@
 'use client';
 
+import { Flame, Headphones, Music2, Sparkles } from 'lucide-react';
 import { captureEvent } from '../../lib/posthog-client';
+
+// One icon per genre key so the tab row reads as more crafted than plain
+// text pills — falls back to Music2 for any future genre flag that isn't
+// mapped here yet, so a new flag never renders an unlabeled tab.
+const GENRE_ICONS = {
+  trending: Flame,
+  hiphop: Headphones,
+  pop: Sparkles,
+  rock: Music2,
+};
 
 // Pill tab row above the hero trial. `genres` is the full list including
 // Trending (always first, always present); anything past it only shows up
@@ -16,6 +27,7 @@ export default function GenreToggle({ genres, selected, onSelect }) {
     <div className="mb-4 flex flex-wrap justify-center gap-2 md:justify-start">
       {genres.map((genre) => {
         const isActive = genre.key === selected;
+        const Icon = GENRE_ICONS[genre.key] || Music2;
         return (
           <button
             key={genre.key}
@@ -26,12 +38,13 @@ export default function GenreToggle({ genres, selected, onSelect }) {
               onSelect(genre.key);
             }}
             aria-pressed={isActive}
-            className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
+            className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
               isActive
                 ? 'scale-105 border-transparent bg-gradient-to-b from-brand to-brand-deep text-zinc-50 shadow-[0_4px_12px_rgba(18,64,234,0.35)]'
                 : 'border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-200'
             }`}
           >
+            <Icon className="h-3.5 w-3.5 flex-none" />
             {genre.label}
           </button>
         );

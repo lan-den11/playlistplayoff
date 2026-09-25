@@ -8,6 +8,7 @@ import { useLastfmData } from '../../hooks/useLastfmData';
 import { useProfileSync } from '../../hooks/useProfileSync';
 import { buildFetchOrder } from '../../lib/bracketEngine';
 import { captureEvent } from '../../lib/posthog-client';
+import PageBackground from '../ui/PageBackground';
 
 import BracketHeader from './BracketHeader';
 import SetupScreen from './SetupScreen';
@@ -52,7 +53,8 @@ export default function BracketApp() {
   const { screen } = bracket.state;
 
   return (
-    <div className="min-h-dvh bg-zinc-950">
+    <div className="relative isolate min-h-dvh overflow-x-hidden bg-zinc-950">
+      <PageBackground />
       <BracketHeader
         screen={screen}
         headerProgressPct={bracket.headerProgressPct}

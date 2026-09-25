@@ -5,9 +5,9 @@ import { Sparkles } from 'lucide-react';
 import Glow from '../ui/Glow';
 import WaitlistForm from './WaitlistForm';
 
-export default function MultiplayerTeaser({ referredBy = null }) {
+export default function MultiplayerTeaser() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14 md:px-8 md:py-20">
+    <section id="waitlist" className="mx-auto max-w-7xl scroll-mt-10 px-6 py-14 md:px-8 md:py-20">
       <m.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -19,7 +19,7 @@ export default function MultiplayerTeaser({ referredBy = null }) {
         <Glow tone="brand" className="-bottom-28 right-0 h-72 w-[40rem] max-w-full" />
 
         <div className="relative mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
-          <Sparkles className="h-4 w-4" />
+          <Sparkles className="h-4 w-4 animate-pulse" />
           Coming soon
         </div>
 
@@ -31,13 +31,7 @@ export default function MultiplayerTeaser({ referredBy = null }) {
           surface insights on your taste.
         </p>
 
-        <WaitlistForm
-          source="multiplayer_teaser"
-          gradient="gold"
-          label="Get Notified"
-          referredBy={referredBy}
-          className="relative mt-9"
-        />
+        <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Get Notified" className="relative mt-9" />
       </m.div>
     </section>
   );
