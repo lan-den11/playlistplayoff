@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Flame, Loader2, Music2, Trophy } from 'lucide-react';
@@ -149,8 +149,9 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
 
   const autoStartedRef = useRef(false);
   const pickTimerRef = useRef(0);
-  const gameRef = useRef(null);
-  const gameHeightRef = useRef(0);
+  const contentWrapRef = useRef(null);
+  const maxHeightRef = useRef(0);
+  const [lockedHeight, setLockedHeight] = useState(undefined);
   const [isAnimatingPick, setIsAnimatingPick] = useState(null);
   const [introDone, setIntroDone] = useState(false);
 
@@ -224,17 +225,37 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trialDone, bracket.state.championTrack, embedA.ready]);
 
-  // Locks the matchup card to the height it had while the game was being
-  // played, so crowning a champion (which swaps in a much shorter gate/
-  // handoff view) can't shrink the card's DOM footprint. FitToScreen scales
-  // the ENTIRE hero off that footprint, so any change here used to cascade
-  // into the whole hero — headline included — visibly resizing the instant
-  // the trial finished. The wrapper below applies this as a fixed height +
-  // overflow-hidden, so it holds even if the shorter views' natural content
-  // is a little taller than expected.
+  // Keeps the card from ever clipping the gate/handoff content on smaller
+  // screens. Tracks the tallest natural height seen across EVERY view this
+  // card renders (game, gate, handoff) via ResizeObserver, and locks the
+  // wrapper to that running MAX the moment gameplay ends — not just to
+  // whatever height the game view happened to have. Locking to the game
+  // view alone (the old approach) could clip the gate/handoff content
+  // whenever either needed more room than the game view did — the actual
+  // bug being fixed here. Height is still left unlocked while
+  // `view === 'game'`, so FitToScreen's desktop scaling keeps reacting to
+  // natural content during play, and the lock still only engages once
+  // gameplay ends, so it still can't visibly resize the whole hero the
+  // instant a champion is reached (the original reason this existed).
+  useLayoutEffect(() => {
+    const el = contentWrapRef.current;
+    if (!el) return;
+    const measure = () => {
+      const h = el.scrollHeight;
+      if (h > maxHeightRef.current) {
+        maxHeightRef.current = h;
+        if (view !== 'game') setLockedHeight(h);
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [view]);
+
   useEffect(() => {
-    if (view === 'game' && gameRef.current) gameHeightRef.current = gameRef.current.offsetHeight;
-  });
+    if (view !== 'game') setLockedHeight((prev) => Math.max(prev || 0, maxHeightRef.current));
+  }, [view]);
 
   useEffect(() => () => clearTimeout(pickTimerRef.current), []);
 
@@ -252,8 +273,6 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   const label = introDone
     ? `${bracket.state.playlistName || 'Trending in the US'} · ${trialDone ? 'Champion' : bracket.roundLabel}`
     : null;
-
-  const lockedHeight = view !== 'game' ? gameHeightRef.current || undefined : undefined;
 
   return (
     <div className="relative mx-auto w-full max-w-lg">
@@ -276,55 +295,57 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
             <LiveCounter compact className="flex-none" />
           </div>
 
-          <div style={lockedHeight ? { height: lockedHeight, overflow: 'hidden' } : undefined}>
-            <AnimatePresence mode="wait" initial={false}>
-              {view === 'game' && (
-                <m.div key="game" ref={gameRef} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
-                  <div className="flex flex-col gap-3">
-                    <TeaserSide
-                      side="a"
-                      track={pendingA}
-                      revealed={revealed}
+          <div style={view !== 'game' && lockedHeight ? { height: lockedHeight, overflow: 'hidden' } : undefined}>
+            <div ref={contentWrapRef}>
+              <AnimatePresence mode="wait" initial={false}>
+                {view === 'game' && (
+                  <m.div key="game" exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}>
+                    <div className="flex flex-col gap-3">
+                      <TeaserSide
+                        side="a"
+                        track={pendingA}
+                        revealed={revealed}
+                        elRef={embedA.elRef}
+                        height={embedA.height}
+                        embedGradient="from-brand to-brand-light"
+                        accent="brand"
+                        onPick={handlePick}
+                        isAnimatingPick={isAnimatingPick}
+                      />
+                      <MatchupDivider />
+                      <TeaserSide
+                        side="b"
+                        track={pendingB}
+                        revealed={revealed}
+                        elRef={embedB.elRef}
+                        height={embedB.height}
+                        embedGradient="from-sky-400 to-sky-600"
+                        accent="sideB"
+                        onPick={handlePick}
+                        isAnimatingPick={isAnimatingPick}
+                      />
+                    </div>
+                  </m.div>
+                )}
+
+                {view === 'gate' && <TrialGate key="gate" championTrack={bracket.state.championTrack} />}
+
+                {view === 'handoff' && (
+                  <m.div key="handoff" className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                    <ChampionReveal
+                      championTrack={bracket.state.championTrack}
                       elRef={embedA.elRef}
                       height={embedA.height}
-                      embedGradient="from-brand to-brand-light"
-                      accent="brand"
-                      onPick={handlePick}
-                      isAnimatingPick={isAnimatingPick}
+                      loading={!embedA.loaded}
                     />
-                    <MatchupDivider />
-                    <TeaserSide
-                      side="b"
-                      track={pendingB}
-                      revealed={revealed}
-                      elRef={embedB.elRef}
-                      height={embedB.height}
-                      embedGradient="from-sky-400 to-sky-600"
-                      accent="sideB"
-                      onPick={handlePick}
-                      isAnimatingPick={isAnimatingPick}
-                    />
-                  </div>
-                </m.div>
-              )}
-
-              {view === 'gate' && <TrialGate key="gate" championTrack={bracket.state.championTrack} />}
-
-              {view === 'handoff' && (
-                <m.div key="handoff" className="flex h-full flex-col items-center justify-center gap-4 text-center">
-                  <ChampionReveal
-                    championTrack={bracket.state.championTrack}
-                    elRef={embedA.elRef}
-                    height={embedA.height}
-                    loading={!embedA.loaded}
-                  />
-                  <p className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-light" />
-                    Setting up your full bracket…
-                  </p>
-                </m.div>
-              )}
-            </AnimatePresence>
+                    <p className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-light" />
+                      Setting up your full bracket…
+                    </p>
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </m.div>

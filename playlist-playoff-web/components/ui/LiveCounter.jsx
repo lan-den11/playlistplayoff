@@ -10,11 +10,11 @@ const POLL_MS = 10_000;
 // real brackets alike), polling every 10s. Hides itself entirely rather than
 // show a number when DATABASE_URL isn't configured — no fake urgency.
 //
-// `compact`: sized to sit inline in the trial card's header row next to the
-// playlist name + round label (see HeroMatchup.jsx). The digits now inherit
-// color/weight/tracking from the same span as "decided" instead of
-// overriding to a brighter zinc-200 — that override was what made the
-// number read as a different font/style from the rest of the row.
+// `compact`: rebuilt as a proper small glass pill (border + bg-white/5 +
+// backdrop-blur, like every other badge on the site) instead of bare text
+// floating in the trial card's header row. Also swapped the emerald "live"
+// pulse for the site's brand blue so it actually matches the rest of the UI
+// instead of clashing with it.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
@@ -48,14 +48,16 @@ export default function LiveCounter({ className = '', compact = false }) {
   if (compact) {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-widest text-zinc-400 ${className}`}
+        className={`inline-flex flex-none items-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-1 pl-2 pr-2.5 backdrop-blur-md ${className}`}
       >
         <span className="relative flex h-1.5 w-1.5 flex-none">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-light opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-light" />
         </span>
-        <OdometerNumber value={value} />
-        <span className="hidden sm:inline">decided</span>
+        <OdometerNumber value={value} className="font-display text-[11px] font-bold text-zinc-50" />
+        <span className="hidden font-display text-[11px] font-semibold uppercase tracking-widest text-zinc-500 sm:inline">
+          decided
+        </span>
       </span>
     );
   }
@@ -65,8 +67,8 @@ export default function LiveCounter({ className = '', compact = false }) {
       className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md ${className}`}
     >
       <span className="relative flex h-2 w-2 flex-none">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-light opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-light" />
       </span>
       <span className="font-semibold text-zinc-200">
         <OdometerNumber value={value} />

@@ -17,6 +17,9 @@ import GlassIconBadge from '../ui/GlassIconBadge';
 // Both destinations fire from ONE place, right after a successful Clerk
 // join — not from a separate effect watching `waitlist.id` — so the
 // Supabase copy is never at the mercy of a second render happening in time.
+//
+// "1 week free trial of Premium" now sits BELOW the email field (was above
+// it) so the form itself is the first thing read.
 export default function WaitlistForm({
   source,
   gradient = 'gold',
@@ -55,13 +58,6 @@ export default function WaitlistForm({
 
   return (
     <div className={`w-full ${className}`}>
-      {!joined && (
-        <p className="mb-3 flex items-center justify-center gap-1.5 text-center text-sm font-bold text-amber-300 sm:text-base">
-          <Sparkles className="h-4 w-4 flex-none sm:h-5 sm:w-5" />
-          1 week free trial of Premium
-        </p>
-      )}
-
       <div className="flex flex-col items-center">
         <AnimatePresence mode="wait" initial={false}>
           {joined ? (
@@ -103,6 +99,14 @@ export default function WaitlistForm({
           )}
         </AnimatePresence>
       </div>
+
+      {!joined && (
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-bold text-amber-300 sm:text-base">
+          <Sparkles className="h-4 w-4 flex-none sm:h-5 sm:w-5" />
+          1 week free trial of Premium
+        </p>
+      )}
+
       {errorText && !joined && <p className="mt-3 text-center text-xs text-rose-400">{errorText}</p>}
     </div>
   );
