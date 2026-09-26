@@ -11,11 +11,10 @@ const POLL_MS = 10_000;
 // show a number when DATABASE_URL isn't configured — no fake urgency.
 //
 // `compact`: sized to sit inline in the trial card's header row next to the
-// playlist name + round label (see HeroMatchup.jsx). It now shares that
-// label's exact type treatment — font-display, bold, uppercase, tracking-
-// widest, text-xs — instead of the plain sans-serif digits it had before,
-// which is what made it read as a mismatched, oddly-sized "image number"
-// that didn't fit the row.
+// playlist name + round label (see HeroMatchup.jsx). The digits now inherit
+// color/weight/tracking from the same span as "decided" instead of
+// overriding to a brighter zinc-200 — that override was what made the
+// number read as a different font/style from the rest of the row.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
@@ -55,7 +54,7 @@ export default function LiveCounter({ className = '', compact = false }) {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
         </span>
-        <OdometerNumber value={value} className="text-zinc-200" />
+        <OdometerNumber value={value} />
         <span className="hidden sm:inline">decided</span>
       </span>
     );

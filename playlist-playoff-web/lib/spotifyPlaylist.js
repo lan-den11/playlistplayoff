@@ -35,7 +35,14 @@ async function fetchPlaylist(playlistId) {
       uri: t.uri,
       name: t.name,
       artists: t.artists.map((a) => a.name).join(', '),
+      // Spotify returns images largest-first. `image` stays the smallest
+      // (last in the array) — deliberately low-res for embed-panel/list
+      // thumbnails to save bandwidth. `imageLarge` is the biggest available,
+      // for anywhere art is shown big (e.g. the champion screen's blurred
+      // hero background) — reusing the small one there is what made it look
+      // low-res once blown up full-screen.
       image: t.album?.images?.[t.album.images.length - 1]?.url || t.album?.images?.[0]?.url || null,
+      imageLarge: t.album?.images?.[0]?.url || t.album?.images?.[t.album.images.length - 1]?.url || null,
       popularity: t.popularity,
       addedAt: t.addedAt,
       albumName: t.album?.name || null,

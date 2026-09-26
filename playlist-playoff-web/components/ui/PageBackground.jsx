@@ -29,6 +29,13 @@ import DotGrid from './DotGrid';
 //   - remembers the result for the rest of the session (sessionStorage).
 // The two lowest tiers also flip <html data-perf="lite"> (see globals.css),
 // which drops backdrop blur; the last tier freezes the shader to one frame.
+//
+// Timing was previously SETTLE_MS=3000 + two 90-frame (~1.5s) windows before
+// the first possible downgrade — a ~6s no-mitigation window on every load.
+// That's exactly when the heaviest concurrent work happens (two Spotify
+// iframes spinning up for the hero trial bracket, DotGrid + WebGL both
+// active), so a struggling device got zero relief right when it needed it
+// most. Tightened to react on the first slow window (~1.4s total) instead.
 const TIERS = [
   { dpr: 0.75, fps: 31, lite: false, paused: false },
   { dpr: 0.6, fps: 21, lite: false, paused: false },
@@ -37,8 +44,8 @@ const TIERS = [
 ];
 
 const TIER_STORAGE_KEY = 'ppBackgroundTier';
-const SETTLE_MS = 3000; // ignore load/hydration jank before judging
-const WINDOW_FRAMES = 90; // ~1.5s per measurement window at 60Hz
+const SETTLE_MS = 800; // ignore load/hydration jank before judging
+const WINDOW_FRAMES = 36; // ~0.6s per measurement window at 60Hz
 const SLOW_FRAME_MS = 28; // avg rAF gap above this ≈ under 36fps
 
 function deviceStartTier() {
@@ -111,7 +118,7 @@ export default function PageBackground() {
       slowWindows = sum / count > SLOW_FRAME_MS ? slowWindows + 1 : 0;
       sum = 0;
       count = 0;
-      if (slowWindows >= 2) setTier((current) => Math.min((current ?? 0) + 1, TIERS.length - 1));
+      if (slowWindows >= 1) setTier((current) => Math.min((current ?? 0) + 1, TIERS.length - 1));
     };
 
     rafId = requestAnimationFrame(loop);

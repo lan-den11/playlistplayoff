@@ -48,10 +48,6 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         <m.div animate={{ scale: isOpen ? 1.08 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }}>
           <GlassIconBadge icon={item.icon} size="sm" />
         </m.div>
-        {/* Always full-bright zinc-50, open or closed — brand-light blue
-            text against the blue-tinted "open" background/glow read as low
-            contrast. The tinted border/background plus the rotated,
-            colored chevron below still make the open item obvious. */}
         <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50">
           {item.q}
         </span>
@@ -90,38 +86,21 @@ export default function Faq() {
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
       <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
-        <m.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
-        >
+        <h2 className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
           Your questions, our answers
-        </m.h2>
+        </h2>
 
-        <m.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
-          className="relative space-y-3"
-        >
+        <div className="relative space-y-3">
           {FAQS.map((item, i) => (
-            <m.div
+            <FaqItem
               key={item.q}
-              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
-              transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-            >
-              <FaqItem
-                item={item}
-                index={i}
-                isOpen={openIndex === i}
-                onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
-              />
-            </m.div>
+              item={item}
+              index={i}
+              isOpen={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+            />
           ))}
-        </m.div>
+        </div>
       </div>
     </section>
   );

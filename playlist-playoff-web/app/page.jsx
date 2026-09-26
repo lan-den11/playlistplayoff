@@ -5,7 +5,6 @@ import HowItWorks from '../components/home/HowItWorks';
 import Differentiator from '../components/home/Differentiator';
 import MultiplayerTeaser from '../components/home/MultiplayerTeaser';
 import Faq from '../components/home/Faq';
-import Footer from '../components/home/Footer';
 import PageBackground from '../components/ui/PageBackground';
 import BackToTop from '../components/ui/BackToTop';
 import { getTrendingPlaylistId, getAppAccessMode, getGenrePlaylists } from '../lib/posthog-server';
@@ -56,7 +55,6 @@ export default async function HomePage() {
       <Differentiator />
       <MultiplayerTeaser />
       <Faq />
-      <Footer />
       <BackToTop />
     </main>
   );
