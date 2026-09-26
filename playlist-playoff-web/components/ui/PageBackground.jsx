@@ -13,6 +13,13 @@ import DotGrid from './DotGrid';
 // Layer order is explicit (z-0 → z-10 → z-20) rather than left to DOM order:
 // fibers (WebGL) → interactive dot grid → scrim.
 //
+// `pointer-events-none` on the whole layer: DotGrid's hover/click reactions
+// are driven by `window`-level listeners that compute position against the
+// canvas's own bounding box, not by this element receiving the event — so
+// making the layer fully click/touch-transparent doesn't break that
+// interactivity, and guarantees this purely decorative background can never
+// swallow a tap or a scroll gesture meant for real UI in front of it.
+//
 // PERFORMANCE GOVERNOR. The shader repaints the layer under every glass
 // (backdrop-blur) panel, so its cost multiplies across the whole page. The
 // background therefore runs at a quality tier:
@@ -113,7 +120,8 @@ export default function PageBackground() {
 
   const config = tier === null ? null : TIERS[tier];
 
-  const wrapperClass = 'fixed left-0 top-0 -z-10 h-screen w-full supports-[height:100lvh]:h-[100lvh]';
+  const wrapperClass =
+    'pointer-events-none fixed left-0 top-0 -z-10 h-screen w-full supports-[height:100lvh]:h-[100lvh]';
 
   return (
     <div aria-hidden="true" className={wrapperClass}>

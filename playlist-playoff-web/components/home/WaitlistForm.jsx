@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useWaitlist } from '@clerk/nextjs';
 import { Award, Check, Loader2, Sparkles } from 'lucide-react';
@@ -13,6 +13,10 @@ import GlassIconBadge from '../ui/GlassIconBadge';
 // on the site (the homepage "coming soon" section and the hero trial's end
 // card) so none of them can drift. `source` tags the PostHog
 // waitlist_joined / waitlist_join_failed events and the Supabase signup row.
+//
+// Both destinations fire from ONE place, right after a successful Clerk
+// join — not from a separate effect watching `waitlist.id` — so the
+// Supabase copy is never at the mercy of a second render happening in time.
 export default function WaitlistForm({
   source,
   gradient = 'gold',
@@ -28,17 +32,6 @@ export default function WaitlistForm({
   const isSubmitting = fetchStatus === 'fetching';
   const errorText = localError || errors?.fields?.emailAddress?.longMessage;
 
-  // Fires once, right when the join is actually confirmed (waitlist.id
-  // appears) — mirrors the signup into our own Supabase-backed table (see
-  // app/api/waitlist/route.js) so there's a plain list of emails + when they
-  // signed up, independent of Clerk.
-  useEffect(() => {
-    if (!joined || !waitlist?.id) return;
-    saveWaitlistSignup({ email, source });
-    captureEvent('waitlist_joined', { source });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when the join itself actually becomes available
-  }, [joined, waitlist?.id]);
-
   async function handleSubmit(e) {
     e.preventDefault();
     const value = email.trim();
@@ -51,7 +44,13 @@ export default function WaitlistForm({
     if (error) {
       captureEvent('waitlist_join_failed', { source });
       console.error('Failed to join waitlist:', error);
+      return;
     }
+    // Clerk join succeeded — mirror it into our own Supabase-backed table
+    // right now, deterministically, instead of waiting on `waitlist.id` to
+    // show up in a later render.
+    saveWaitlistSignup({ email: value, source });
+    captureEvent('waitlist_joined', { source });
   }
 
   return (

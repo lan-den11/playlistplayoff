@@ -48,11 +48,11 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         <m.div animate={{ scale: isOpen ? 1.08 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }}>
           <GlassIconBadge icon={item.icon} size="sm" />
         </m.div>
-        <span
-          className={`flex-1 font-display text-[15px] font-semibold tracking-tight transition-colors duration-300 ${
-            isOpen ? 'text-brand-light' : 'text-zinc-50'
-          }`}
-        >
+        {/* Always full-bright zinc-50, open or closed — brand-light blue
+            text against the blue-tinted "open" background/glow read as low
+            contrast. The tinted border/background plus the rotated,
+            colored chevron below still make the open item obvious. */}
+        <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50">
           {item.q}
         </span>
         <span

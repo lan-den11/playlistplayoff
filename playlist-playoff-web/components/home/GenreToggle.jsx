@@ -20,11 +20,15 @@ const GENRE_ICONS = {
 // `selected` in place — Hero/HeroMatchup no longer remount on switch (see
 // HeroMatchup.jsx), so the trial's embeds and progress stay alive instead of
 // reloading with a gray box.
+//
+// `mx-auto max-w-lg` matches HeroMatchup's own card width exactly, so the
+// pills and the card below share the same left/right edges at every
+// breakpoint instead of the pills sitting off to one side.
 export default function GenreToggle({ genres, selected, onSelect }) {
   if (genres.length <= 1) return null;
 
   return (
-    <div className="mb-4 flex flex-wrap justify-center gap-2 md:justify-start">
+    <div className="mx-auto mb-4 flex w-full max-w-lg flex-wrap justify-center gap-2 md:justify-start">
       {genres.map((genre) => {
         const isActive = genre.key === selected;
         const Icon = GENRE_ICONS[genre.key] || Music2;

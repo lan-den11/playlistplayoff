@@ -7,9 +7,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 // `tabular-nums` on the parent keeps every digit the same width so nothing
 // jitters horizontally as digits swap. Column width is a touch wider than
 // the digit itself (0.7ch, not 0.62ch) so bolder/display fonts don't clip.
+//
+// Height is 1.25em (not 1em) and the animated glyph is `leading-none`:
+// without both, the font's default line-height pushed the actual glyph
+// taller than a plain 1.1em box, so `overflow-hidden` was clipping the
+// top/bottom of every digit — that's what made the counter look glitchy.
 function Digit({ char }) {
   return (
-    <span className="relative inline-block h-[1.1em] w-[0.7ch] overflow-hidden align-top">
+    <span className="relative inline-block h-[1.25em] w-[0.7ch] overflow-hidden align-top">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={char}
@@ -17,7 +22,7 @@ function Digit({ char }) {
           animate={{ y: '0%', opacity: 1 }}
           exit={{ y: '-120%', opacity: 0 }}
           transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 flex items-center justify-center leading-none"
         >
           {char}
         </motion.span>
