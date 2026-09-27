@@ -20,12 +20,18 @@ import GlassIconBadge from '../ui/GlassIconBadge';
 //
 // "1 week free trial of Premium" now sits BELOW the email field (was above
 // it) so the form itself is the first thing read.
+//
+// `compactPremiumText`: the trial gate screen (TrialGate.jsx) needs its own
+// "Join the waitlist…" heading to read larger than this line, so this
+// shrinks just the Premium line — still amber — without touching the
+// default size used by the homepage's "Coming soon" section.
 export default function WaitlistForm({
   source,
   gradient = 'gold',
   label = 'Get Notified',
   busyLabel = 'Joining…',
   className = '',
+  compactPremiumText = false,
 }) {
   const { waitlist, errors, fetchStatus } = useWaitlist();
   const [email, setEmail] = useState('');
@@ -101,8 +107,12 @@ export default function WaitlistForm({
       </div>
 
       {!joined && (
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-bold text-amber-300 sm:text-base">
-          <Sparkles className="h-4 w-4 flex-none sm:h-5 sm:w-5" />
+        <p
+          className={`mt-3 flex items-center justify-center gap-1.5 text-center font-bold text-amber-300 ${
+            compactPremiumText ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'
+          }`}
+        >
+          <Sparkles className={`flex-none ${compactPremiumText ? 'h-3.5 w-3.5 sm:h-4 sm:w-4' : 'h-4 w-4 sm:h-5 sm:w-5'}`} />
           1 week free trial of Premium
         </p>
       )}

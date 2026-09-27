@@ -52,9 +52,20 @@ export default function TrialGate({ championTrack }) {
         <h3 className="font-display text-xl font-bold tracking-tight text-zinc-50">Thanks for playing!</h3>
       )}
 
-      <p className="max-w-xs text-xs text-zinc-400">Join the waitlist to build full brackets from any playlist.</p>
+      {/* Larger + white (was text-xs text-zinc-400) so it reads as the
+          headline ask of this screen, with the Premium line below sized
+          down to stay clearly secondary to it. */}
+      <p className="max-w-sm text-sm font-semibold leading-snug text-zinc-50 sm:text-base">
+        Join the waitlist to build full brackets from any playlist.
+      </p>
 
-      <WaitlistForm source="trial_gate" gradient="brand" label="Join waitlist" className="mt-1" />
+      <WaitlistForm
+        source="trial_gate"
+        gradient="brand"
+        label="Join waitlist"
+        className="mt-1"
+        compactPremiumText
+      />
     </m.div>
   );
 }

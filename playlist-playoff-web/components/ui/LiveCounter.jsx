@@ -14,7 +14,8 @@ const POLL_MS = 10_000;
 // backdrop-blur, like every other badge on the site) instead of bare text
 // floating in the trial card's header row. Also swapped the emerald "live"
 // pulse for the site's brand blue so it actually matches the rest of the UI
-// instead of clashing with it.
+// instead of clashing with it. Both the number and the "decided" label are
+// white (zinc-50) so the whole pill reads as one consistent piece of text.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
@@ -55,7 +56,7 @@ export default function LiveCounter({ className = '', compact = false }) {
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-light" />
         </span>
         <OdometerNumber value={value} className="font-display text-[11px] font-bold text-zinc-50" />
-        <span className="hidden font-display text-[11px] font-semibold uppercase tracking-widest text-zinc-500 sm:inline">
+        <span className="hidden font-display text-[11px] font-semibold uppercase tracking-widest text-zinc-50 sm:inline">
           decided
         </span>
       </span>

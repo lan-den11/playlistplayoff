@@ -1,5 +1,6 @@
 'use client';
 
+import { m } from 'framer-motion';
 import { Flame, Headphones, Music2, Sparkles } from 'lucide-react';
 import { captureEvent } from '../../lib/posthog-client';
 
@@ -23,12 +24,19 @@ const GENRE_ICONS = {
 //
 // `mx-auto max-w-lg` matches HeroMatchup's own card width exactly, so the
 // pills and the card below share the same left/right edges at every
-// breakpoint instead of the pills sitting off to one side.
+// breakpoint instead of the pills sitting off to one side. Fades/slides in
+// on mount, matching the trial card beneath it, so the pair reads as one
+// animated unit instead of the pills popping in static.
 export default function GenreToggle({ genres, selected, onSelect }) {
   if (genres.length <= 1) return null;
 
   return (
-    <div className="mx-auto mb-4 flex w-full max-w-lg flex-wrap justify-center gap-2 md:justify-start">
+    <m.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+      className="mx-auto mb-4 flex w-full max-w-lg flex-wrap justify-center gap-2 md:justify-start"
+    >
       {genres.map((genre) => {
         const isActive = genre.key === selected;
         const Icon = GENRE_ICONS[genre.key] || Music2;
@@ -53,6 +61,6 @@ export default function GenreToggle({ genres, selected, onSelect }) {
           </button>
         );
       })}
-    </div>
+    </m.div>
   );
 }

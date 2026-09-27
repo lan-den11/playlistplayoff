@@ -140,7 +140,7 @@ function ChampionReveal({ championTrack, elRef, height, loading }) {
   );
 }
 
-export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only' }) {
+export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-only', onTrialStateChange }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const bracket = useBracket({ storageKey: TRENDING_HANDOFF_STORAGE_KEY });
@@ -164,6 +164,15 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   const view = trialDone ? (isOpen ? 'handoff' : 'gate') : 'game';
 
   const revealed = Boolean(matchKey) && embedA.loaded && embedB.loaded;
+
+  // Tells Hero.jsx whether the trial has left its "game" screen — used to
+  // hide the fixed "Scroll to see more" hint once this card's final
+  // (taller) screen is showing, so the two can never visually overlap.
+  // Fires both ways: also flips back to `false` if the mini bracket resets
+  // (e.g. switching genre tabs restarts it), so the hint can reappear.
+  useEffect(() => {
+    onTrialStateChange?.(view !== 'game');
+  }, [view, onTrialStateChange]);
 
   useEffect(() => {
     autoStartedRef.current = false;

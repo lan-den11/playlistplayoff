@@ -43,6 +43,13 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const [showScrollHint, setShowScrollHint] = useState(true);
+  // Tracks whether the hero trial widget has reached its final (gate/
+  // handoff) screen — that screen is taller than the mid-game one, and the
+  // "Scroll to see more" hint is fixed to the viewport bottom, so the two
+  // could visually collide there. Hiding the hint once the trial finishes
+  // (and letting it come back if the trial resets, e.g. a genre switch)
+  // fixes that at the source instead of guessing at spacing.
+  const [trialFinished, setTrialFinished] = useState(false);
 
   const allGenres = useMemo(
     () => [{ ...TRENDING_GENRE, playlistId: trendingPlaylistId }, ...genres],
@@ -104,14 +111,18 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
               <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
             </div>
             <div className="order-2 w-full">
-              <HeroMatchup trendingPlaylistId={selected.playlistId} accessMode={accessMode} />
+              <HeroMatchup
+                trendingPlaylistId={selected.playlistId}
+                accessMode={accessMode}
+                onTrialStateChange={setTrialFinished}
+              />
             </div>
           </div>
         </div>
       </FitToScreen>
 
       <AnimatePresence>
-        {showScrollHint && (
+        {showScrollHint && !trialFinished && (
           <m.div
             key="scroll-hint"
             initial={{ opacity: 0 }}

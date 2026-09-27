@@ -29,11 +29,22 @@ const FAQS = [
   },
 ];
 
-function FaqItem({ item, index, isOpen, onToggle }) {
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
+};
+
+function FaqItem({ item: faqItem, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
-    <div
+    <m.div
+      variants={item}
       className={`rounded-2xl border backdrop-blur-md transition-colors duration-300 ${
         isOpen ? 'border-brand/30 bg-brand/5' : 'border-white/10 bg-white/5'
       }`}
@@ -46,10 +57,10 @@ function FaqItem({ item, index, isOpen, onToggle }) {
         className="flex w-full items-center gap-4 px-6 py-5 text-left"
       >
         <m.div animate={{ scale: isOpen ? 1.08 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }}>
-          <GlassIconBadge icon={item.icon} size="sm" />
+          <GlassIconBadge icon={faqItem.icon} size="sm" />
         </m.div>
         <span className="flex-1 font-display text-[15px] font-semibold tracking-tight text-zinc-50">
-          {item.q}
+          {faqItem.q}
         </span>
         <span
           className={`flex-none transition-all duration-300 ease-out ${
@@ -70,14 +81,17 @@ function FaqItem({ item, index, isOpen, onToggle }) {
       >
         <div className="overflow-hidden">
           <p className="px-6 pb-5 pl-[3.75rem] text-[15px] leading-relaxed text-zinc-400">
-            {item.a}
+            {faqItem.a}
           </p>
         </div>
       </div>
-    </div>
+    </m.div>
   );
 }
 
+// Scroll-triggered reveal for the heading + FAQ list, matching HowItWorks.jsx
+// / Differentiator.jsx — this section previously only animated its
+// open/close interactions, with no entrance of its own.
 export default function Faq() {
   const [openIndex, setOpenIndex] = useState(0);
 
@@ -85,23 +99,29 @@ export default function Faq() {
     <section className="relative overflow-x-clip">
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
-      <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
-        <h2 className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
+      <m.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.3 }}
+        className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20"
+      >
+        <m.h2 variants={item} className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
           Your questions, our answers
-        </h2>
+        </m.h2>
 
         <div className="relative space-y-3">
-          {FAQS.map((item, i) => (
+          {FAQS.map((faqItem, i) => (
             <FaqItem
-              key={item.q}
-              item={item}
+              key={faqItem.q}
+              item={faqItem}
               index={i}
               isOpen={openIndex === i}
               onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
             />
           ))}
         </div>
-      </div>
+      </m.div>
     </section>
   );
 }
