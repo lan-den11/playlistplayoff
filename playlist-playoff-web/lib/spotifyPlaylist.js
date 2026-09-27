@@ -5,9 +5,8 @@ import { getAppToken } from './spotifyAuth';
 // the /api/playlist route share it even though Next bundles them separately.
 const store = (globalThis.__playlistStore ??= { cache: new Map(), inflight: new Map() });
 
-// Short by default so someone editing their own playlist and reloading sees
-// the change. The homepage passes a longer TTL for the trending playlist.
-const DEFAULT_TTL_MS = 60_000;
+// Increased default TTL to 15 minutes (900,000 ms) to reduce unnecessary API hits
+const DEFAULT_TTL_MS = 15 * 60 * 1000;
 const MAX_ENTRIES = 25;
 
 async function fetchPlaylist(playlistId) {
@@ -19,12 +18,35 @@ async function fetchPlaylist(playlistId) {
     .then((r) => r.data.name)
     .catch(() => null);
 
-  let items = [];
-  let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&fields=next,items(added_at,track(id,uri,name,duration_ms,popularity,artists(name),album(name,release_date,images)))`;
-  while (url) {
-    const resp = await axios.get(url, { headers });
-    items = items.concat(resp.data.items);
-    url = resp.data.next;
+  const fields = 'total,items(added_at,track(id,uri,name,duration_ms,popularity,artists(name),album(name,release_date,images)))';
+
+  // 1. Fetch first page to get initial items and total track count
+  const firstPageResp = await axios.get(
+    `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&offset=0&fields=${fields}`,
+    { headers }
+  );
+
+  let items = [...(firstPageResp.data?.items || [])];
+  const total = firstPageResp.data?.total || items.length;
+
+  // 2. Fetch all remaining pages in parallel instead of sequentially
+  if (total > 100) {
+    const pageRequests = [];
+    for (let offset = 100; offset < total; offset += 100) {
+      pageRequests.push(
+        axios.get(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&offset=${offset}&fields=${fields}`,
+          { headers }
+        )
+      );
+    }
+
+    const pages = await Promise.all(pageRequests);
+    for (const page of pages) {
+      if (page.data?.items) {
+        items = items.concat(page.data.items);
+      }
+    }
   }
 
   const tracks = items
@@ -35,12 +57,6 @@ async function fetchPlaylist(playlistId) {
       uri: t.uri,
       name: t.name,
       artists: t.artists.map((a) => a.name).join(', '),
-      // Spotify returns images largest-first. `image` stays the smallest
-      // (last in the array) — deliberately low-res for embed-panel/list
-      // thumbnails to save bandwidth. `imageLarge` is the biggest available,
-      // for anywhere art is shown big (e.g. the champion screen's blurred
-      // hero background) — reusing the small one there is what made it look
-      // low-res once blown up full-screen.
       image: t.album?.images?.[t.album.images.length - 1]?.url || t.album?.images?.[0]?.url || null,
       imageLarge: t.album?.images?.[0]?.url || t.album?.images?.[t.album.images.length - 1]?.url || null,
       popularity: t.popularity,
