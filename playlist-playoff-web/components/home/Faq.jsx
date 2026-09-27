@@ -20,7 +20,7 @@ const FAQS = [
   {
     icon: ListMusic,
     q: 'How can I find playlists?',
-    a: 'Any public Spotify or Apple Music playlist works, or use the search function to find playlists by username. We aim to support more music platforms as we grow, and even possible implement a playlist search feature.',
+    a: 'Any public Spotify or Apple Music playlist works, or use the search function to find playlists by username. We aim to support more music platforms as we grow, and implement a playlist search feature.',
   },
   {
     icon: CreditCard,

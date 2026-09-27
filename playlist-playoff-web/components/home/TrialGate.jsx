@@ -92,8 +92,8 @@ export default function TrialGate({ championTrack }) {
         <p className="text-sm font-semibold leading-snug text-zinc-50 sm:text-base">
           Save your result & get early access.
         </p>
-        <p className="text-xs text-zinc-400">F
-          Build full brackets from any Spotify or Apple Music playlist. Join the waitlist below to lock in **1 week of Premium at launch**.
+        <p className="text-xs text-zinc-400">
+          Build full brackets from any playlist. Join the waitlist below to lock in <strong className="font-semibold text-zinc-200">1 week of Premium at launch</strong>.
         </p>
       </div>
 

@@ -42,12 +42,11 @@ export default function MultiplayerTeaser() {
           Music taste, revolutionized
         </m.h2>
         <m.p variants={item} className="relative mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-zinc-400">
-          A personalized musical bracket experience complete with your listening data, analyzed by our PlayoffAI to
-          surface insights on your taste.
+          Generate personalized brackets using your listening data, and let PlayoffAI uncover insights about your true music taste.
         </m.p>
 
         <m.div variants={item}>
-          <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Get Notified" className="relative mt-9" />
+          <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Claim My Spot" className="relative mt-9" />
         </m.div>
       </m.div>
     </section>
