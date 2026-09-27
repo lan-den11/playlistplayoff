@@ -90,10 +90,10 @@ export default function TrialGate({ championTrack }) {
 
       <div className="mt-2 flex max-w-sm flex-col gap-1.5">
         <p className="text-sm font-semibold leading-snug text-zinc-50 sm:text-base">
-          Save your bracket result & get early access.
+          Save your result & get early access.
         </p>
-        <p className="text-xs text-zinc-400">
-          Build full brackets from any Spotify or Apple Music playlist. Join the waitlist below to lock in 1 week of Premium at launch.
+        <p className="text-xs text-zinc-400">F
+          Build full brackets from any Spotify or Apple Music playlist. Join the waitlist below to lock in **1 week of Premium at launch**.
         </p>
       </div>
 

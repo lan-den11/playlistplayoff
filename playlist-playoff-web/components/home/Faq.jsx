@@ -10,7 +10,7 @@ const FAQS = [
   {
     icon: Music2,
     q: 'Do I need Spotify Premium?',
-    a: "No. Playlist Playoff uses Spotify's embeds to give you a free 30-second preview of every song — no Premium required.",
+    a: "No. Playlist Playoff uses Spotify's embeds to give you a free 30-second preview of every song.",
   },
   {
     icon: UserCircle,
@@ -20,12 +20,12 @@ const FAQS = [
   {
     icon: ListMusic,
     q: 'How can I find playlists?',
-    a: 'Any public Spotify playlist works, or use the search function to find playlists by username.',
+    a: 'Any public Spotify or Apple Music playlist works, or use the search function to find playlists by username. We aim to support more music platforms as we grow, and even possible implement a playlist search feature.',
   },
   {
     icon: CreditCard,
     q: 'Will this be free?',
-    a: "Yes — a free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a free week of Premium plus a Founding Member badge the day we launch.",
+    a: "Yes - the free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a free week of premium the day we launch.",
   },
 ];
 

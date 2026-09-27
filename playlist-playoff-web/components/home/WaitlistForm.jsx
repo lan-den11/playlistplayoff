@@ -9,18 +9,10 @@ import { saveWaitlistSignup } from '../../lib/api';
 import GradientButton from '../ui/GradientButton';
 import GlassIconBadge from '../ui/GlassIconBadge';
 
-// Single email → Clerk waitlist form, shared by every waitlist entry point
-// on the site (the homepage "coming soon" section and the hero trial's end
-// card) so none of them can drift. `source` tags the PostHog
-// waitlist_joined / waitlist_join_failed events and the Supabase signup row.
-//
-// Both destinations fire from ONE place, right after a successful Clerk
-// join — not from a separate effect watching `waitlist.id` — so the
-// Supabase copy is never at the mercy of a second render happening in time.
 export default function WaitlistForm({
   source,
   gradient = 'gold',
-  label = 'Get Notified',
+  label = 'Claim My Spot', // Changed default to active, high-value CTA
   busyLabel = 'Joining…',
   className = '',
 }) {
@@ -46,16 +38,13 @@ export default function WaitlistForm({
       console.error('Failed to join waitlist:', error);
       return;
     }
-    // Clerk join succeeded — mirror it into our own Supabase-backed table
-    // right now, deterministically, instead of waiting on `waitlist.id` to
-    // show up in a later render.
     saveWaitlistSignup({ email: value, source });
     captureEvent('waitlist_joined', { source });
   }
 
   return (
-    <div className={`w-full ${className}`}>
-      <div className="flex flex-col items-center">
+    <div className={`w-full flex flex-col items-center ${className}`}>
+      <div className="flex flex-col items-center w-full">
         <AnimatePresence mode="wait" initial={false}>
           {joined ? (
             <m.div
@@ -69,30 +58,37 @@ export default function WaitlistForm({
               You're on the list — 1 week of Premium is on us
             </m.div>
           ) : (
-            <m.form
-              key="cta"
-              onSubmit={handleSubmit}
+            <m.div
+              key="cta-container"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex w-full max-w-sm items-stretch gap-2"
+              className="flex w-full max-w-md flex-col items-center gap-3"
             >
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                aria-label="Email address"
-                placeholder="you@example.com"
-                disabled={isSubmitting}
-                className="min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-400 focus:border-brand/50 focus:ring-1 focus:ring-brand/50 focus:outline-none disabled:opacity-60"
-              />
-              <GradientButton type="submit" gradient={gradient} size="sm" disabled={isSubmitting} className="flex-none">
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
-                {isSubmitting ? busyLabel : label}
-              </GradientButton>
-            </m.form>
+              <form
+                onSubmit={handleSubmit}
+                className="relative flex w-full items-center rounded-full border border-white/30 bg-white/10 p-1.5 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50"
+              >
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  aria-label="Email address"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  className="min-w-0 flex-1 bg-transparent px-4 py-1 text-sm text-zinc-50 placeholder:text-zinc-400 focus:outline-none disabled:opacity-60"
+                />
+                <GradientButton type="submit" gradient={gradient} size="sm" disabled={isSubmitting} className="flex-none">
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
+                  {isSubmitting ? busyLabel : label}
+                </GradientButton>
+              </form>
+              <p className="text-center text-xs text-zinc-400">
+                No spam. We'll only email you when we launch.
+              </p>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

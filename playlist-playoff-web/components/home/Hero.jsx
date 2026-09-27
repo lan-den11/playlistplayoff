@@ -93,7 +93,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
               variants={item}
               className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
             >
-              Select winners per matchup until one song takes the crown while listening history influences your choices.
+              Battle tracks head-to-head until one takes the crown. Connect your listening history to generate personalized matchups.
             </m.p>
 
             <m.div variants={item} className="mt-5 flex justify-center md:mt-8 md:justify-start">

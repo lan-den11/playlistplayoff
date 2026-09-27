@@ -10,19 +10,19 @@ const STEPS = [
     number: '01',
     icon: Link2,
     title: 'Pick a playlist.',
-    body: 'Choose any public Spotify playlist to personalize your bracket experience.',
+    body: 'Choose any public playlist to personalize your bracket experience.',
   },
   {
     number: '02',
     icon: Play,
     title: 'Select a winner.',
-    body: 'Spotify playback embeds and listening history stats help influence your chosen matchup winner.',
+    body: 'Spotify playback embeds and listening history stats help influence your matchup winner.',
   },
   {
     number: '03',
     icon: Trophy,
     title: 'Crown a champion.',
-    body: 'See the complete bracket, share results, and play again with a different playlist.',
+    body: 'See the complete bracket, share results, and play again with another playlist.',
   },
 ];
 
