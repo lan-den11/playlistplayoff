@@ -110,11 +110,6 @@ function TeaserSide({ side, track, revealed, elRef, height, embedGradient, accen
   );
 }
 
-// Shown once the mini bracket crowns a champion — before the waitlist CTA
-// (gated) or the handoff to a full bracket (unlocked). Reuses embedA (still
-// a live iframe from the final matchup) rather than spinning up a third
-// Spotify embed just to replay the champion once. `loading` is driven by the
-// embed's real `loaded` state, not a guess.
 function ChampionReveal({ championTrack, elRef, height, loading }) {
   return (
     <m.div
@@ -127,13 +122,25 @@ function ChampionReveal({ championTrack, elRef, height, loading }) {
         <Trophy className="h-3.5 w-3.5" />
         Your champion
       </span>
-      <div className="w-full">
+      <div className="relative w-full">
+        {/* Dynamic Ambient Glow */}
+        <div className="absolute inset-4 -z-10 animate-pulse rounded-[2rem] bg-brand/40 blur-2xl filter" aria-hidden="true" />
         <EmbedPanel elRef={elRef} loading={loading} gradient="from-brand to-brand-light" height={height} />
       </div>
       {championTrack && (
         <div className="min-w-0">
           <p className="truncate font-display text-base font-bold text-zinc-50">{championTrack.name}</p>
           <p className="truncate text-xs text-zinc-400">{championTrack.artists}</p>
+          
+          {/* Bracket Insights / Stat Hook */}
+          <m.p 
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-2 text-[11px] font-medium text-emerald-400"
+          >
+            Contrarian pick! Only 8% chose this track.
+          </m.p>
         </div>
       )}
     </m.div>
@@ -158,18 +165,11 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
-  // Done = the mini bracket actually crowned a champion, not an arbitrary
-  // pick count — see TEASER_BRACKET_SIZE above.
   const trialDone = bracket.state.screen === 'champion';
   const view = trialDone ? (isOpen ? 'handoff' : 'gate') : 'game';
 
   const revealed = Boolean(matchKey) && embedA.loaded && embedB.loaded;
 
-  // Tells Hero.jsx whether the trial has left its "game" screen — used to
-  // hide the fixed "Scroll to see more" hint once this card's final
-  // (taller) screen is showing, so the two can never visually overlap.
-  // Fires both ways: also flips back to `false` if the mini bracket resets
-  // (e.g. switching genre tabs restarts it), so the hint can reappear.
   useEffect(() => {
     onTrialStateChange?.(view !== 'game');
   }, [view, onTrialStateChange]);
@@ -179,7 +179,6 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     setIsAnimatingPick(null);
     bracket.restart();
     bracket.loadPlaylist(trendingPlaylistId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- bracket.restart/loadPlaylist are stable-enough refs from useBracket(); only re-run if the resolved playlist ID itself changes
   }, [trendingPlaylistId]);
 
   useEffect(() => {
@@ -196,7 +195,6 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
       autoStartedRef.current = true;
       bracket.startSample(TEASER_BRACKET_SIZE);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bracket.state.screen]);
 
   useEffect(() => {
@@ -225,27 +223,12 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     if (embedB.ready && pendingB) embedB.loadUri(pendingB.uri);
   }, [matchKey, embedB.ready, embedB.loadUri, pendingB]);
 
-  // Champion reached — replay it once through embedA (already a live,
-  // warmed-up iframe) instead of creating a third embed.
   useEffect(() => {
     if (trialDone && bracket.state.championTrack && embedA.ready) {
       embedA.loadUri(bracket.state.championTrack.uri);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trialDone, bracket.state.championTrack, embedA.ready]);
 
-  // Keeps the card from ever clipping the gate/handoff content on smaller
-  // screens. Tracks the tallest natural height seen across EVERY view this
-  // card renders (game, gate, handoff) via ResizeObserver, and locks the
-  // wrapper to that running MAX the moment gameplay ends — not just to
-  // whatever height the game view happened to have. Locking to the game
-  // view alone (the old approach) could clip the gate/handoff content
-  // whenever either needed more room than the game view did — the actual
-  // bug being fixed here. Height is still left unlocked while
-  // `view === 'game'`, so FitToScreen's desktop scaling keeps reacting to
-  // natural content during play, and the lock still only engages once
-  // gameplay ends, so it still can't visibly resize the whole hero the
-  // instant a champion is reached (the original reason this existed).
   useLayoutEffect(() => {
     const el = contentWrapRef.current;
     if (!el) return;

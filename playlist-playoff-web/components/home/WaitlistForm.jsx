@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useWaitlist } from '@clerk/nextjs';
-import { Award, Check, Loader2, Sparkles } from 'lucide-react';
+import { Award, Check, Loader2 } from 'lucide-react';
 import { captureEvent } from '../../lib/posthog-client';
 import { saveWaitlistSignup } from '../../lib/api';
 import GradientButton from '../ui/GradientButton';
@@ -17,21 +17,12 @@ import GlassIconBadge from '../ui/GlassIconBadge';
 // Both destinations fire from ONE place, right after a successful Clerk
 // join — not from a separate effect watching `waitlist.id` — so the
 // Supabase copy is never at the mercy of a second render happening in time.
-//
-// "1 week free trial of Premium" now sits BELOW the email field (was above
-// it) so the form itself is the first thing read.
-//
-// `compactPremiumText`: the trial gate screen (TrialGate.jsx) needs its own
-// "Join the waitlist…" heading to read larger than this line, so this
-// shrinks just the Premium line — still amber — without touching the
-// default size used by the homepage's "Coming soon" section.
 export default function WaitlistForm({
   source,
   gradient = 'gold',
   label = 'Get Notified',
   busyLabel = 'Joining…',
   className = '',
-  compactPremiumText = false,
 }) {
   const { waitlist, errors, fetchStatus } = useWaitlist();
   const [email, setEmail] = useState('');
@@ -95,7 +86,7 @@ export default function WaitlistForm({
                 aria-label="Email address"
                 placeholder="you@example.com"
                 disabled={isSubmitting}
-                className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-500 focus:border-brand/50 focus:outline-none disabled:opacity-60"
+                className="min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-400 focus:border-brand/50 focus:ring-1 focus:ring-brand/50 focus:outline-none disabled:opacity-60"
               />
               <GradientButton type="submit" gradient={gradient} size="sm" disabled={isSubmitting} className="flex-none">
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
@@ -105,17 +96,6 @@ export default function WaitlistForm({
           )}
         </AnimatePresence>
       </div>
-
-      {!joined && (
-        <p
-          className={`mt-3 flex items-center justify-center gap-1.5 text-center font-bold text-amber-300 ${
-            compactPremiumText ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'
-          }`}
-        >
-          <Sparkles className={`flex-none ${compactPremiumText ? 'h-3.5 w-3.5 sm:h-4 sm:w-4' : 'h-4 w-4 sm:h-5 sm:w-5'}`} />
-          1 week free trial of Premium
-        </p>
-      )}
 
       {errorText && !joined && <p className="mt-3 text-center text-xs text-rose-400">{errorText}</p>}
     </div>

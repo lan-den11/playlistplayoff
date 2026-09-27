@@ -1,7 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { Music2, Trophy } from 'lucide-react';
+import { Music2, Trophy, Share } from 'lucide-react';
 import WaitlistForm from './WaitlistForm';
 
 // The screen shown once the homepage's 4-song mini bracket crowns a
@@ -47,24 +47,33 @@ export default function TrialGate({ championTrack }) {
             </p>
             <p className="truncate text-sm text-zinc-400">{championTrack.artists}</p>
           </div>
+          
+          <button 
+            type="button"
+            className="mt-1 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold text-zinc-50 transition-colors hover:bg-white/10"
+          >
+            <Share className="h-3.5 w-3.5" />
+            Share Result
+          </button>
         </div>
       ) : (
         <h3 className="font-display text-xl font-bold tracking-tight text-zinc-50">Thanks for playing!</h3>
       )}
 
-      {/* Larger + white (was text-xs text-zinc-400) so it reads as the
-          headline ask of this screen, with the Premium line below sized
-          down to stay clearly secondary to it. */}
-      <p className="max-w-sm text-sm font-semibold leading-snug text-zinc-50 sm:text-base">
-        Join the waitlist to build full brackets from any playlist.
-      </p>
+      <div className="mt-2 flex max-w-sm flex-col gap-1.5">
+        <p className="text-sm font-semibold leading-snug text-zinc-50 sm:text-base">
+          Save your bracket result & get early access.
+        </p>
+        <p className="text-xs text-zinc-400">
+          Build full brackets from any Spotify or Apple Music playlist. Join the waitlist below to lock in 1 week of Premium at launch.
+        </p>
+      </div>
 
       <WaitlistForm
         source="trial_gate"
         gradient="brand"
-        label="Join waitlist"
-        className="mt-1"
-        compactPremiumText
+        label="Claim Early Access"
+        className="w-full"
       />
     </m.div>
   );
