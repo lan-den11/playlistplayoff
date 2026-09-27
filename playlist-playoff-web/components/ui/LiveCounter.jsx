@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { fetchMatchupCounter } from '../../lib/api';
+import OdometerNumber from './OdometerNumber';
 
 const POLL_MS = 10_000;
 
@@ -10,17 +10,12 @@ const POLL_MS = 10_000;
 // real brackets alike), polling every 10s. Hides itself entirely rather than
 // show a number when DATABASE_URL isn't configured — no fake urgency.
 //
-// The number cross-fades as a single block (font-display, matching every
-// other prominent number on the site — see OptionsScreen's song count)
-// instead of animating per-digit. A per-digit slide sitting under this
-// pill's backdrop-blur was losing subpixel antialiasing mid-transition
-// (the blur) while its fixed-width, overflow-hidden digit boxes clipped
-// the sliding glyph (the choppiness) — swapping the whole string at once
-// removes both failure modes at the source.
-//
 // `compact`: small glass pill (border + bg-white/5 + backdrop-blur, like
-// every other badge on the site). Brand-blue pulse dot to match the rest
-// of the UI. Both the number and the "decided" label are zinc-50 so the
+// every other badge on the site). Pulse dot is emerald — matching the
+// success-green already used elsewhere (WaitlistForm's confirmed state,
+// Clerk's colorSuccess) — instead of brand blue, so the "live" indicator
+// actually pops against this blue-heavy UI instead of blending into it.
+// Both the number and the "decided" label are white (zinc-50) so the whole
 // pill reads as one consistent piece of text.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
@@ -52,36 +47,17 @@ export default function LiveCounter({ className = '', compact = false }) {
 
   if (!configured || value === null) return null;
 
-  const display = value.toLocaleString();
-
-  const number = (
-    <span className="relative inline-grid">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={display}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="col-start-1 row-start-1 font-display tabular-nums text-zinc-50"
-        >
-          {display}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  );
-
   if (compact) {
     return (
       <span
         className={`inline-flex flex-none items-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-1 pl-2 pr-2.5 backdrop-blur-md ${className}`}
       >
         <span className="relative flex h-1.5 w-1.5 flex-none">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-light opacity-75" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-light" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
         </span>
-        <span className="text-[11px] font-bold leading-none">{number}</span>
-        <span className="hidden font-display text-[11px] font-semibold uppercase leading-none tracking-widest text-zinc-50 sm:inline">
+        <OdometerNumber value={value} className="font-display text-[11px] font-bold text-zinc-50" />
+        <span className="hidden font-display text-[11px] font-semibold uppercase tracking-widest text-zinc-50 sm:inline">
           decided
         </span>
       </span>
@@ -93,10 +69,12 @@ export default function LiveCounter({ className = '', compact = false }) {
       className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md ${className}`}
     >
       <span className="relative flex h-2 w-2 flex-none">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-light opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-light" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
       </span>
-      <span className="text-sm font-bold leading-none">{number}</span>
+      <span className="font-semibold text-zinc-200">
+        <OdometerNumber value={value} />
+      </span>
       matchups decided
     </div>
   );
