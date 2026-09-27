@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { fetchMatchupCounter } from '../../lib/api';
-import OdometerNumber from './OdometerNumber';
 
 const POLL_MS = 10_000;
 
@@ -10,12 +10,18 @@ const POLL_MS = 10_000;
 // real brackets alike), polling every 10s. Hides itself entirely rather than
 // show a number when DATABASE_URL isn't configured — no fake urgency.
 //
-// `compact`: rebuilt as a proper small glass pill (border + bg-white/5 +
-// backdrop-blur, like every other badge on the site) instead of bare text
-// floating in the trial card's header row. Also swapped the emerald "live"
-// pulse for the site's brand blue so it actually matches the rest of the UI
-// instead of clashing with it. Both the number and the "decided" label are
-// white (zinc-50) so the whole pill reads as one consistent piece of text.
+// The number cross-fades as a single block (font-display, matching every
+// other prominent number on the site — see OptionsScreen's song count)
+// instead of animating per-digit. A per-digit slide sitting under this
+// pill's backdrop-blur was losing subpixel antialiasing mid-transition
+// (the blur) while its fixed-width, overflow-hidden digit boxes clipped
+// the sliding glyph (the choppiness) — swapping the whole string at once
+// removes both failure modes at the source.
+//
+// `compact`: small glass pill (border + bg-white/5 + backdrop-blur, like
+// every other badge on the site). Brand-blue pulse dot to match the rest
+// of the UI. Both the number and the "decided" label are zinc-50 so the
+// pill reads as one consistent piece of text.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
@@ -46,6 +52,25 @@ export default function LiveCounter({ className = '', compact = false }) {
 
   if (!configured || value === null) return null;
 
+  const display = value.toLocaleString();
+
+  const number = (
+    <span className="relative inline-grid">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={display}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          className="col-start-1 row-start-1 font-display tabular-nums text-zinc-50"
+        >
+          {display}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+
   if (compact) {
     return (
       <span
@@ -55,8 +80,8 @@ export default function LiveCounter({ className = '', compact = false }) {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-light opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-light" />
         </span>
-        <OdometerNumber value={value} className="font-display text-[11px] font-bold text-zinc-50" />
-        <span className="hidden font-display text-[11px] font-semibold uppercase tracking-widest text-zinc-50 sm:inline">
+        <span className="text-[11px] font-bold leading-none">{number}</span>
+        <span className="hidden font-display text-[11px] font-semibold uppercase leading-none tracking-widest text-zinc-50 sm:inline">
           decided
         </span>
       </span>
@@ -71,9 +96,7 @@ export default function LiveCounter({ className = '', compact = false }) {
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-light opacity-75" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-light" />
       </span>
-      <span className="font-semibold text-zinc-200">
-        <OdometerNumber value={value} />
-      </span>
+      <span className="text-sm font-bold leading-none">{number}</span>
       matchups decided
     </div>
   );
