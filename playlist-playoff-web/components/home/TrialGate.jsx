@@ -2,14 +2,19 @@
 
 import { useState } from 'react';
 import { m } from 'framer-motion';
-import { Trophy, Share, Check } from 'lucide-react';
+import { Music2, Trophy, Share, Check } from 'lucide-react';
 import WaitlistForm from './WaitlistForm';
-import EmbedPanel from '../bracket/EmbedPanel';
 
 // The screen shown once the homepage's 4-song mini bracket crowns a
 // champion, for visitors who aren't unlocked yet.
-export default function TrialGate({ championTrack, elRef, height, loading }) {
+export default function TrialGate({ championTrack }) {
   const [copied, setCopied] = useState(false);
+
+  // `imageLarge` is Spotify's biggest album art (same field ChampionScreen
+  // uses for its full-bracket background) — this was falling back to
+  // `image`, the deliberately-small thumbnail used everywhere else, which
+  // is why the champion art here looked low-res.
+  const championImage = championTrack?.imageLarge || championTrack?.image;
 
   async function handleShare() {
     const text = championTrack
@@ -49,29 +54,25 @@ export default function TrialGate({ championTrack, elRef, height, loading }) {
       </span>
 
       {championTrack ? (
-        <div className="flex w-full flex-col items-center gap-3">
-          
-          <div className="relative w-full max-w-[280px]">
-            {/* Dynamic Ambient Glow */}
-            <div className="absolute inset-4 -z-10 animate-pulse rounded-[2rem] bg-brand/40 blur-2xl filter" aria-hidden="true" />
-            <EmbedPanel elRef={elRef} loading={loading} gradient="from-brand to-brand-light" height={height} />
-          </div>
-
+        <div className="flex flex-col items-center gap-3">
+          {championImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={championImage}
+              alt=""
+              decoding="async"
+              className="h-24 w-24 flex-none rounded-2xl object-cover ring-2 ring-brand-light/60 shadow-xl shadow-black/40 sm:h-28 sm:w-28"
+            />
+          ) : (
+            <div className="flex h-24 w-24 flex-none items-center justify-center rounded-2xl bg-white/10 sm:h-28 sm:w-28">
+              <Music2 className="h-8 w-8 text-zinc-500" />
+            </div>
+          )}
           <div className="min-w-0">
             <p className="truncate font-display text-xl font-bold leading-tight text-zinc-50 sm:text-2xl">
               {championTrack.name}
             </p>
             <p className="truncate text-sm text-zinc-400">{championTrack.artists}</p>
-            
-            {/* Bracket Insights / Stat Hook */}
-            <m.p 
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-2 text-[11px] font-medium text-emerald-400"
-            >
-              Contrarian pick! Only 8% chose this track.
-            </m.p>
           </div>
           
           <button 

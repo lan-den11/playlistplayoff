@@ -320,15 +320,7 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
                   </m.div>
                 )}
 
-                {view === 'gate' && (
-                  <TrialGate 
-                    key="gate" 
-                    championTrack={bracket.state.championTrack}
-                    elRef={embedA.elRef}
-                    height={embedA.height}
-                    loading={!embedA.loaded}
-                  />
-                )}
+                {view === 'gate' && <TrialGate key="gate" championTrack={bracket.state.championTrack} />}
 
                 {view === 'handoff' && (
                   <m.div key="handoff" className="flex h-full flex-col items-center justify-center gap-4 text-center">
