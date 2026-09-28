@@ -4,38 +4,6 @@ import { useEffect, useState } from 'react';
 import GhostFibers from './GhostFibers';
 import DotGrid from './DotGrid';
 
-// Sits behind the entire page, pinned to the viewport with `fixed` (not tied
-// to document height) so the ghost-fiber effect stays visible everywhere as
-// the page scrolls, at a consistent size no matter the viewport. The
-// gradient scrim adds a light-top/dark-bottom vignette on top, which also
-// doubles as the "depth" pass for sections lower on the page.
-//
-// Layer order is explicit (z-0 → z-10 → z-20) rather than left to DOM order:
-// fibers (WebGL) → interactive dot grid → scrim.
-//
-// `pointer-events-none` on the whole layer: DotGrid's hover/click reactions
-// are driven by `window`-level listeners that compute position against the
-// canvas's own bounding box, not by this element receiving the event — so
-// making the layer fully click/touch-transparent doesn't break that
-// interactivity, and guarantees this purely decorative background can never
-// swallow a tap or a scroll gesture meant for real UI in front of it.
-//
-// PERFORMANCE GOVERNOR. The shader repaints the layer under every glass
-// (backdrop-blur) panel, so its cost multiplies across the whole page. The
-// background therefore runs at a quality tier:
-//   - starts at a tier picked from the device (cores / memory / data-saver),
-//   - steps DOWN if the page can't hold a smooth frame rate for a sustained
-//     stretch (never back up, so it can't flap),
-//   - remembers the result for the rest of the session (sessionStorage).
-// The two lowest tiers also flip <html data-perf="lite"> (see globals.css),
-// which drops backdrop blur; the last tier freezes the shader to one frame.
-//
-// Timing was previously SETTLE_MS=3000 + two 90-frame (~1.5s) windows before
-// the first possible downgrade — a ~6s no-mitigation window on every load.
-// That's exactly when the heaviest concurrent work happens (two Spotify
-// iframes spinning up for the hero trial bracket, DotGrid + WebGL both
-// active), so a struggling device got zero relief right when it needed it
-// most. Tightened to react on the first slow window (~1.4s total) instead.
 const TIERS = [
   { dpr: 0.75, fps: 31, lite: false, paused: false },
   { dpr: 0.6, fps: 21, lite: false, paused: false },
@@ -44,9 +12,9 @@ const TIERS = [
 ];
 
 const TIER_STORAGE_KEY = 'ppBackgroundTier';
-const SETTLE_MS = 800; // ignore load/hydration jank before judging
-const WINDOW_FRAMES = 36; // ~0.6s per measurement window at 60Hz
-const SLOW_FRAME_MS = 28; // avg rAF gap above this ≈ under 36fps
+const SETTLE_MS = 800;
+const WINDOW_FRAMES = 36;
+const SLOW_FRAME_MS = 28;
 
 function deviceStartTier() {
   const nav = window.navigator;
@@ -67,9 +35,6 @@ function readStoredTier() {
 }
 
 export default function PageBackground() {
-  // null until mounted: the fibers only mount once the tier is known, so a
-  // weak device never spins up a full-quality WebGL context just to tear it
-  // down a frame later.
   const [tier, setTier] = useState(null);
 
   useEffect(() => {
@@ -80,9 +45,7 @@ export default function PageBackground() {
     if (tier === null) return;
     try {
       window.sessionStorage.setItem(TIER_STORAGE_KEY, String(tier));
-    } catch {
-      // storage unavailable — the tier just isn't remembered
-    }
+    } catch {}
     const root = document.documentElement;
     if (TIERS[tier].lite) root.dataset.perf = 'lite';
     else delete root.dataset.perf;

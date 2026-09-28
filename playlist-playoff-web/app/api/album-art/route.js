@@ -1,16 +1,6 @@
 import axios from 'axios';
 import { getAppToken } from '../../../lib/spotifyAuth';
 
-// Looks up one album's cover art by artist + album name, using the same
-// client-credentials token every other Spotify route already uses. This
-// exists for marketing/mockup UI (e.g. the homepage's Differentiator
-// section) that wants a real, current cover image instead of a hardcoded
-// CDN URL that could rot or never gets verified in the first place.
-//
-// Cover art for a given album basically never changes, so successful
-// lookups are cached twice: in-process (no repeat Spotify calls per warm
-// instance) and at the CDN via Cache-Control (one call per day globally,
-// however many visitors a launch brings). Failures are never cached.
 const cache = new Map();
 const CACHE_HEADERS = { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' };
 

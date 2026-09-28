@@ -27,7 +27,7 @@ function TrackDetailsMockup() {
         <div className="flex h-14 w-14 flex-none items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-amber-500/25 to-brand/25 backdrop-blur-md">
           {albumArt ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={albumArt} alt="" className="h-full w-full object-cover" />
+            <img src={albumArt} alt="" decoding="async" className="h-full w-full object-cover" />
           ) : (
             <Music2 className="h-6 w-6 text-zinc-50" />
           )}
@@ -82,9 +82,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
 };
 
-// Scroll-triggered reveal restored: the copy column and the mockup fade/
-// slide in with a short stagger once the section enters view (`once: true`
-// — never replays scrolling back up). Album art still loads once, on mount.
 export default function Differentiator() {
   return (
     <section className="relative overflow-x-clip px-6 py-14 md:px-8 md:py-20">

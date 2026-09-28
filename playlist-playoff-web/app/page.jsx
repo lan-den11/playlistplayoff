@@ -14,18 +14,14 @@ import { warmPlaylist } from '../lib/spotifyPlaylist';
 export const dynamic = 'force-dynamic';
 
 const SPOTIFY_EMBED_ORIGIN = 'https://open.spotify.com';
+const SPOTIFY_IMAGE_CDN_ORIGIN = 'https://i.scdn.co';
 const TRENDING_CACHE_TTL_MS = 10 * 60 * 1000;
 
-// Homepage topbar toggle — set to false to hide it. Hero reads the same
-// flag, so it gives the header's height to the hero (and takes it back)
-// automatically; nothing else needs touching.
 const SHOW_NAVBAR = true;
 
 export default async function HomePage() {
-  // Hero matchup critical path, started as early as possible: open the
-  // connection to Spotify's embed host, begin downloading its iframe API, and
-  // grab a Spotify token while the PostHog flags below are still resolving.
   preconnect(SPOTIFY_EMBED_ORIGIN);
+  preconnect(SPOTIFY_IMAGE_CDN_ORIGIN);
   preload(`${SPOTIFY_EMBED_ORIGIN}/embed/iframe-api/v1`, { as: 'script' });
   getAppToken().catch(() => {});
 
@@ -35,10 +31,6 @@ export default async function HomePage() {
     getGenrePlaylists(),
   ]);
 
-  // Fetch the trending playlist server-side now, and tell the browser to
-  // request the same URL the hero will use during HTML parse — before any JS
-  // has loaded. Genre tabs warm the same way, but stay lazy (no preload hint)
-  // since only one of them is ever shown first.
   warmPlaylist(trendingPlaylistId, TRENDING_CACHE_TTL_MS);
   preload(`/api/playlist/${encodeURIComponent(trendingPlaylistId)}/tracks`, {
     as: 'fetch',

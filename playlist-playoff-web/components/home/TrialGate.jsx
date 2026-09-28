@@ -3,23 +3,21 @@
 import { useState } from 'react';
 import { m } from 'framer-motion';
 import { Music2, Trophy, Share, Check } from 'lucide-react';
+import { computeStandings, buildResultsText } from '../../lib/bracketEngine';
 import WaitlistForm from './WaitlistForm';
 
-// The screen shown once the homepage's 4-song mini bracket crowns a
-// champion, for visitors who aren't unlocked yet.
-export default function TrialGate({ championTrack }) {
+export default function TrialGate({ championTrack, mainBracketRounds }) {
   const [copied, setCopied] = useState(false);
 
-  // `imageLarge` is Spotify's biggest album art (same field ChampionScreen
-  // uses for its full-bracket background) — this was falling back to
-  // `image`, the deliberately-small thumbnail used everywhere else, which
-  // is why the champion art here looked low-res.
   const championImage = championTrack?.imageLarge || championTrack?.image;
 
   async function handleShare() {
-    const text = championTrack
-      ? `I crowned "${championTrack.name}" by ${championTrack.artists} as my champion!`
-      : 'Check out my music bracket result!';
+    const standings = computeStandings(mainBracketRounds);
+    const text = standings.length
+      ? buildResultsText(standings)
+      : championTrack
+        ? `I crowned "${championTrack.name}" by ${championTrack.artists} as my champion!`
+        : 'Check out my music bracket result!';
 
     const shareData = {
       title: 'Music Bracket Champion',
@@ -30,9 +28,7 @@ export default function TrialGate({ championTrack }) {
     if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.(shareData)) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
-        // User closed native share sheet — safe to ignore
-      }
+      } catch {}
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(`${text} ${shareData.url}`);
       setCopied(true);
@@ -74,8 +70,8 @@ export default function TrialGate({ championTrack }) {
             </p>
             <p className="truncate text-sm text-zinc-400">{championTrack.artists}</p>
           </div>
-          
-          <button 
+
+          <button
             type="button"
             onClick={handleShare}
             className="mt-1 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold text-zinc-50 transition-colors hover:bg-white/10 active:scale-95"

@@ -4,8 +4,6 @@
 
 html {
   scroll-behavior: smooth;
-  /* Always reserve the scrollbar's width so scrolling and non-scrolling
-     pages don't differ in content width. */
   scrollbar-gutter: stable;
 }
 
@@ -14,10 +12,6 @@ body {
   overflow-x: hidden;
 }
 
-/* `clip` does what `hidden` was doing here (no sideways scroll) without
-   turning html/body into scroll containers — that's what let iOS Safari
-   still pan sideways and what stopped `position: sticky` headers from
-   sticking. `hidden` above stays as the fallback for browsers without it. */
 @supports (overflow: clip) {
   html,
   body {
@@ -26,48 +20,25 @@ body {
 }
 
 body {
-  background-color: #09090b; /* zinc-950 — deep midnight, never pure black */
+  background-color: #09090b;
   color: #fafafa;
 }
 
-/* Defensive reset for the Spotify-injected iframes (embed panels): some
-   browsers add a default border/outline to bare iframes, which — stacked
-   on top of our own rounded glass panel border — was part of what made the
-   embeds look "off" versus the container around them. */
 iframe {
   border: 0;
 }
 
 :focus-visible {
-  outline: 2px solid rgba(124, 156, 255, 0.9); /* brand-light */
+  outline: 2px solid rgba(124, 156, 255, 0.9);
   outline-offset: 3px;
 }
 
-/* Every "liquid glass" surface (GradientButton, GlassButton,
-   GlassIconBadge) boosts backdrop-saturate to 150% via
-   `backdrop-saturate-150` for extra vibrancy on browsers that render it
-   correctly. WebKit renders `backdrop-filter: blur() saturate()` through
-   an extended/linear color pipeline that pushes blue tones toward
-   magenta-purple — and the shift scales directly with the saturate()
-   multiplier. That is true on iOS Safari AND desktop Safari on P3 Macs.
-   Every iOS browser is WebKit too, so this matches: iOS
-   (-webkit-touch-callout) OR any Safari (-apple-system-body is
-   WebKit-only). It caps the boost back to 100% — effectively a no-op
-   saturate — and leaves Chrome/Firefox/Edge untouched. Tailwind composes
-   backdrop-filter from these custom properties, so overriding just this one
-   leaves blur and every other backdrop effect intact. */
 @supports (-webkit-touch-callout: none) or ((font: -apple-system-body) and (-webkit-appearance: none)) {
   .backdrop-saturate-150 {
     --tw-backdrop-saturate: saturate(1) !important;
   }
 }
 
-/* Performance "lite" tier. PageBackground's frame-rate governor sets
-   <html data-perf="lite"> on devices that can't keep the animated
-   background + glass blur at a smooth frame rate. Every backdrop-filter has
-   to be re-blurred whenever the WebGL layer behind it repaints, which is the
-   single most expensive thing on the page for weak GPUs — so lite drops the
-   blur (the translucent tinted panes stay) and stops the decorative loops. */
 html[data-perf='lite'] * {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;

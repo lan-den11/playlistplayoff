@@ -13,8 +13,6 @@ import Bone from '../ui/Bone';
 import EmbedPanel from '../bracket/EmbedPanel';
 import TrialGate from './TrialGate';
 
-// Semifinal x2 + Final x1 + champion — a real mini bracket instead of a
-// generic "top 8" teaser that got cut off after two arbitrary picks.
 const TEASER_BRACKET_SIZE = 4;
 const PICK_ANIMATION_MS = 300;
 const HANDOFF_REVEAL_MS = 1600;
@@ -123,7 +121,6 @@ function ChampionReveal({ championTrack, elRef, height, loading }) {
         Your champion
       </span>
       <div className="relative w-full">
-        {/* Dynamic Ambient Glow */}
         <div className="absolute inset-4 -z-10 animate-pulse rounded-[2rem] bg-brand/40 blur-2xl filter" aria-hidden="true" />
         <EmbedPanel elRef={elRef} loading={loading} gradient="from-brand to-brand-light" height={height} />
       </div>
@@ -131,9 +128,8 @@ function ChampionReveal({ championTrack, elRef, height, loading }) {
         <div className="min-w-0">
           <p className="truncate font-display text-base font-bold text-zinc-50">{championTrack.name}</p>
           <p className="truncate text-xs text-zinc-400">{championTrack.artists}</p>
-          
-          {/* Bracket Insights / Stat Hook */}
-          <m.p 
+
+          <m.p
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -287,7 +283,7 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
             <LiveCounter compact className="flex-none" />
           </div>
 
-          <div style={view !== 'game' && lockedHeight ? { height: lockedHeight, overflow: 'hidden' } : undefined}>
+          <div style={view !== 'game' && lockedHeight ? { minHeight: lockedHeight } : undefined}>
             <div ref={contentWrapRef}>
               <AnimatePresence mode="wait" initial={false}>
                 {view === 'game' && (
@@ -320,7 +316,13 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
                   </m.div>
                 )}
 
-                {view === 'gate' && <TrialGate key="gate" championTrack={bracket.state.championTrack} />}
+                {view === 'gate' && (
+                  <TrialGate
+                    key="gate"
+                    championTrack={bracket.state.championTrack}
+                    mainBracketRounds={bracket.state.mainBracketRounds}
+                  />
+                )}
 
                 {view === 'handoff' && (
                   <m.div key="handoff" className="flex h-full flex-col items-center justify-center gap-4 text-center">

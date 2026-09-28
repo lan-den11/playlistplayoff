@@ -12,7 +12,7 @@ import GlassIconBadge from '../ui/GlassIconBadge';
 export default function WaitlistForm({
   source,
   gradient = 'gold',
-  label = 'Claim My Spot', // Changed default to active, high-value CTA
+  label = 'Claim My Spot',
   busyLabel = 'Joining…',
   className = '',
 }) {

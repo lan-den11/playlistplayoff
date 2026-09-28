@@ -89,9 +89,6 @@ function FaqItem({ item: faqItem, index, isOpen, onToggle }) {
   );
 }
 
-// Scroll-triggered reveal for the heading + FAQ list, matching HowItWorks.jsx
-// / Differentiator.jsx — this section previously only animated its
-// open/close interactions, with no entrance of its own.
 export default function Faq() {
   const [openIndex, setOpenIndex] = useState(0);
 

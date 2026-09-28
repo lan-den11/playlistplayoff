@@ -1,8 +1,5 @@
 import { getPool, ensureTable } from '../../../lib/db';
 
-// Fire-and-forget copy of every waitlist signup, independent of Clerk's own
-// records — just email + source + when, so it's a plain list you can query
-// straight out of Supabase (order of signup falls out of id / created_at).
 export async function POST(request) {
   const pool = getPool();
   if (!pool) return Response.json({ configured: false });

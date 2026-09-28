@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { getAppAccessMode } from './lib/posthog-server';
 
-// Crawler/social-preview endpoints must stay reachable in every access mode.
-// The home page is included too — it's now the only waitlist entry point
-// (see lib/scroll.js, MultiplayerTeaser's #waitlist section), so it can
-// never redirect to itself.
 const isAlwaysPublicRoute = createRouteMatcher([
   '/',
   '/api/health',

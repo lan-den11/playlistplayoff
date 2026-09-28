@@ -145,9 +145,6 @@ function finishWildcard(state) {
   return beginMainPhase(state, state.doShuffle ? shuffleArray(combined) : combined);
 }
 
-// `pool` (optional) replaces the recency-sorted master list as the source of
-// seeds — that's how the homepage teaser plays a random sample instead of the
-// most recently added songs.
 function startTournament(state, pool) {
   const { bracketSize: size, doShuffle, wildcardEnabled } = state;
   const sorted = pool ?? state.masterSortedTracks;
@@ -191,8 +188,6 @@ function startTournament(state, pool) {
   return advanceToNextMatch(next);
 }
 
-// Random `size`-song bracket drawn from the ENTIRE playlist (no recency bias,
-// no wildcard round).
 function startSample(state, size) {
   const pool = shuffleArray(state.masterSortedTracks).slice(0, size);
   return startTournament({ ...state, bracketSize: size, wildcardEnabled: false, doShuffle: true }, pool);
@@ -316,8 +311,6 @@ function reducer(state, action) {
     case 'START_SAMPLE':
       return startSample(state, action.size);
     case 'PICK':
-      // Pick cap (homepage trial): enforced here, inside the reducer, so it
-      // holds even against double clicks or stale closures — not just in UI.
       if (action.limit != null && state.completedRealMatchesOverall >= action.limit) return state;
       return pickReducer(state, action.track);
     case 'UNDO':
@@ -340,9 +333,6 @@ function reducer(state, action) {
   }
 }
 
-// `maxPicks`: optional cap on how many real matchups can be decided in this
-// hook instance. null = unlimited (the trending teaser now plays its mini
-// bracket to a natural champion instead of being cut off — see HeroMatchup).
 export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = {}) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [userPlaylists, setUserPlaylists] = useState(null);
@@ -354,26 +344,20 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = 
       const raw = localStorage.getItem(storageKey);
       const parsed = raw ? JSON.parse(raw) : null;
       if (parsed?.matches?.[parsed.matchIndex]) setSavedSnapshot(parsed);
-    } catch {
-      // corrupted/unavailable storage — just skip resume
-    }
+    } catch {}
   }, [storageKey]);
 
   useEffect(() => {
     if (state.screen !== 'battle') return;
     try {
       localStorage.setItem(storageKey, JSON.stringify(state));
-    } catch {
-      // storage full/unavailable — not critical, skip this save
-    }
+    } catch {}
   }, [state, storageKey]);
 
   const clearSaved = useCallback(() => {
     try {
       localStorage.removeItem(storageKey);
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, [storageKey]);
 
   useEffect(() => {
@@ -468,10 +452,6 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = 
     pick: (track) => {
       if (maxPicks != null && state.completedRealMatchesOverall >= maxPicks) return;
       const completedMatchCount = state.completedRealMatchesOverall + 1;
-      // Feeds the homepage's "live matchups decided" counter (shared across
-      // every visitor, trial and real bracket alike — see
-      // components/ui/LiveCounter.jsx). Fire-and-forget: never blocks or can
-      // fail the actual pick.
       bumpMatchupCounter();
       captureEvent('matchup_chosen', {
         phase: state.phase,

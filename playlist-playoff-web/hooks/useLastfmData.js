@@ -26,9 +26,7 @@ export function useLastfmData() {
     setUsernameOverrideState(value);
     try {
       localStorage.setItem(STORAGE_KEY, value);
-    } catch {
-      // storage unavailable — not critical
-    }
+    } catch {}
   }, []);
 
   const runQueue = useCallback(async (username) => {

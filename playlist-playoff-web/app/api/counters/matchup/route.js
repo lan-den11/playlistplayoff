@@ -2,10 +2,6 @@ import { getPool, ensureTable } from '../../../../lib/db';
 
 const COUNTER_NAME = 'matchups_decided';
 
-// Backs the homepage's "live" matchups-decided counter. Without
-// DATABASE_URL this always reports { configured: false } and the counter UI
-// hides itself rather than show a number that isn't real — see
-// components/ui/LiveCounter.jsx.
 export async function GET() {
   const pool = getPool();
   if (!pool) return Response.json({ configured: false, value: 0 });

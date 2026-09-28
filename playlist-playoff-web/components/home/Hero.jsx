@@ -43,12 +43,6 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
   const [showScrollHint, setShowScrollHint] = useState(true);
-  // Tracks whether the hero trial widget has reached its final (gate/
-  // handoff) screen — that screen is taller than the mid-game one, and the
-  // "Scroll to see more" hint is fixed to the viewport bottom, so the two
-  // could visually collide there. Hiding the hint once the trial finishes
-  // (and letting it come back if the trial resets, e.g. a genre switch)
-  // fixes that at the source instead of guessing at spacing.
   const [trialFinished, setTrialFinished] = useState(false);
 
   const allGenres = useMemo(
@@ -104,8 +98,6 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
             </m.div>
           </m.div>
 
-          {/* flex-col + explicit order (not just DOM order) keeps the genre
-              toggle above the trial bracket card at every breakpoint. */}
           <div className="flex flex-col">
             <div className="order-1 w-full">
               <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
@@ -128,7 +120,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 1, duration: 0.6 } }}
             exit={{ opacity: 0, transition: { duration: 0.3 } }}
-            className="pointer-events-none fixed inset-x-0 bottom-3 z-10 flex justify-center md:bottom-4"
+            className="pointer-events-none fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-10 flex justify-center md:bottom-[calc(1rem+env(safe-area-inset-bottom))]"
           >
             <span className="flex animate-nudge flex-col items-center gap-1 text-zinc-500">
               <span className="text-xs">Scroll to see more</span>

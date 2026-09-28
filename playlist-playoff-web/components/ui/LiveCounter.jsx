@@ -6,17 +6,6 @@ import OdometerNumber from './OdometerNumber';
 
 const POLL_MS = 10_000;
 
-// Social-proof counter: matchups decided across EVERY visitor (trial and
-// real brackets alike), polling every 10s. Hides itself entirely rather than
-// show a number when DATABASE_URL isn't configured — no fake urgency.
-//
-// `compact`: small glass pill (border + bg-white/5 + backdrop-blur, like
-// every other badge on the site). Pulse dot is emerald — matching the
-// success-green already used elsewhere (WaitlistForm's confirmed state,
-// Clerk's colorSuccess) — instead of brand blue, so the "live" indicator
-// actually pops against this blue-heavy UI instead of blending into it.
-// Both the number and the "decided" label are white (zinc-50) so the whole
-// pill reads as one consistent piece of text.
 export default function LiveCounter({ className = '', compact = false }) {
   const [value, setValue] = useState(null);
   const [configured, setConfigured] = useState(true);
@@ -31,10 +20,7 @@ export default function LiveCounter({ className = '', compact = false }) {
         if (cancelled) return;
         setConfigured(Boolean(data.configured));
         if (data.configured) setValue(data.value);
-      } catch {
-        // transient failure — next poll will retry; don't flip `configured`
-        // off just because one request dropped
-      }
+      } catch {}
       if (!cancelled) timer = setTimeout(poll, POLL_MS);
     }
 

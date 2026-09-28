@@ -22,10 +22,6 @@ export function getPool() {
           name TEXT PRIMARY KEY,
           value BIGINT NOT NULL DEFAULT 0
         );
-        -- Plain record of every waitlist signup — email, where they signed
-        -- up from, and when. Independent of Clerk's own waitlist entries;
-        -- this is what you'd query in Supabase for a straight list of
-        -- emails (order of signup falls out of id / created_at).
         CREATE TABLE IF NOT EXISTS waitlist_signups (
           id SERIAL PRIMARY KEY,
           email TEXT NOT NULL,

@@ -45,7 +45,6 @@ function Digit({ value }) {
 }
 
 function Separator({ char }) {
-  // Removed flex positioning so commas/decimals sit on the natural text baseline
   return <span className="leading-none">{char}</span>;
 }
 

@@ -17,24 +17,8 @@ function loadSpotifyIframeApi() {
   return iframeApiPromise;
 }
 
-// The ONE place the embed height is defined. It's given to Spotify's
-// createController AND returned as `height` so EmbedPanel sizes its own box
-// to match — the two must agree or the panel shows dead space (or clips the
-// card). 80px is Spotify's compact card, which reads fine at any width, so
-// there's no width measuring / 80-vs-152 switching anymore.
 export const EMBED_HEIGHT = 80;
 
-// `loaded` is true once the embed has actually finished loading the URI most
-// recently passed to loadUri() — driven by the embed's own `ready` event, not
-// a guessed timer. Skeleton overlays key off it so they lift exactly when the
-// content is there.
-//   MIN_SKELETON_MS  a load that finishes instantly still holds the skeleton
-//                    this long, so it reads as a beat instead of a flicker.
-//   Fallback         if `ready` never arrives the skeleton still lifts. Until
-//                    we've SEEN `ready` fire for a second-or-later load (proof
-//                    it re-fires after loadUri) the fallback is short, so a
-//                    build of the embed that doesn't re-fire can't leave the
-//                    skeleton up; once proven, it's generous for slow networks.
 const MIN_SKELETON_MS = 220;
 const FALLBACK_UNPROVEN_MS = 800;
 const FALLBACK_PROVEN_MS = 2500;
@@ -96,13 +80,9 @@ export function useSpotifyEmbed() {
       loadRef.current.pending = false;
       const controller = controllerRef.current;
       controllerRef.current = null;
-      // Tear the embed down with its panel so a preview that's playing stops
-      // the moment the card is removed.
       try {
         controller?.destroy?.();
-      } catch {
-        // embed already gone
-      }
+      } catch {}
     };
   }, [node, onEmbedReady, clearTimers]);
 

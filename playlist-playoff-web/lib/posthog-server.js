@@ -1,6 +1,6 @@
 import { PostHog } from 'posthog-node';
 
-let cachedClient; // undefined = not attempted yet, null = not configured, PostHog = ready
+let cachedClient;
 
 function buildClient() {
   const token = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
@@ -25,12 +25,6 @@ function buildClient() {
   });
 }
 
-// One PostHog client for the whole process, reused across every request.
-// This used to construct-and-shut-down a fresh client for every single flag
-// check (5+ per homepage render: access mode, trending, 3 genres — each its
-// own client init + network flush), which was real, measurable per-request
-// latency. Render runs this as a long-lived Node process, so a singleton is
-// safe and removes that overhead entirely.
 export function getPostHogClient() {
   if (cachedClient === undefined) cachedClient = buildClient();
   return cachedClient;

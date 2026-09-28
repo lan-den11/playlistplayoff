@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
@@ -7,11 +6,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // True electric blue, hue locked to ~227-231deg with the red channel
-        // kept near zero. Keep in sync with: GhostFibers defaults,
-        // PageBackground, app/layout.jsx (Clerk colorPrimary),
-        // components/ui/Glow.jsx, and the rgba(18,64,234,…) shadows in
-        // BracketTree / BracketHeader.
         brand: {
           DEFAULT: '#1240EA',
           light: '#7C9CFF',
@@ -22,8 +16,6 @@ module.exports = {
         sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['var(--font-space-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
-      // Ambient loops run as CSS keyframes (compositor thread, zero JS per
-      // frame) instead of Framer Motion `repeat: Infinity`.
       keyframes: {
         'glow-pulse': {
           '0%, 100%': { opacity: '0.65' },

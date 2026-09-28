@@ -1,11 +1,8 @@
 import axios from 'axios';
 import { getAppToken } from './spotifyAuth';
 
-// One store per Node process, pinned to globalThis so the homepage render and
-// the /api/playlist route share it even though Next bundles them separately.
 const store = (globalThis.__playlistStore ??= { cache: new Map(), inflight: new Map() });
 
-// Increased default TTL to 15 minutes (900,000 ms) to reduce unnecessary API hits
 const DEFAULT_TTL_MS = 15 * 60 * 1000;
 const MAX_ENTRIES = 25;
 
@@ -20,7 +17,6 @@ async function fetchPlaylist(playlistId) {
 
   const fields = 'total,items(added_at,track(id,uri,name,duration_ms,popularity,artists(name),album(name,release_date,images)))';
 
-  // 1. Fetch first page to get initial items and total track count
   const firstPageResp = await axios.get(
     `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&offset=0&fields=${fields}`,
     { headers }
@@ -29,7 +25,6 @@ async function fetchPlaylist(playlistId) {
   let items = [...(firstPageResp.data?.items || [])];
   const total = firstPageResp.data?.total || items.length;
 
-  // 2. Fetch all remaining pages in parallel instead of sequentially
   if (total > 100) {
     const pageRequests = [];
     for (let offset = 100; offset < total; offset += 100) {
@@ -68,8 +63,6 @@ async function fetchPlaylist(playlistId) {
   return { tracks, playlistName: await namePromise };
 }
 
-// Resolves to { tracks, playlistName }. Rejects with the original axios error
-// (callers read e.response?.status). Failures are never cached.
 export function getPlaylist(playlistId, { ttlMs = DEFAULT_TTL_MS } = {}) {
   const hit = store.cache.get(playlistId);
   if (hit && hit.expiresAt > Date.now()) return Promise.resolve(hit.data);
@@ -92,8 +85,6 @@ export function getPlaylist(playlistId, { ttlMs = DEFAULT_TTL_MS } = {}) {
   return request;
 }
 
-// Fire-and-forget: start (or join) the fetch so it's ready by the time the
-// browser asks for it. Errors surface later on the real request.
 export function warmPlaylist(playlistId, ttlMs) {
   getPlaylist(playlistId, { ttlMs }).catch(() => {});
 }

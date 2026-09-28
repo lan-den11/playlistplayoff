@@ -36,12 +36,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
 };
 
-// Scroll-triggered reveal restored: cards fade/slide in with a gentle
-// stagger once the section enters view (`once: true` — never replays
-// scrolling back up). Icon badge now sits left with the step number to its
-// right on the SAME row (was stacked: number on top, icon below it), so the
-// two share one line instead of competing for vertical space above the
-// title.
 export default function HowItWorks() {
   return (
     <section className="relative overflow-x-clip px-6 pb-14 pt-8 md:px-8 md:pb-20 md:pt-12">

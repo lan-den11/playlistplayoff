@@ -5,12 +5,6 @@ import { m } from 'framer-motion';
 import { Headphones } from 'lucide-react';
 import GlassIconBadge from './GlassIconBadge';
 
-// Sticky, always-glass header — consistent with the bracket page's header
-// (BracketHeader.jsx) instead of fading in only after scrolling. Height
-// stays fixed (h-14 + border = 57px) either way, so Hero.jsx's
-// NAVBAR_HEIGHT_PX reserve is unaffected. Fades/slides down once on mount so
-// it isn't the one static piece of chrome on an otherwise fully-animated
-// homepage — a one-shot entrance, not tied to scroll.
 export default function SiteHeader({ logoHref = '/', children }) {
   return (
     <m.header

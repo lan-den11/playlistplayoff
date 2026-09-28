@@ -4,8 +4,6 @@ export const alt = 'Playlist Playoff — Turn any playlist into a showdown';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-// Link-preview card (Discord, iMessage, X, Slack…). Satori only understands
-// flexbox + inline styles, so this is the one place inline styles are required.
 export default function OpengraphImage() {
   return new ImageResponse(
     (

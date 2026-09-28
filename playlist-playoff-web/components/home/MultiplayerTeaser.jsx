@@ -15,8 +15,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
 };
 
-// Scroll-triggered reveal, matching HowItWorks.jsx / Differentiator.jsx —
-// this card was the one homepage section with no entrance animation at all.
 export default function MultiplayerTeaser() {
   return (
     <section id="waitlist" className="mx-auto max-w-7xl scroll-mt-10 px-6 py-14 md:px-8 md:py-20">

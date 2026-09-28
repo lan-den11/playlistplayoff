@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-let appToken = null; // { access_token, expires_at }
-let tokenRequest = null; // in-flight token request, shared by concurrent callers
+let appToken = null;
+let tokenRequest = null;
 
 export const TRENDING_PLAYLIST_ID = '37i9dQZF1FwRJQfEovuoNH';
 
@@ -11,8 +11,6 @@ export async function getAppToken() {
   }
   if (appToken && appToken.expires_at > Date.now()) return appToken.access_token;
 
-  // On a cold instance the homepage render, the playlist route and the
-  // album-art route can all ask at once — share one token request.
   if (!tokenRequest) {
     tokenRequest = axios
       .post('https://accounts.spotify.com/api/token', new URLSearchParams({ grant_type: 'client_credentials' }), {

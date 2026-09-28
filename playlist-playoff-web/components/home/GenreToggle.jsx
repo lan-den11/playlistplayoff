@@ -4,9 +4,6 @@ import { m } from 'framer-motion';
 import { Flame, Headphones, Music2, Sparkles } from 'lucide-react';
 import { captureEvent } from '../../lib/posthog-client';
 
-// One icon per genre key so the tab row reads as more crafted than plain
-// text pills — falls back to Music2 for any future genre flag that isn't
-// mapped here yet, so a new flag never renders an unlabeled tab.
 const GENRE_ICONS = {
   trending: Flame,
   hiphop: Headphones,
@@ -14,19 +11,6 @@ const GENRE_ICONS = {
   rock: Music2,
 };
 
-// Pill tab row above the hero trial. `genres` is the full list including
-// Trending (always first, always present); anything past it only shows up
-// once its PostHog flag has a playlist configured — see
-// lib/posthog-server.js `getGenrePlaylists`. Selecting a tab updates
-// `selected` in place — Hero/HeroMatchup no longer remount on switch (see
-// HeroMatchup.jsx), so the trial's embeds and progress stay alive instead of
-// reloading with a gray box.
-//
-// `mx-auto max-w-lg` matches HeroMatchup's own card width exactly, so the
-// pills and the card below share the same left/right edges at every
-// breakpoint instead of the pills sitting off to one side. Fades/slides in
-// on mount, matching the trial card beneath it, so the pair reads as one
-// animated unit instead of the pills popping in static.
 export default function GenreToggle({ genres, selected, onSelect }) {
   if (genres.length <= 1) return null;
 
