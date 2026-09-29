@@ -4,25 +4,18 @@ import { m } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import Glow from '../ui/Glow';
 import WaitlistForm from './WaitlistForm';
-
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
-};
+import { useReveal } from '../../hooks/useReveal';
 
 export default function MultiplayerTeaser() {
+  const { container, item, viewport } = useReveal({ stagger: 0.12, amount: 0.4 });
+
   return (
     <section id="waitlist" className="mx-auto max-w-7xl scroll-mt-10 px-6 py-14 md:px-8 md:py-20">
       <m.div
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.4 }}
+        viewport={viewport}
         className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-8 py-12 text-center backdrop-blur-md sm:px-14 md:py-14"
       >
         <Glow tone="amber" className="-top-28 left-1/2 h-80 w-[46rem] max-w-[140%] -translate-x-1/2" />

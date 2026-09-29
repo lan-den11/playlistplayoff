@@ -154,6 +154,9 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   const pickTimerRef = useRef(0);
   const contentWrapRef = useRef(null);
   const maxHeightRef = useRef(0);
+  const completedRef = useRef(new Map());
+  const activeIdRef = useRef(trendingPlaylistId);
+  const [restored, setRestored] = useState(null);
   const [lockedHeight, setLockedHeight] = useState(undefined);
   const [isAnimatingPick, setIsAnimatingPick] = useState(null);
   const [introDone, setIntroDone] = useState(false);
@@ -161,7 +164,11 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   const { pendingA, pendingB } = bracket;
   const matchKey = pendingA && pendingB ? `${pendingA.id}:${pendingB.id}` : null;
 
-  const trialDone = bracket.state.screen === 'champion';
+  const liveDone = bracket.state.screen === 'champion';
+  const trialDone = Boolean(restored) || liveDone;
+  const championTrack = restored ? restored.championTrack : bracket.state.championTrack;
+  const mainBracketRounds = restored ? restored.mainBracketRounds : bracket.state.mainBracketRounds;
+  const playlistName = restored ? restored.playlistName : bracket.state.playlistName;
   const view = trialDone ? (isOpen ? 'handoff' : 'gate') : 'game';
 
   const revealed = Boolean(matchKey) && embedA.loaded && embedB.loaded;
@@ -171,11 +178,28 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   }, [view, onTrialStateChange]);
 
   useEffect(() => {
-    autoStartedRef.current = false;
+    activeIdRef.current = trendingPlaylistId;
     setIsAnimatingPick(null);
+    const done = completedRef.current.get(trendingPlaylistId);
+    if (done) {
+      autoStartedRef.current = true;
+      setRestored(done);
+      return;
+    }
+    autoStartedRef.current = false;
+    setRestored(null);
     bracket.restart();
     bracket.loadPlaylist(trendingPlaylistId);
   }, [trendingPlaylistId]);
+
+  useEffect(() => {
+    if (restored || !liveDone || !bracket.state.championTrack) return;
+    completedRef.current.set(activeIdRef.current, {
+      championTrack: bracket.state.championTrack,
+      mainBracketRounds: bracket.state.mainBracketRounds,
+      playlistName: bracket.state.playlistName,
+    });
+  }, [restored, liveDone, bracket.state.championTrack, bracket.state.mainBracketRounds, bracket.state.playlistName]);
 
   useEffect(() => {
     if (bracket.state.loadError) {
@@ -194,14 +218,14 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   }, [bracket.state.screen]);
 
   useEffect(() => {
-    if (!trialDone) return;
+    if (!trialDone || restored) return;
     if (!isOpen) {
       captureEvent('trial_gate_shown', { bracket_size: TEASER_BRACKET_SIZE });
       return;
     }
     const t = setTimeout(() => router.push('/bracket?from=trending'), HANDOFF_REVEAL_MS);
     return () => clearTimeout(t);
-  }, [trialDone, isOpen, router]);
+  }, [trialDone, restored, isOpen, router]);
 
   useEffect(() => {
     setIsAnimatingPick(null);
@@ -220,10 +244,10 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
   }, [matchKey, embedB.ready, embedB.loadUri, pendingB]);
 
   useEffect(() => {
-    if (trialDone && bracket.state.championTrack && embedA.ready) {
-      embedA.loadUri(bracket.state.championTrack.uri);
+    if (trialDone && championTrack && embedA.ready) {
+      embedA.loadUri(championTrack.uri);
     }
-  }, [trialDone, bracket.state.championTrack, embedA.ready]);
+  }, [trialDone, championTrack, embedA.ready]);
 
   useLayoutEffect(() => {
     const el = contentWrapRef.current;
@@ -256,17 +280,17 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     }, PICK_ANIMATION_MS);
   }
 
-  if (bracket.state.loadError) return <StaticFallback />;
+  if (bracket.state.loadError && !restored) return <StaticFallback />;
 
   const label = introDone
-    ? `${bracket.state.playlistName || 'Trending in the US'} · ${trialDone ? 'Champion' : bracket.roundLabel}`
+    ? `${playlistName || 'Trending in the US'} · ${trialDone ? 'Champion' : bracket.roundLabel}`
     : null;
 
   return (
     <div className="relative mx-auto w-full max-w-lg">
       <div
         aria-hidden="true"
-        className="absolute -inset-3 -z-10 animate-glow-pulse rounded-[2rem] bg-gradient-to-br from-brand/30 via-brand/10 to-transparent blur-2xl"
+        className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-brand/30 via-brand/10 to-transparent blur-2xl md:animate-glow-pulse"
       />
 
       <m.div
@@ -274,7 +298,7 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={SPRING}
       >
-        <div className="animate-float rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:p-5">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:animate-float md:p-5">
           <div className="mb-3 flex min-h-[1.35rem] items-center justify-between gap-2 md:mb-4">
             <p className="flex min-w-0 items-center gap-1.5 text-center font-display text-xs font-bold uppercase tracking-widest text-zinc-300">
               <Flame className="h-3.5 w-3.5 flex-none text-brand-light" />
@@ -318,16 +342,16 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
 
                 {view === 'gate' && (
                   <TrialGate
-                    key="gate"
-                    championTrack={bracket.state.championTrack}
-                    mainBracketRounds={bracket.state.mainBracketRounds}
+                    key={`gate-${championTrack?.id ?? 'none'}`}
+                    championTrack={championTrack}
+                    mainBracketRounds={mainBracketRounds}
                   />
                 )}
 
                 {view === 'handoff' && (
                   <m.div key="handoff" className="flex h-full flex-col items-center justify-center gap-4 text-center">
                     <ChampionReveal
-                      championTrack={bracket.state.championTrack}
+                      championTrack={championTrack}
                       elRef={embedA.elRef}
                       height={embedA.height}
                       loading={!embedA.loaded}

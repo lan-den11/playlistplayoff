@@ -4,6 +4,7 @@ import { getAppAccessMode } from './lib/posthog-server';
 
 const isAlwaysPublicRoute = createRouteMatcher([
   '/',
+  '/share(.*)',
   '/api/health',
   '/api/debug(.*)',
   '/robots.txt',

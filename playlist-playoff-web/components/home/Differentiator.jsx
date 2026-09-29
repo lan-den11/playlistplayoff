@@ -5,6 +5,7 @@ import { m } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 import Glow from '../ui/Glow';
+import { useReveal } from '../../hooks/useReveal';
 
 function TrackDetailsMockup() {
   const [albumArt, setAlbumArt] = useState(null);
@@ -72,17 +73,9 @@ function TrackDetailsMockup() {
   );
 }
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.15 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
-};
-
 export default function Differentiator() {
+  const { container, item, viewport } = useReveal({ stagger: 0.15, amount: 0.35 });
+
   return (
     <section className="relative overflow-x-clip px-6 py-14 md:px-8 md:py-20">
       <Glow tone="brand" className="-top-16 right-0 h-[28rem] w-[46rem] max-w-full opacity-70" />
@@ -91,7 +84,7 @@ export default function Differentiator() {
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.35 }}
+        viewport={viewport}
         className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16"
       >
         <m.div variants={item} className="text-center md:text-left">

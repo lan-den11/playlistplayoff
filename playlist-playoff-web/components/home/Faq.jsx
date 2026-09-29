@@ -5,6 +5,7 @@ import { m } from 'framer-motion';
 import { ChevronDown, Music2, UserCircle, ListMusic, CreditCard } from 'lucide-react';
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Glow from '../ui/Glow';
+import { useReveal } from '../../hooks/useReveal';
 
 const FAQS = [
   {
@@ -29,22 +30,12 @@ const FAQS = [
   },
 ];
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
-};
-
-function FaqItem({ item: faqItem, index, isOpen, onToggle }) {
+function FaqItem({ item: faqItem, reveal, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
     <m.div
-      variants={item}
+      variants={reveal}
       className={`rounded-2xl border backdrop-blur-md transition-colors duration-300 ${
         isOpen ? 'border-brand/30 bg-brand/5' : 'border-white/10 bg-white/5'
       }`}
@@ -91,6 +82,7 @@ function FaqItem({ item: faqItem, index, isOpen, onToggle }) {
 
 export default function Faq() {
   const [openIndex, setOpenIndex] = useState(0);
+  const { container, item, viewport } = useReveal({ stagger: 0.1, distance: 20 });
 
   return (
     <section className="relative overflow-x-clip">
@@ -100,7 +92,7 @@ export default function Faq() {
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={viewport}
         className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20"
       >
         <m.h2 variants={item} className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
@@ -112,6 +104,7 @@ export default function Faq() {
             <FaqItem
               key={faqItem.q}
               item={faqItem}
+              reveal={item}
               index={i}
               isOpen={openIndex === i}
               onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}

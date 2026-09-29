@@ -47,7 +47,7 @@ export default function GradientButton({
     >
       <span
         aria-hidden="true"
-        className={`absolute -inset-2.5 animate-glow-pulse rounded-full bg-gradient-to-r ${glow} blur-xl`}
+        className={`absolute -inset-2.5 rounded-full bg-gradient-to-r ${glow} blur-xl md:animate-glow-pulse`}
       />
       <span
         aria-hidden="true"

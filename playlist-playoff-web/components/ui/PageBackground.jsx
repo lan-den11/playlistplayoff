@@ -15,13 +15,16 @@ const TIER_STORAGE_KEY = 'ppBackgroundTier';
 const SETTLE_MS = 800;
 const WINDOW_FRAMES = 36;
 const SLOW_FRAME_MS = 28;
+const SCROLL_IDLE_MS = 140;
+
+const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
 
 function deviceStartTier() {
   const nav = window.navigator;
   const cores = nav.hardwareConcurrency || 8;
   const memory = nav.deviceMemory || 8;
   if (nav.connection?.saveData || memory <= 2 || cores <= 2) return 2;
-  if (memory <= 4 || cores <= 4) return 1;
+  if (memory <= 4 || cores <= 4 || isCoarsePointer()) return 1;
   return 0;
 }
 
@@ -36,10 +39,35 @@ function readStoredTier() {
 
 export default function PageBackground() {
   const [tier, setTier] = useState(null);
+  const [coarse, setCoarse] = useState(false);
+  const [scrolling, setScrolling] = useState(false);
 
   useEffect(() => {
     setTier(Math.max(deviceStartTier(), readStoredTier()));
+    setCoarse(isCoarsePointer());
   }, []);
+
+  useEffect(() => {
+    if (!coarse) return;
+    let timer = 0;
+    let active = false;
+    const onScroll = () => {
+      if (!active) {
+        active = true;
+        setScrolling(true);
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        active = false;
+        setScrolling(false);
+      }, SCROLL_IDLE_MS);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(timer);
+    };
+  }, [coarse]);
 
   useEffect(() => {
     if (tier === null) return;
@@ -104,7 +132,7 @@ export default function PageBackground() {
           speed={0.16}
           dpr={config.dpr}
           fps={config.fps}
-          paused={config.paused}
+          paused={config.paused || scrolling}
           className="z-0"
         />
       )}
@@ -115,7 +143,7 @@ export default function PageBackground() {
           baseColor="#5C80F7"
           activeColor="#B4C8FF"
           proximity={140}
-          shockRadius={220}
+          shockRadius={coarse ? 0 : 220}
           shockStrength={4}
         />
       </div>
