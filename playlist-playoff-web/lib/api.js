@@ -1,4 +1,4 @@
-import { getDistinctId } from './posthog-client';
+import { getDistinctId, isCapturingOptedOut } from './posthog-client';
 
 async function request(path, options = {}) {
   const res = await fetch(path, options);
@@ -57,6 +57,6 @@ export function saveWaitlistSignup({ email, source }) {
   return request('/api/waitlist', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, source, distinctId: getDistinctId() }),
+    body: JSON.stringify({ email, source, distinctId: getDistinctId(), optedOut: isCapturingOptedOut() }),
   }).catch(() => {});
 }

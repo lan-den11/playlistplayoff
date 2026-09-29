@@ -5,7 +5,7 @@ export async function POST(request) {
   const pool = getPool();
   if (!pool) return Response.json({ configured: false });
 
-  const { email, source, distinctId } = await request.json().catch(() => ({}));
+  const { email, source, distinctId, optedOut } = await request.json().catch(() => ({}));
   if (!email) return Response.json({ error: 'email is required' }, { status: 400 });
 
   try {
@@ -15,6 +15,8 @@ export async function POST(request) {
     console.error('Failed to save waitlist signup:', e.message);
     return Response.json({ configured: false });
   }
+
+  if (optedOut === true) return Response.json({ configured: true, ok: true });
 
   const knownPerson = typeof distinctId === 'string' && distinctId.length > 0;
   await captureServerEvent({

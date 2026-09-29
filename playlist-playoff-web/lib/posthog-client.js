@@ -24,6 +24,15 @@ export function captureClientException(error, properties) {
   posthog.captureException(error, properties);
 }
 
+export function isCapturingOptedOut() {
+  if (!isPostHogConfigured) return false;
+  try {
+    return posthog.has_opted_out_capturing();
+  } catch {
+    return false;
+  }
+}
+
 export function getDistinctId() {
   if (!isPostHogConfigured) return null;
   try {
