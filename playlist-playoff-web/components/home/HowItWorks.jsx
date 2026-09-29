@@ -42,11 +42,13 @@ export default function HowItWorks() {
           <Reveal
             key={step.number}
             delay={i * 0.12}
-            className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
+            className="group relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
           >
             <div className="flex items-center justify-between">
-              <GlassIconBadge icon={step.icon} size="lg" />
-              <span className="font-display text-2xl font-bold text-zinc-300">{step.number}</span>
+              <span className="transition-transform duration-300 group-hover:scale-110">
+                <GlassIconBadge icon={step.icon} size="lg" />
+              </span>
+              <span className="font-display text-2xl font-bold text-zinc-300 transition-colors duration-300 group-hover:text-zinc-50">{step.number}</span>
             </div>
 
             <h3 className="mt-6 font-display text-xl font-semibold tracking-tight text-zinc-50">

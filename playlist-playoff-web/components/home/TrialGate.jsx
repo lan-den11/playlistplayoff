@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { m } from 'framer-motion';
 import { Music2, Share, Check } from 'lucide-react';
 import { encodeBracket } from '../../lib/shareBracket';
+import { captureEvent } from '../../lib/posthog-client';
 import WaitlistForm from './WaitlistForm';
 
 export default function TrialGate({ championTrack, mainBracketRounds }) {
@@ -22,10 +23,12 @@ export default function TrialGate({ championTrack, mainBracketRounds }) {
     const shareData = { title: 'Playlist Playoff Champion', text, url };
 
     if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.(shareData)) {
+      captureEvent('trial_share_clicked', { method: 'native' });
       try {
         await navigator.share(shareData);
       } catch {}
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      captureEvent('trial_share_clicked', { method: 'clipboard' });
       await navigator.clipboard.writeText(`${text} ${url}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

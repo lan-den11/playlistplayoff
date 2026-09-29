@@ -15,6 +15,7 @@ const TIER_STORAGE_KEY = 'ppBackgroundTier';
 const SETTLE_MS = 800;
 const WINDOW_FRAMES = 36;
 const SLOW_FRAME_MS = 28;
+const SLOW_WINDOWS_TO_DOWNGRADE = 2;
 const SCROLL_IDLE_MS = 140;
 
 const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
@@ -39,11 +40,14 @@ function readStoredTier() {
 
 export default function PageBackground() {
   const [tier, setTier] = useState(null);
+  const [dpr, setDpr] = useState(TIERS[0].dpr);
   const [coarse, setCoarse] = useState(false);
   const [scrolling, setScrolling] = useState(false);
 
   useEffect(() => {
-    setTier(Math.max(deviceStartTier(), readStoredTier()));
+    const start = Math.max(deviceStartTier(), readStoredTier());
+    setTier(start);
+    setDpr(TIERS[start].dpr);
     setCoarse(isCoarsePointer());
   }, []);
 
@@ -109,7 +113,10 @@ export default function PageBackground() {
       slowWindows = sum / count > SLOW_FRAME_MS ? slowWindows + 1 : 0;
       sum = 0;
       count = 0;
-      if (slowWindows >= 1) setTier((current) => Math.min((current ?? 0) + 1, TIERS.length - 1));
+      if (slowWindows >= SLOW_WINDOWS_TO_DOWNGRADE) {
+        slowWindows = 0;
+        setTier((current) => Math.min((current ?? 0) + 1, TIERS.length - 1));
+      }
     };
 
     rafId = requestAnimationFrame(loop);
@@ -130,7 +137,7 @@ export default function PageBackground() {
           brightness={1.6}
           glowIntensity={1.3}
           speed={0.16}
-          dpr={config.dpr}
+          dpr={dpr}
           fps={config.fps}
           paused={config.paused || scrolling}
           className="z-0"

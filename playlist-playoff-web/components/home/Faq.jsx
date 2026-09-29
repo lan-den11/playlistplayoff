@@ -30,15 +30,13 @@ const FAQS = [
   },
 ];
 
-function FaqItem({ item: faqItem, delay, index, isOpen, onToggle }) {
+function FaqItem({ item: faqItem, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
-    <Reveal
-      delay={delay}
-      distance={20}
+    <div
       className={`rounded-2xl border backdrop-blur-md transition-colors duration-300 ${
-        isOpen ? 'border-brand/30 bg-brand/5' : 'border-white/10 bg-white/5'
+        isOpen ? 'border-brand/30 bg-brand/5' : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]'
       }`}
     >
       <button
@@ -46,7 +44,7 @@ function FaqItem({ item: faqItem, delay, index, isOpen, onToggle }) {
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="flex w-full items-center gap-4 px-6 py-5 text-left"
+        className="group flex w-full items-center gap-4 px-6 py-5 text-left"
       >
         <m.div animate={{ scale: isOpen ? 1.08 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }}>
           <GlassIconBadge icon={faqItem.icon} size="sm" />
@@ -56,7 +54,7 @@ function FaqItem({ item: faqItem, delay, index, isOpen, onToggle }) {
         </span>
         <span
           className={`flex-none transition-all duration-300 ease-out ${
-            isOpen ? 'rotate-180 text-brand-light' : 'text-zinc-500'
+            isOpen ? 'rotate-180 text-brand-light' : 'text-zinc-500 group-hover:text-zinc-300'
           }`}
         >
           <ChevronDown className="h-5 w-5" />
@@ -77,7 +75,7 @@ function FaqItem({ item: faqItem, delay, index, isOpen, onToggle }) {
           </p>
         </div>
       </div>
-    </Reveal>
+    </div>
   );
 }
 
@@ -88,28 +86,23 @@ export default function Faq() {
     <section className="relative overflow-x-clip">
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
-      <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
-        <Reveal
-          as="h2"
-          distance={20}
-          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
-        >
+      <Reveal amount={0.12} distance={20} className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
+        <h2 className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
           Your questions, our answers
-        </Reveal>
+        </h2>
 
         <div className="relative space-y-3">
           {FAQS.map((faqItem, i) => (
             <FaqItem
               key={faqItem.q}
               item={faqItem}
-              delay={(i + 1) * 0.1}
               index={i}
               isOpen={openIndex === i}
               onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
             />
           ))}
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

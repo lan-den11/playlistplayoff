@@ -1,14 +1,21 @@
 'use client';
 
+import { m } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { captureEvent } from '../../lib/posthog-client';
 import Glow from '../ui/Glow';
 import Reveal from '../ui/Reveal';
 import WaitlistForm from './WaitlistForm';
 
 export default function MultiplayerTeaser() {
   return (
-    <section id="waitlist" className="mx-auto max-w-7xl scroll-mt-10 px-6 py-14 md:px-8 md:py-20">
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-8 py-12 text-center backdrop-blur-md sm:px-14 md:py-14">
+    <m.section
+      id="waitlist"
+      onViewportEnter={() => captureEvent('waitlist_section_viewed')}
+      viewport={{ once: true, amount: 0.4 }}
+      className="mx-auto max-w-7xl scroll-mt-10 px-6 py-14 md:px-8 md:py-20"
+    >
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 transition-colors duration-300 hover:border-white/20 px-8 py-12 text-center backdrop-blur-md sm:px-14 md:py-14">
         <Glow tone="amber" className="-top-28 left-1/2 h-80 w-[46rem] max-w-[140%] -translate-x-1/2" />
         <Glow tone="brand" className="-bottom-28 right-0 h-72 w-[40rem] max-w-full" />
 
@@ -41,6 +48,6 @@ export default function MultiplayerTeaser() {
           <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Claim My Spot" className="relative mt-9" />
         </Reveal>
       </div>
-    </section>
+    </m.section>
   );
 }

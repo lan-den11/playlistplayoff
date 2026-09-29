@@ -1,3 +1,5 @@
+import { getDistinctId } from './posthog-client';
+
 async function request(path, options = {}) {
   const res = await fetch(path, options);
   const data = await res.json().catch(() => ({}));
@@ -55,6 +57,6 @@ export function saveWaitlistSignup({ email, source }) {
   return request('/api/waitlist', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, source }),
+    body: JSON.stringify({ email, source, distinctId: getDistinctId() }),
   }).catch(() => {});
 }

@@ -23,3 +23,12 @@ export function captureClientException(error, properties) {
   if (!isPostHogConfigured) return;
   posthog.captureException(error, properties);
 }
+
+export function getDistinctId() {
+  if (!isPostHogConfigured) return null;
+  try {
+    return posthog.get_distinct_id() || null;
+  } catch {
+    return null;
+  }
+}

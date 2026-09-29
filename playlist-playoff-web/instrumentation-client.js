@@ -17,7 +17,8 @@ if (!posthogHost && process.env.NODE_ENV === 'development') {
 
 if (posthogToken && posthogHost) {
   posthog.init(posthogToken, {
-    api_host: posthogHost,
+    api_host: '/ingest',
+    ui_host: posthogHost.replace(/\/$/, '').replace('.i.posthog.com', '.posthog.com'),
     defaults: '2026-01-30',
     capture_exceptions: true,
     debug: process.env.NODE_ENV === 'development',

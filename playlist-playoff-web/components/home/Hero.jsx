@@ -9,6 +9,7 @@ import FitToScreen from '../ui/FitToScreen';
 import HeroMatchup from './HeroMatchup';
 import GenreToggle from './GenreToggle';
 import { scrollToWaitlist } from '../../lib/scroll';
+import { captureEvent } from '../../lib/posthog-client';
 
 const HEADLINE_WORDS = 'Turn any playlist into a showdown.'.split(' ');
 
@@ -55,6 +56,12 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
   const reservedPx =
     (showNavbar ? NAVBAR_HEIGHT_PX + PADDING_TOP_WITH_NAVBAR_PX : PADDING_TOP_NO_NAVBAR_PX) + PADDING_BOTTOM_PX;
 
+  function handleCtaClick() {
+    captureEvent('cta_clicked', { location: 'hero', action: isOpen ? 'start_bracket' : 'join_waitlist' });
+    if (isOpen) router.push('/bracket');
+    else scrollToWaitlist();
+  }
+
   useEffect(() => {
     if (!showScrollHint) return;
     function handleScroll() {
@@ -91,7 +98,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
             </m.p>
 
             <m.div variants={item} className="mt-4 flex justify-center md:mt-8 md:justify-start">
-              <GradientButton gradient="brand" onClick={() => (isOpen ? router.push('/bracket') : scrollToWaitlist())}>
+              <GradientButton gradient="brand" onClick={handleCtaClick}>
                 {isOpen ? 'Start a bracket' : 'Join the waitlist'}
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </GradientButton>

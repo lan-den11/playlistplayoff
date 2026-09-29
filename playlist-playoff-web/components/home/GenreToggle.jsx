@@ -37,7 +37,7 @@ export default function GenreToggle({ genres, selected, onSelect }) {
             className={`inline-flex min-w-0 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full border px-1.5 py-1.5 text-[11px] font-semibold transition-all duration-200 sm:flex-none sm:gap-1.5 sm:px-4 sm:text-xs ${
               isActive
                 ? 'scale-105 border-transparent bg-gradient-to-b from-brand to-brand-deep text-zinc-50 shadow-[0_4px_12px_rgba(18,64,234,0.35)]'
-                : 'border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-200'
+                : 'border-white/10 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200 active:scale-95'
             }`}
           >
             <Icon className="hidden h-3.5 w-3.5 flex-none min-[420px]:block" />

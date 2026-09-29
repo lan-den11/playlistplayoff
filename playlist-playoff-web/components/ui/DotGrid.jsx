@@ -8,6 +8,7 @@ gsap.registerPlugin(InertiaPlugin);
 
 const TAU = Math.PI * 2;
 const OFFSCREEN = -9999;
+const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, label, summary, iframe, [role="button"], [role="link"]';
 
 const throttle = (func, limit) => {
   let lastCall = 0;
@@ -243,6 +244,7 @@ const DotGrid = ({
     };
 
     const onClick = (e) => {
+      if (e.target instanceof Element && e.target.closest(INTERACTIVE_SELECTOR)) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
