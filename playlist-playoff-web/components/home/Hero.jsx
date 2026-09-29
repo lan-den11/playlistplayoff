@@ -14,7 +14,7 @@ const HEADLINE_WORDS = 'Turn any playlist into a showdown.'.split(' ');
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
+  show: { transition: { staggerChildren: 0.07 } },
 };
 
 const item = {
@@ -24,7 +24,7 @@ const item = {
 
 const headline = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
+  show: { transition: { staggerChildren: 0.04 } },
 };
 
 const word = {
@@ -65,13 +65,13 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
   }, [showScrollHint]);
 
   return (
-    <section className={`relative px-6 pb-14 md:px-8 ${showNavbar ? 'pt-4' : 'pt-6'}`}>
+    <section className={`relative px-6 pb-10 md:px-8 md:pb-14 ${showNavbar ? 'pt-3 md:pt-4' : 'pt-6'}`}>
       <FitToScreen reserve={reservedPx}>
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 md:grid-cols-2 md:gap-16">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-4 md:grid-cols-2 md:gap-16">
           <m.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
             <m.h1
               variants={headline}
-              className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
+              className="font-display text-[1.7rem] font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
             >
               {HEADLINE_WORDS.map((w, i) => (
                 <Fragment key={i}>
@@ -85,12 +85,12 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
 
             <m.p
               variants={item}
-              className="mx-auto mt-3 max-w-lg text-sm text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
+              className="mx-auto mt-2.5 max-w-lg text-[13px] leading-snug text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
             >
               Battle tracks head-to-head until one takes the crown. Connect your listening history to generate personalized matchups.
             </m.p>
 
-            <m.div variants={item} className="mt-5 flex justify-center md:mt-8 md:justify-start">
+            <m.div variants={item} className="mt-4 flex justify-center md:mt-8 md:justify-start">
               <GradientButton gradient="brand" onClick={() => (isOpen ? router.push('/bracket') : scrollToWaitlist())}>
                 {isOpen ? 'Start a bracket' : 'Join the waitlist'}
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />

@@ -24,16 +24,22 @@ export async function generateMetadata({ searchParams }) {
   if (!result) return { robots };
 
   const { champion } = result;
-  const title = `${champion.name} took the crown — Playlist Playoff`;
+  const title = `Playlist Playoff Champion — ${champion.name}`;
   const description = 'See every pick in this bracket, then build your own.';
-  const images = champion.imageLarge ? [champion.imageLarge] : undefined;
+  const imageUrl = `/share/image?b=${encodeURIComponent(b)}`;
 
   return {
     title,
     description,
     robots,
-    openGraph: { type: 'website', siteName: 'Playlist Playoff', title, description, images },
-    twitter: { card: images ? 'summary_large_image' : 'summary', title, description, images },
+    openGraph: {
+      type: 'website',
+      siteName: 'Playlist Playoff',
+      title,
+      description,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: { card: 'summary_large_image', title, description, images: [imageUrl] },
   };
 }
 

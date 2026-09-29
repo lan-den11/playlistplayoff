@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { m } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 import Glow from '../ui/Glow';
-import { useReveal } from '../../hooks/useReveal';
+import Reveal from '../ui/Reveal';
 
 function TrackDetailsMockup() {
   const [albumArt, setAlbumArt] = useState(null);
@@ -74,20 +73,12 @@ function TrackDetailsMockup() {
 }
 
 export default function Differentiator() {
-  const { container, item, viewport } = useReveal({ stagger: 0.15, amount: 0.35 });
-
   return (
     <section className="relative overflow-x-clip px-6 py-14 md:px-8 md:py-20">
       <Glow tone="brand" className="-top-16 right-0 h-[28rem] w-[46rem] max-w-full opacity-70" />
 
-      <m.div
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={viewport}
-        className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16"
-      >
-        <m.div variants={item} className="text-center md:text-left">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
+        <Reveal amount={0.35} className="text-center md:text-left">
           <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
             Not just a vote. Your true taste.
           </h2>
@@ -95,12 +86,12 @@ export default function Differentiator() {
             Link your Last.fm account and every matchup turns personal with your listening data. See what you
             actually listen to, not just what's trending.
           </p>
-        </m.div>
+        </Reveal>
 
-        <m.div variants={item}>
+        <Reveal amount={0.35} delay={0.15}>
           <TrackDetailsMockup />
-        </m.div>
-      </m.div>
+        </Reveal>
+      </div>
     </section>
   );
 }

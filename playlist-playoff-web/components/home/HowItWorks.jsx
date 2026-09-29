@@ -1,10 +1,9 @@
 'use client';
 
-import { m } from 'framer-motion';
 import { Link2, Play, Trophy } from 'lucide-react';
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Glow from '../ui/Glow';
-import { useReveal } from '../../hooks/useReveal';
+import Reveal from '../ui/Reveal';
 
 const STEPS = [
   {
@@ -28,29 +27,21 @@ const STEPS = [
 ];
 
 export default function HowItWorks() {
-  const { container, item, viewport } = useReveal({ stagger: 0.12 });
-
   return (
     <section className="relative overflow-x-clip px-6 pb-14 pt-8 md:px-8 md:pb-20 md:pt-12">
       <Glow tone="brand" className="-top-28 left-1/2 h-[26rem] w-[56rem] max-w-full -translate-x-1/2" />
 
-      <div className="mx-auto mb-10 max-w-2xl text-center md:mb-12">
+      <Reveal className="mx-auto mb-10 max-w-2xl text-center md:mb-12">
         <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
           How it works
         </h2>
-      </div>
+      </Reveal>
 
-      <m.div
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={viewport}
-        className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3"
-      >
-        {STEPS.map((step) => (
-          <m.div
+      <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3">
+        {STEPS.map((step, i) => (
+          <Reveal
             key={step.number}
-            variants={item}
+            delay={i * 0.12}
             className="relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
           >
             <div className="flex items-center justify-between">
@@ -62,9 +53,9 @@ export default function HowItWorks() {
               {step.title}
             </h3>
             <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">{step.body}</p>
-          </m.div>
+          </Reveal>
         ))}
-      </m.div>
+      </div>
     </section>
   );
 }

@@ -5,7 +5,7 @@ import { m } from 'framer-motion';
 import { ChevronDown, Music2, UserCircle, ListMusic, CreditCard } from 'lucide-react';
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Glow from '../ui/Glow';
-import { useReveal } from '../../hooks/useReveal';
+import Reveal from '../ui/Reveal';
 
 const FAQS = [
   {
@@ -30,12 +30,13 @@ const FAQS = [
   },
 ];
 
-function FaqItem({ item: faqItem, reveal, index, isOpen, onToggle }) {
+function FaqItem({ item: faqItem, delay, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
 
   return (
-    <m.div
-      variants={reveal}
+    <Reveal
+      delay={delay}
+      distance={20}
       className={`rounded-2xl border backdrop-blur-md transition-colors duration-300 ${
         isOpen ? 'border-brand/30 bg-brand/5' : 'border-white/10 bg-white/5'
       }`}
@@ -76,42 +77,39 @@ function FaqItem({ item: faqItem, reveal, index, isOpen, onToggle }) {
           </p>
         </div>
       </div>
-    </m.div>
+    </Reveal>
   );
 }
 
 export default function Faq() {
   const [openIndex, setOpenIndex] = useState(0);
-  const { container, item, viewport } = useReveal({ stagger: 0.1, distance: 20 });
 
   return (
     <section className="relative overflow-x-clip">
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
-      <m.div
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={viewport}
-        className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20"
-      >
-        <m.h2 variants={item} className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
+      <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
+        <Reveal
+          as="h2"
+          distance={20}
+          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
+        >
           Your questions, our answers
-        </m.h2>
+        </Reveal>
 
         <div className="relative space-y-3">
           {FAQS.map((faqItem, i) => (
             <FaqItem
               key={faqItem.q}
               item={faqItem}
-              reveal={item}
+              delay={(i + 1) * 0.1}
               index={i}
               isOpen={openIndex === i}
               onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
             />
           ))}
         </div>
-      </m.div>
+      </div>
     </section>
   );
 }

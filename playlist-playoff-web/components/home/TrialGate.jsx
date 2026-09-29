@@ -19,7 +19,7 @@ export default function TrialGate({ championTrack, mainBracketRounds }) {
       ? `I crowned "${championTrack.name}" by ${championTrack.artists} as my champion!`
       : 'Check out my music bracket result!';
 
-    const shareData = { title: 'Music Bracket Champion', text, url };
+    const shareData = { title: 'Playlist Playoff Champion', text, url };
 
     if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.(shareData)) {
       try {
