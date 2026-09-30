@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAFKhvemkWbseY2rX';
 const TOKEN_WAIT_MS = 10000;
+
+export const TURNSTILE_ACTION = 'waitlist';
 
 let scriptPromise = null;
 
@@ -39,8 +41,11 @@ export function useTurnstile() {
       if (cancelled || !turnstile || !containerRef.current) return;
       widgetRef.current = turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,
+        action: TURNSTILE_ACTION,
         theme: 'dark',
         appearance: 'interaction-only',
+        retry: 'auto',
+        'refresh-expired': 'auto',
         callback: (token) => {
           tokenRef.current = token;
         },

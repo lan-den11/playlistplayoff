@@ -7,10 +7,11 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 254;
 const MAX_SOURCE_LENGTH = 64;
 const MAX_TOKEN_LENGTH = 2048;
+const TURNSTILE_ACTION = 'waitlist';
 
 async function verifyTurnstile(token, ip) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret || !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) return true;
+  const secret = process.env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET;
+  if (!secret) return true;
   if (typeof token !== 'string' || !token || token.length > MAX_TOKEN_LENGTH) return false;
   try {
     const body = new URLSearchParams({ secret, response: token });
@@ -20,10 +21,27 @@ async function verifyTurnstile(token, ip) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body,
       cache: 'no-store',
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(10000),
     });
+    if (!resp.ok) throw new Error(`siteverify ${resp.status}`);
     const data = await resp.json();
-    return data.success === true;
+    if (data.success !== true) {
+      console.error('Turnstile rejected token:', (data['error-codes'] || []).join(',') || 'unknown');
+      return false;
+    }
+    if (data.action !== TURNSTILE_ACTION) {
+      console.error('Turnstile action mismatch:', data.action);
+      return false;
+    }
+    const hostnames = (process.env.TURNSTILE_HOSTNAMES || '')
+      .split(',')
+      .map((h) => h.trim())
+      .filter(Boolean);
+    if (hostnames.length && !hostnames.includes(data.hostname)) {
+      console.error('Turnstile hostname mismatch:', data.hostname);
+      return false;
+    }
+    return true;
   } catch (e) {
     console.error('Turnstile verification failed:', e.message);
     return false;
