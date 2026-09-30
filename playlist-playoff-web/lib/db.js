@@ -49,6 +49,10 @@ export function getPool() {
       connectionString: process.env.DATABASE_URL,
       ssl: sslConfig(),
     });
+    // Without a listener, an idle client error (e.g. 57P01 on a DB restart) is an uncaught exception.
+    pool.on('error', (e) => {
+      console.error('Idle database client error:', e.code, e.message);
+    });
     ensureTablePromise = (async () => {
       for (const sql of SETUP_STEPS) {
         try {
