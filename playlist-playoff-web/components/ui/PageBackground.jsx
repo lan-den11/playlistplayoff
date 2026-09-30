@@ -52,17 +52,19 @@ export default function PageBackground() {
   }, []);
 
   useEffect(() => {
-    if (!coarse) return;
+    const root = document.documentElement;
     let timer = 0;
     let active = false;
     const onScroll = () => {
       if (!active) {
         active = true;
+        root.dataset.scrolling = '1';
         setScrolling(true);
       }
       clearTimeout(timer);
       timer = setTimeout(() => {
         active = false;
+        delete root.dataset.scrolling;
         setScrolling(false);
       }, SCROLL_IDLE_MS);
     };
@@ -70,8 +72,9 @@ export default function PageBackground() {
     return () => {
       window.removeEventListener('scroll', onScroll);
       clearTimeout(timer);
+      delete root.dataset.scrolling;
     };
-  }, [coarse]);
+  }, []);
 
   useEffect(() => {
     if (tier === null) return;

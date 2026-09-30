@@ -39,7 +39,7 @@ export default async function HomePage() {
   genres.forEach((genre) => warmPlaylist(genre.playlistId, TRENDING_CACHE_TTL_MS));
 
   return (
-    <main className="relative isolate min-h-screen overflow-x-hidden bg-zinc-950">
+    <main className="relative isolate min-h-screen overflow-x-clip bg-zinc-950">
       <PageBackground />
       {SHOW_NAVBAR && <Navbar accessMode={accessMode} />}
       <Hero trendingPlaylistId={trendingPlaylistId} genres={genres} accessMode={accessMode} showNavbar={SHOW_NAVBAR} />

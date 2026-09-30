@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
-import { useWaitlist } from '@clerk/nextjs';
 import { Award, Check, Loader2 } from 'lucide-react';
 import { captureEvent } from '../../lib/posthog-client';
 import { saveWaitlistSignup } from '../../lib/api';
@@ -16,13 +15,10 @@ export default function WaitlistForm({
   busyLabel = 'Joining…',
   className = '',
 }) {
-  const { waitlist, errors, fetchStatus } = useWaitlist();
   const [email, setEmail] = useState('');
+  const [joined, setJoined] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState('');
-
-  const joined = Boolean(waitlist?.id);
-  const isSubmitting = fetchStatus === 'fetching';
-  const errorText = localError || errors?.fields?.emailAddress?.longMessage;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,14 +28,18 @@ export default function WaitlistForm({
       return;
     }
     setLocalError('');
-    const { error } = await waitlist.join({ emailAddress: value });
-    if (error) {
+    setIsSubmitting(true);
+    try {
+      await saveWaitlistSignup({ email: value, source });
+      setJoined(true);
+      captureEvent('waitlist_joined', { source });
+    } catch (error) {
       captureEvent('waitlist_join_failed', { source });
-      console.error('Failed to join waitlist:', error);
-      return;
+      console.error('Failed to join waitlist:', error.message);
+      setLocalError(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
-    saveWaitlistSignup({ email: value, source });
-    captureEvent('waitlist_joined', { source });
   }
 
   return (
@@ -86,14 +86,14 @@ export default function WaitlistForm({
                 </GradientButton>
               </form>
               <p className="text-center text-xs text-zinc-400">
-                No spam. We'll only email you when we launch.
+                No spam. We'll only email you with launch news and updates.
               </p>
             </m.div>
           )}
         </AnimatePresence>
       </div>
 
-      {errorText && !joined && <p className="mt-3 text-center text-xs text-rose-400">{errorText}</p>}
+      {localError && !joined && <p className="mt-3 text-center text-xs text-rose-400">{localError}</p>}
     </div>
   );
 }

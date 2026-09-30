@@ -6,6 +6,7 @@ const isAlwaysPublicRoute = createRouteMatcher([
   '/',
   '/share(.*)',
   '/api/health',
+  '/api/waitlist',
   '/api/debug(.*)',
   '/robots.txt',
   '/sitemap.xml',

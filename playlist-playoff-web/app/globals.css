@@ -3,18 +3,12 @@
 @tailwind utilities;
 
 html {
-  scroll-behavior: smooth;
   scrollbar-gutter: stable;
-}
-
-html,
-body {
   overflow-x: hidden;
 }
 
 @supports (overflow: clip) {
-  html,
-  body {
+  html {
     overflow-x: clip;
   }
 }
@@ -47,6 +41,12 @@ html[data-perf='lite'] * {
 html[data-perf='lite'] .animate-float,
 html[data-perf='lite'] .animate-glow-pulse {
   animation: none;
+}
+
+html[data-scrolling] [class*='animate-float'],
+html[data-scrolling] [class*='animate-glow-pulse'],
+html[data-scrolling] [class*='animate-nudge'] {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {

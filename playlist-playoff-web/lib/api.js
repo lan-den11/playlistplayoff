@@ -58,5 +58,5 @@ export function saveWaitlistSignup({ email, source }) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, source, distinctId: getDistinctId(), optedOut: isCapturingOptedOut() }),
-  }).catch(() => {});
+  });
 }
