@@ -5,11 +5,13 @@ import HowItWorks from '../components/home/HowItWorks';
 import Differentiator from '../components/home/Differentiator';
 import MultiplayerTeaser from '../components/home/MultiplayerTeaser';
 import Faq from '../components/home/Faq';
+import Footer from '../components/home/Footer';
 import PageBackground from '../components/ui/PageBackground';
 import BackToTop from '../components/ui/BackToTop';
 import { getTrendingPlaylistId, getAppAccessMode, getGenrePlaylists } from '../lib/posthog-server';
 import { TRENDING_PLAYLIST_ID, getAppToken } from '../lib/spotifyAuth';
 import { warmPlaylist } from '../lib/spotifyPlaylist';
+import { syncHeroSnapshots } from '../lib/heroSnapshots';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +33,7 @@ export default async function HomePage() {
     getGenrePlaylists(),
   ]);
 
+  syncHeroSnapshots([trendingPlaylistId, ...genres.map((genre) => genre.playlistId)]).catch(() => {});
   warmPlaylist(trendingPlaylistId, TRENDING_CACHE_TTL_MS);
   preload(`/api/playlist/${encodeURIComponent(trendingPlaylistId)}/tracks`, {
     as: 'fetch',
@@ -47,6 +50,7 @@ export default async function HomePage() {
       <Differentiator />
       <MultiplayerTeaser />
       <Faq />
+      <Footer />
       <BackToTop />
     </main>
   );

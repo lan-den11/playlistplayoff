@@ -15,22 +15,22 @@ if (!posthogHost && process.env.NODE_ENV === 'development') {
   );
 }
 
-function readInternalFlag() {
+function readInternalParam() {
   try {
     const param = new URLSearchParams(window.location.search).get('internal');
     if (param === '1') localStorage.setItem('ppInternal', '1');
     if (param === '0') localStorage.removeItem('ppInternal');
-    return { param, internal: localStorage.getItem('ppInternal') === '1' };
+    return param;
   } catch {
-    return { param: null, internal: false };
+    return null;
   }
 }
 
-const { param: internalParam, internal: isInternalDevice } = readInternalFlag();
+const internalParam = readInternalParam();
 
 if (posthogToken && posthogHost) {
   posthog.init(posthogToken, {
-    opt_out_capturing_by_default: isInternalDevice || process.env.NODE_ENV === 'development',
+    opt_out_capturing_by_default: true,
     api_host: '/ingest',
     ui_host: posthogHost.replace(/\/$/, '').replace('.i.posthog.com', '.posthog.com'),
     defaults: '2026-01-30',

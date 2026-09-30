@@ -1,9 +1,17 @@
-import { extractPlaylistId } from '../../../../../lib/spotifyAuth';
+import { extractPlaylistId, isValidPlaylistId } from '../../../../../lib/spotifyAuth';
 import { getPlaylist } from '../../../../../lib/spotifyPlaylist';
+import { limited } from '../../../../../lib/rateLimit';
 
-export async function GET(_request, { params }) {
+export async function GET(request, { params }) {
+  const blocked = limited(request, 'playlist', 30, 60_000);
+  if (blocked) return blocked;
+
   const { idOrUrl } = await params;
   const playlistId = extractPlaylistId(idOrUrl);
+
+  if (!isValidPlaylistId(playlistId)) {
+    return Response.json({ error: "That doesn't look like a valid Spotify playlist link or ID." }, { status: 400 });
+  }
 
   try {
     const data = await getPlaylist(playlistId);
@@ -14,7 +22,7 @@ export async function GET(_request, { params }) {
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+          'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
         },
       }
     );

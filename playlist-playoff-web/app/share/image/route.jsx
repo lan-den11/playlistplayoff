@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { buildRounds, decodeBracket } from '../../../lib/shareBracket';
 import { getTracksByIds } from '../../../lib/spotifyTracks';
+import { limited } from '../../../lib/rateLimit';
 
 const CROWN_PATHS = [
   'M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z',
@@ -28,6 +29,9 @@ function Crown({ size, style }) {
 }
 
 export async function GET(request) {
+  const blocked = limited(request, 'share-image', 20, 60_000);
+  if (blocked) return blocked;
+
   const code = new URL(request.url).searchParams.get('b');
   let champion = null;
 

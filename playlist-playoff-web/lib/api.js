@@ -53,10 +53,16 @@ export function fetchMatchupCounter() {
   return request('/api/counters/matchup');
 }
 
-export function saveWaitlistSignup({ email, source }) {
+export function saveWaitlistSignup({ email, source, turnstileToken }) {
   return request('/api/waitlist', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, source, distinctId: getDistinctId(), optedOut: isCapturingOptedOut() }),
+    body: JSON.stringify({
+      email,
+      source,
+      turnstileToken: turnstileToken || null,
+      distinctId: getDistinctId(),
+      optedOut: isCapturingOptedOut(),
+    }),
   });
 }

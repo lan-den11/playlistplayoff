@@ -1,14 +1,24 @@
 import axios from 'axios';
 import { getAppToken } from '../../../../../lib/spotifyAuth';
+import { limited } from '../../../../../lib/rateLimit';
 
-export async function GET(_request, { params }) {
+const USERNAME_RE = /^[A-Za-z0-9._:-]{1,64}$/;
+const MAX_PAGES = 10;
+
+export async function GET(request, { params }) {
+  const blocked = limited(request, 'user-playlists', 20, 60_000);
+  if (blocked) return blocked;
+
   const { username } = await params;
+  if (!USERNAME_RE.test(username)) {
+    return Response.json({ error: 'Enter a valid Spotify username.' }, { status: 400 });
+  }
 
   try {
     const token = await getAppToken();
     let items = [];
     let url = `https://api.spotify.com/v1/users/${encodeURIComponent(username)}/playlists?limit=50`;
-    while (url) {
+    for (let page = 0; url && page < MAX_PAGES; page++) {
       const resp = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
       items = items.concat(resp.data.items);
       url = resp.data.next;

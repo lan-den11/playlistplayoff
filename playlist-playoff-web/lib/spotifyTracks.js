@@ -3,7 +3,15 @@ import { getAppToken } from './spotifyAuth';
 
 const cache = (globalThis.__trackStore ??= new Map());
 const TTL_MS = 6 * 60 * 60 * 1000;
+const MISSING_TTL_MS = 10 * 60 * 1000;
+const ERROR_TTL_MS = 30 * 1000;
 const MAX_ENTRIES = 200;
+
+function remember(id, track, ttlMs) {
+  cache.delete(id);
+  cache.set(id, { track, expiresAt: Date.now() + ttlMs });
+  while (cache.size > MAX_ENTRIES) cache.delete(cache.keys().next().value);
+}
 
 async function fetchTrack(id, headers) {
   const hit = cache.get(id);
@@ -18,11 +26,12 @@ async function fetchTrack(id, headers) {
       image: images[images.length - 1]?.url || null,
       imageLarge: images[0]?.url || null,
     };
-    cache.set(id, { track, expiresAt: Date.now() + TTL_MS });
-    while (cache.size > MAX_ENTRIES) cache.delete(cache.keys().next().value);
+    remember(id, track, TTL_MS);
     return track;
   } catch (e) {
-    console.error('Share track lookup error:', e.response?.status, e.message);
+    const status = e.response?.status;
+    console.error('Share track lookup error:', status, e.message);
+    remember(id, null, status === 400 || status === 404 ? MISSING_TTL_MS : ERROR_TTL_MS);
     return null;
   }
 }

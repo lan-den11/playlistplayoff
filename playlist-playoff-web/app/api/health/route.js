@@ -1,6 +1,9 @@
 import { getPool } from '../../../lib/db';
+import { syncHeroSnapshots } from '../../../lib/heroSnapshots';
 
 export async function GET() {
+  syncHeroSnapshots().catch(() => {});
+
   const pool = getPool();
   if (!pool) return Response.json({ ok: true, database: 'not configured' });
   try {

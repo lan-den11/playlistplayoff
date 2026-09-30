@@ -5,9 +5,11 @@ import { getAppAccessMode } from './lib/posthog-server';
 const isAlwaysPublicRoute = createRouteMatcher([
   '/',
   '/share(.*)',
+  '/privacy',
+  '/terms',
   '/api/health',
   '/api/waitlist',
-  '/api/debug(.*)',
+  '/api/consent',
   '/robots.txt',
   '/sitemap.xml',
   '/opengraph-image(.*)',
@@ -16,6 +18,10 @@ const isAlwaysPublicRoute = createRouteMatcher([
 const isGameplayRoute = createRouteMatcher(['/bracket(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
+  if (req.nextUrl.pathname.startsWith('/api/debug')) {
+    return new NextResponse('Not found', { status: 404 });
+  }
+
   if (isAlwaysPublicRoute(req)) return;
 
   const mode = await getAppAccessMode();

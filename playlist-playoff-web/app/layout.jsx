@@ -2,6 +2,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import MotionProvider from '../components/MotionProvider';
 import PostHogIdentity from '../components/PostHogIdentity';
+import ConsentBanner from '../components/ui/ConsentBanner';
 import { SITE_URL } from '../lib/site';
 import './globals.css';
 
@@ -95,7 +96,10 @@ export default function RootLayout({ children }) {
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
         <body className="font-sans antialiased">
           <PostHogIdentity />
-          <MotionProvider>{children}</MotionProvider>
+          <MotionProvider>
+            {children}
+            <ConsentBanner />
+          </MotionProvider>
         </body>
       </html>
     </ClerkProvider>

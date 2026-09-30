@@ -128,15 +128,6 @@ function ChampionReveal({ championTrack, elRef, height, loading }) {
         <div className="min-w-0">
           <p className="truncate font-display text-base font-bold text-zinc-50">{championTrack.name}</p>
           <p className="truncate text-xs text-zinc-400">{championTrack.artists}</p>
-
-          <m.p
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-2 text-[11px] font-medium text-emerald-400"
-          >
-            Contrarian pick! Only 8% chose this track.
-          </m.p>
         </div>
       )}
     </m.div>

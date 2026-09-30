@@ -26,7 +26,7 @@ const FAQS = [
   {
     icon: CreditCard,
     q: 'Will this be free?',
-    a: "Yes - the free tier will cover standard-sized solo brackets. Premium unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a free week of premium the day we launch.",
+    a: "Yes - the free tier will cover standard-sized solo brackets. Playoff Pro unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a free week of Playoff Pro the day we launch.",
   },
 ];
 

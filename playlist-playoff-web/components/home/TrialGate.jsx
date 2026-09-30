@@ -85,7 +85,7 @@ export default function TrialGate({ championTrack, mainBracketRounds }) {
           Save your result & get early access.
         </p>
         <p className="text-xs text-zinc-400">
-          Build full brackets from any playlist. Join the waitlist below to lock in <strong className="font-semibold text-zinc-200">1 week of Premium at launch</strong>.
+          Build full brackets from any playlist. Join the waitlist below to lock in <strong className="font-semibold text-zinc-200">1 week of Playoff Pro at launch</strong>.
         </p>
       </div>
 

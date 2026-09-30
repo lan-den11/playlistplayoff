@@ -5,6 +5,8 @@ let tokenRequest = null;
 
 export const TRENDING_PLAYLIST_ID = '37i9dQZF1FwRJQfEovuoNH';
 
+const PLAYLIST_ID_RE = /^[A-Za-z0-9]{22}$/;
+
 export async function getAppToken() {
   if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
     throw new Error('Spotify credentials not configured — set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env.local.');
@@ -38,4 +40,8 @@ export async function getAppToken() {
 export function extractPlaylistId(input) {
   const match = String(input).match(/playlist[/:]([a-zA-Z0-9]+)/);
   return match ? match[1] : String(input).trim();
+}
+
+export function isValidPlaylistId(id) {
+  return PLAYLIST_ID_RE.test(String(id));
 }
