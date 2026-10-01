@@ -1,5 +1,6 @@
 import { getPool } from './db';
 import { readSnapshot, saveSnapshot } from './snapshotStore';
+import { pruneStaleSnapshots } from './snapshotPrune';
 import { loadLive } from './spotifyPlaylist';
 import { TRENDING_PLAYLIST_ID } from './spotifyAuth';
 import { getTrendingPlaylistId, getGenrePlaylists, captureServerEvent } from './posthog-server';
@@ -10,9 +11,10 @@ const RETRY_WINDOW_MINUTES = 6 * 60;
 const RETRY_EVERY_MS = 30 * 60 * 1000;
 const FAILURE_BACKOFF_MS = 5 * 60 * 1000;
 const CHECK_INTERVAL_MS = 10 * 60 * 1000;
+const PRUNE_EVERY_MS = 60 * 60 * 1000;
 const WEEKDAYS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 
-const state = (globalThis.__heroSnapshotState ??= { inflight: new Map(), lastAttempt: new Map(), timer: null });
+const state = (globalThis.__heroSnapshotState ??= { inflight: new Map(), lastAttempt: new Map(), timer: null, lastPrune: 0 });
 
 const formatter = new Intl.DateTimeFormat('en-US', {
   timeZone: TIME_ZONE,
@@ -118,8 +120,22 @@ function startScheduler() {
   state.timer.unref?.();
 }
 
+async function pruneOld(activeIds, snapshots) {
+  if (!activeIds.length || !snapshots.every(Boolean)) return;
+  if (Date.now() - (state.lastPrune || 0) < PRUNE_EVERY_MS) return;
+  state.lastPrune = Date.now();
+  try {
+    const removed = await pruneStaleSnapshots(activeIds);
+    if (removed) console.log(`[hero-snapshot] pruned ${removed} stale snapshot row(s)`);
+  } catch (e) {
+    console.error('[hero-snapshot] prune failed:', e.message);
+  }
+}
+
 export async function syncHeroSnapshots(ids) {
   startScheduler();
   const list = ids ?? (await resolveHeroIds());
-  await Promise.all([...new Set(list.filter(Boolean))].map(ensureHeroSnapshot));
+  const activeIds = [...new Set(list.filter(Boolean))];
+  const snapshots = await Promise.all(activeIds.map(ensureHeroSnapshot));
+  await pruneOld(activeIds, snapshots);
 }

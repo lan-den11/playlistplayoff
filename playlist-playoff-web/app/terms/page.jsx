@@ -7,7 +7,7 @@ export const metadata = {
   alternates: { canonical: '/terms' },
 };
 
-const UPDATED = 'September 29, 2026';
+const UPDATED = 'September 30, 2026';
 
 export default function TermsPage() {
   return (
@@ -39,12 +39,13 @@ export default function TermsPage() {
           Playoff Pro is a planned paid plan. Its features, pricing, and launch date have not been finalized and may change.
         </p>
         <List>
+          <li>By joining the waitlist, you agree to receive launch news and updates by email, and you can opt out at any time by contacting us.</li>
           <li>When you join the waitlist, we reserve one free week of Playoff Pro for your email address, redeemable when Playoff Pro launches.</li>
           <li>No payment method is required, and the free week will not turn into a paid subscription unless you choose to subscribe.</li>
           <li>The offer is limited to one free week per person, is non-transferable, and has no cash value.</li>
           <li>
-            We may change, limit, or end the offer before launch, and may withhold it if we reasonably suspect duplicate, automated, or
-            fraudulent sign-ups.
+            We may change, limit, or end the offer before launch, and may withhold it or remove a waitlist entry if we reasonably suspect
+            duplicate, automated, or fraudulent sign-ups or a breach of these terms.
           </li>
         </List>
       </Section>
@@ -52,7 +53,7 @@ export default function TermsPage() {
       <Section title="Accounts">
         <p>
           If you create an account, you are responsible for keeping your sign-in details secure and for activity under your account. Tell us
-          promptly if you suspect unauthorized use.
+          promptly if you suspect unauthorized use. You must give accurate information and may not share your account or impersonate others.
         </p>
       </Section>
 
@@ -107,6 +108,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
+
       <Section title="Termination">
         <p>
           We may suspend or end your access to the Service at any time, including for violations of these terms. You may stop using the Service
@@ -125,6 +127,13 @@ export default function TermsPage() {
         <p>
           These terms are governed by the laws of the jurisdiction where the operator of Playlist Playoff is established, without regard to
           conflict-of-law rules. Mandatory consumer protection laws in your country of residence continue to apply.
+        </p>
+      </Section>
+
+      <Section title="General">
+        <p>
+          These terms and the Privacy Policy are the entire agreement between you and us about the Service. If a part of these terms is found
+          unenforceable, the rest stays in effect.
         </p>
       </Section>
 

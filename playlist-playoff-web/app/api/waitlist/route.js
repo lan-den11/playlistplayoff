@@ -8,6 +8,7 @@ const MAX_EMAIL_LENGTH = 254;
 const MAX_SOURCE_LENGTH = 64;
 const MAX_TOKEN_LENGTH = 2048;
 const TURNSTILE_ACTION = 'waitlist';
+const JOIN_ERROR = 'Could not join the waitlist right now. Please try again.';
 
 async function verifyTurnstile(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET;
@@ -48,16 +49,28 @@ async function verifyTurnstile(token, ip) {
   }
 }
 
-async function addToClerk(email) {
+async function checkClerk(email) {
   try {
     const client = await clerkClient();
-    await client.waitlistEntries.create({ emailAddress: email });
-    return true;
+    let entry;
+    try {
+      entry = await client.waitlistEntries.create({ emailAddress: email });
+    } catch (e) {
+      if (!/exist|duplicate/i.test(e?.errors?.[0]?.code || '')) throw e;
+      const found = await client.waitlistEntries.list({ query: email });
+      entry = (found.data || []).find((x) => x.emailAddress?.toLowerCase() === email);
+    }
+    if (!entry) return { ok: true, blocked: false };
+    if (entry.status === 'rejected' || entry.invitation?.status === 'revoked') return { ok: true, blocked: true };
+    if (entry.status !== 'pending') {
+      const res = await client.users.getUserList({ emailAddress: [email], limit: 1 });
+      const user = (Array.isArray(res) ? res : res.data || [])[0];
+      if (user?.banned || user?.locked) return { ok: true, blocked: true };
+    }
+    return { ok: true, blocked: false };
   } catch (e) {
-    const err = e?.errors?.[0];
-    if (/exist|duplicate/i.test(err?.code || '')) return true;
-    console.error('Failed to add waitlist entry to Clerk:', err?.longMessage || e.message);
-    return false;
+    console.error('Failed to check Clerk waitlist entry:', e?.errors?.[0]?.longMessage || e.message);
+    return { ok: false, blocked: false };
   }
 }
 
@@ -96,11 +109,14 @@ export async function POST(request) {
     return Response.json({ error: "We couldn't verify you're human. Refresh the page and try again." }, { status: 400 });
   }
 
-  const pool = getPool();
-  const [clerkOk, dbOk] = await Promise.all([addToClerk(email), addToDatabase(pool, email, source)]);
+  const clerk = await checkClerk(email);
+  if (clerk.blocked) return Response.json({ error: JOIN_ERROR }, { status: 403 });
 
-  if (!(pool ? dbOk : clerkOk)) {
-    return Response.json({ error: 'Could not join the waitlist right now. Please try again.' }, { status: 500 });
+  const pool = getPool();
+  const dbOk = await addToDatabase(pool, email, source);
+
+  if (!(pool ? dbOk : clerk.ok)) {
+    return Response.json({ error: JOIN_ERROR }, { status: 500 });
   }
 
   if (optedOut === true) return Response.json({ configured: Boolean(pool), ok: true });
