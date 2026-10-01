@@ -12,22 +12,34 @@ export default function LiveCounter({ className = '', compact = false }) {
 
   useEffect(() => {
     let cancelled = false;
+    let busy = false;
     let timer = 0;
 
     async function poll() {
+      if (cancelled || busy || document.hidden) return;
+      busy = true;
       try {
         const data = await fetchMatchupCounter();
         if (cancelled) return;
         setConfigured(Boolean(data.configured));
         if (data.configured) setValue(data.value);
       } catch {}
+      busy = false;
       if (!cancelled) timer = setTimeout(poll, POLL_MS);
     }
 
+    function handleVisibility() {
+      if (document.hidden) return;
+      clearTimeout(timer);
+      poll();
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility);
     poll();
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, []);
 

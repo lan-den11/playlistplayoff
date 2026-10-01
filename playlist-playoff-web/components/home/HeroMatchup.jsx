@@ -179,7 +179,7 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
     }
     autoStartedRef.current = false;
     setRestored(null);
-    bracket.restart();
+    bracket.reset();
     bracket.loadPlaylist(trendingPlaylistId);
   }, [trendingPlaylistId]);
 
@@ -289,7 +289,7 @@ export default function HeroMatchup({ trendingPlaylistId, accessMode = 'hero-onl
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={SPRING}
       >
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:animate-float md:p-5">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl shadow-black/40 md:animate-float md:p-5 md:hover:[animation-play-state:paused]">
           <div className="mb-3 flex min-h-[1.35rem] items-center justify-between gap-2 md:mb-4">
             <p className="flex min-w-0 items-center gap-1.5 text-center font-display text-xs font-bold uppercase tracking-widest text-zinc-300">
               <Flame className="h-3.5 w-3.5 flex-none text-brand-light" />

@@ -4,7 +4,12 @@
 
 html {
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @supports (overflow: clip) {
@@ -20,6 +25,19 @@ body {
 
 iframe {
   border: 0;
+}
+
+button,
+a,
+summary,
+label,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+::selection {
+  background: rgba(18, 64, 234, 0.55);
+  color: #fafafa;
 }
 
 :focus-visible {

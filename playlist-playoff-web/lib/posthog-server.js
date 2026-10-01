@@ -68,11 +68,15 @@ export const GENRE_PLAYLIST_FLAGS = [
 const ACCESS_MODES = ['waitlist-only', 'hero-only', 'unlocked'];
 const DEFAULT_ACCESS_MODE = 'hero-only';
 
-const ACCESS_MODE_CACHE_MS = 30_000;
-const PLAYLIST_CACHE_MS = 60_000;
+const ALL_FLAG_KEYS = [
+  APP_ACCESS_MODE_FLAG_KEY,
+  TRENDING_PLAYLIST_FLAG_KEY,
+  ...GENRE_PLAYLIST_FLAGS.map((g) => g.flagKey),
+];
+const FLAGS_CACHE_MS = 30_000;
 
-let accessModeCache = { value: null, expiresAt: 0 };
-const playlistCaches = new Map();
+let flagsCache = { value: null, expiresAt: 0 };
+let flagsInflight = null;
 
 function safeGetPostHogClient() {
   try {
@@ -82,29 +86,51 @@ function safeGetPostHogClient() {
   }
 }
 
-async function evaluateFlag(flagKey) {
+async function evaluateAllFlags() {
   const clientOrError = safeGetPostHogClient();
   if (!clientOrError) return { error: 'PostHog is not configured (missing env vars) — using fallback.' };
   if (clientOrError.error) return { error: `PostHog client failed to initialize: ${clientOrError.error}` };
 
-  const posthog = clientOrError;
   hookShutdown();
   try {
-    const flags = await posthog.evaluateFlags(GLOBAL_CONFIG_DISTINCT_ID, { flagKeys: [flagKey] });
-    return { raw: flags.getFlag(flagKey), payload: flags.getFlagPayload(flagKey) };
+    const flags = await clientOrError.evaluateFlags(GLOBAL_CONFIG_DISTINCT_ID, { flagKeys: ALL_FLAG_KEYS });
+    return {
+      results: Object.fromEntries(
+        ALL_FLAG_KEYS.map((key) => [key, { raw: flags.getFlag(key), payload: flags.getFlagPayload(key) }])
+      ),
+    };
   } catch (e) {
     return { error: e.message };
   }
 }
 
-export async function getAppAccessMode({ bypassCache = false } = {}) {
-  if (!bypassCache && Date.now() < accessModeCache.expiresAt) return accessModeCache.value;
+function loadFlags({ bypassCache = false } = {}) {
+  if (!bypassCache) {
+    if (Date.now() < flagsCache.expiresAt) return Promise.resolve(flagsCache.value);
+    if (flagsInflight) return flagsInflight;
+  }
 
-  const { raw, error } = await evaluateFlag(APP_ACCESS_MODE_FLAG_KEY);
-  if (error) console.error(`Failed to evaluate "${APP_ACCESS_MODE_FLAG_KEY}" flag, defaulting to "${DEFAULT_ACCESS_MODE}":`, error);
-  const resolved = ACCESS_MODES.includes(raw) ? raw : DEFAULT_ACCESS_MODE;
-  if (!bypassCache) accessModeCache = { value: resolved, expiresAt: Date.now() + ACCESS_MODE_CACHE_MS };
-  return resolved;
+  const task = evaluateAllFlags()
+    .then((value) => {
+      if (value.error) console.error('Failed to evaluate PostHog flags, using fallbacks:', value.error);
+      if (!bypassCache) flagsCache = { value, expiresAt: Date.now() + FLAGS_CACHE_MS };
+      return value;
+    })
+    .finally(() => {
+      if (flagsInflight === task) flagsInflight = null;
+    });
+  if (!bypassCache) flagsInflight = task;
+  return task;
+}
+
+async function flagResult(key, options) {
+  const all = await loadFlags(options);
+  return all.error ? { error: all.error } : all.results[key];
+}
+
+export async function getAppAccessMode({ bypassCache = false } = {}) {
+  const { raw } = await flagResult(APP_ACCESS_MODE_FLAG_KEY, { bypassCache });
+  return ACCESS_MODES.includes(raw) ? raw : DEFAULT_ACCESS_MODE;
 }
 
 function parsePlaylistPayload(payload) {
@@ -117,15 +143,9 @@ function parsePlaylistPayload(payload) {
   return id || null;
 }
 
-async function resolveFlagPlaylistId(flagKey, { bypassCache = false } = {}) {
-  const cached = playlistCaches.get(flagKey);
-  if (!bypassCache && cached && Date.now() < cached.expiresAt) return cached.value;
-
-  const { payload, error } = await evaluateFlag(flagKey);
-  if (error) console.error(`Failed to evaluate "${flagKey}" flag:`, error);
-  const id = error ? null : parsePlaylistPayload(payload);
-  if (!bypassCache) playlistCaches.set(flagKey, { value: id, expiresAt: Date.now() + PLAYLIST_CACHE_MS });
-  return id;
+async function resolveFlagPlaylistId(flagKey, options) {
+  const { payload, error } = await flagResult(flagKey, options);
+  return error ? null : parsePlaylistPayload(payload);
 }
 
 export async function getTrendingPlaylistId(fallbackPlaylistId, { bypassCache = false } = {}) {
@@ -144,11 +164,10 @@ export async function getGenrePlaylists({ bypassCache = false } = {}) {
 }
 
 export async function debugEvaluateFlags() {
-  const [accessMode, trending, ...genres] = await Promise.all([
-    evaluateFlag(APP_ACCESS_MODE_FLAG_KEY),
-    evaluateFlag(TRENDING_PLAYLIST_FLAG_KEY),
-    ...GENRE_PLAYLIST_FLAGS.map((g) => evaluateFlag(g.flagKey)),
-  ]);
+  const all = await loadFlags({ bypassCache: true });
+  const pick = (key) => (all.error ? { error: all.error } : all.results[key]);
+  const accessMode = pick(APP_ACCESS_MODE_FLAG_KEY);
+  const trending = pick(TRENDING_PLAYLIST_FLAG_KEY);
   return {
     posthogConfigured: Boolean(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST),
     posthogHost: process.env.NEXT_PUBLIC_POSTHOG_HOST || null,
@@ -164,12 +183,15 @@ export async function debugEvaluateFlags() {
       resolvedPlaylistId: parsePlaylistPayload(trending.payload),
       error: trending.error ?? null,
     },
-    genrePlaylists: GENRE_PLAYLIST_FLAGS.map((g, i) => ({
-      key: g.key,
-      flagKey: g.flagKey,
-      rawPayload: genres[i].payload ?? null,
-      resolvedPlaylistId: parsePlaylistPayload(genres[i].payload),
-      error: genres[i].error ?? null,
-    })),
+    genrePlaylists: GENRE_PLAYLIST_FLAGS.map((g) => {
+      const flag = pick(g.flagKey);
+      return {
+        key: g.key,
+        flagKey: g.flagKey,
+        rawPayload: flag.payload ?? null,
+        resolvedPlaylistId: parsePlaylistPayload(flag.payload),
+        error: flag.error ?? null,
+      };
+    }),
   };
 }

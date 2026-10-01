@@ -48,7 +48,11 @@ export function getPool() {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       ssl: sslConfig(),
+      max: 5,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
     });
+    pool.on('error', (e) => console.error('Database pool error:', e.message));
     ensureTablePromise = (async () => {
       for (const sql of SETUP_STEPS) {
         try {

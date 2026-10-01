@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import {
   shuffleArray,
   nextPowerOfTwo,
@@ -364,6 +364,11 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = 
     if (state.screen === 'champion') clearSaved();
   }, [state.screen, clearSaved]);
 
+  const reset = useCallback(() => {
+    clearSaved();
+    dispatch({ type: 'RESTART' });
+  }, [clearSaved]);
+
   const analyticsSource = storageKey === TRENDING_HANDOFF_STORAGE_KEY ? 'trending_teaser' : 'playlist_setup';
 
   const loadPlaylist = useCallback(async (idOrUrl) => {
@@ -474,14 +479,14 @@ export function useBracket({ storageKey = DEFAULT_SAVE_KEY, maxPicks = null } = 
     shuffleSwap: () => dispatch({ type: 'SHUFFLE_SWAP' }),
     skipSwap: () => dispatch({ type: 'SKIP_SWAP' }),
     setShowDetails: (value) => dispatch({ type: 'SET_SHOW_DETAILS', value }),
+    reset,
     restart: () => {
       captureEvent('bracket_restarted', {
         bracket_size: state.bracketSize,
         total_matches: state.totalRealMatchesOverall,
         source: analyticsSource,
       });
-      clearSaved();
-      dispatch({ type: 'RESTART' });
+      reset();
     },
     resumeSaved: () => {
       if (savedSnapshot) {

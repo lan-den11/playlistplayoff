@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import GhostFibers from './GhostFibers';
-import DotGrid from './DotGrid';
+import dynamic from 'next/dynamic';
+
+const GhostFibers = dynamic(() => import('./GhostFibers'), { ssr: false });
+const DotGrid = dynamic(() => import('./DotGrid'), { ssr: false });
 
 const TIERS = [
   { dpr: 0.75, fps: 31, lite: false, paused: false },
@@ -134,29 +136,32 @@ export default function PageBackground() {
   return (
     <div aria-hidden="true" className={wrapperClass}>
       {config && (
-        <GhostFibers
-          lineColor="#0A1A6B"
-          glowColor="#1240EA"
-          brightness={1.6}
-          glowIntensity={1.3}
-          speed={0.16}
-          dpr={dpr}
-          fps={config.fps}
-          paused={config.paused || scrolling}
-          className="z-0"
-        />
+        <>
+          <GhostFibers
+            lineColor="#0A1A6B"
+            glowColor="#1240EA"
+            brightness={1.6}
+            glowIntensity={1.3}
+            speed={0.16}
+            dpr={dpr}
+            fps={config.fps}
+            paused={config.paused || scrolling}
+            className="z-0 animate-fade-in"
+          />
+          <div className="absolute inset-0 z-10 opacity-80">
+            <DotGrid
+              dotSize={4.5}
+              gap={28}
+              baseColor="#5C80F7"
+              activeColor="#B4C8FF"
+              proximity={140}
+              shockRadius={coarse ? 0 : 220}
+              shockStrength={4}
+              className="animate-fade-in"
+            />
+          </div>
+        </>
       )}
-      <div className="absolute inset-0 z-10 opacity-80">
-        <DotGrid
-          dotSize={4.5}
-          gap={28}
-          baseColor="#5C80F7"
-          activeColor="#B4C8FF"
-          proximity={140}
-          shockRadius={coarse ? 0 : 220}
-          shockStrength={4}
-        />
-      </div>
       <div className="absolute inset-0 z-20 bg-gradient-to-b from-zinc-950/10 via-zinc-950/55 to-zinc-950/85" />
     </div>
   );

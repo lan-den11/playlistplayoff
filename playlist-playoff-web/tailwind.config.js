@@ -36,12 +36,17 @@ module.exports = {
           from: { transform: 'translateX(-100%)' },
           to: { transform: 'translateX(100%)' },
         },
+        'fade-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
         float: 'float 4s ease-in-out infinite',
         nudge: 'nudge 1.8s ease-in-out infinite',
         shimmer: 'shimmer 1.6s ease-in-out infinite',
+        'fade-in': 'fade-in 0.9s ease-out both',
       },
     },
   },

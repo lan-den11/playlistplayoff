@@ -32,17 +32,17 @@ export default function HowItWorks() {
       <Glow tone="brand" className="-top-28 left-1/2 h-[26rem] w-[56rem] max-w-full -translate-x-1/2" />
 
       <Reveal className="mx-auto mb-10 max-w-2xl text-center md:mb-12">
-        <h2 className="font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
+        <h2 className="text-balance font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
           How it works
         </h2>
       </Reveal>
 
-      <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3">
+      <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3 md:gap-6">
         {STEPS.map((step, i) => (
           <Reveal
             key={step.number}
             delay={i * 0.12}
-            className="group relative rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:hover:[translate:0_-4px]"
+            className="group relative rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-[translate,border-color,background-color] duration-300 hover:border-white/20 hover:bg-white/[0.07] md:p-8 md:hover:[translate:0_-4px]"
           >
             <div className="flex items-center justify-between">
               <span className="transition-transform duration-300 group-hover:scale-110">
@@ -51,10 +51,10 @@ export default function HowItWorks() {
               <span className="font-display text-2xl font-bold text-zinc-300 transition-colors duration-300 group-hover:text-zinc-50">{step.number}</span>
             </div>
 
-            <h3 className="mt-6 font-display text-xl font-semibold tracking-tight text-zinc-50">
+            <h3 className="mt-5 font-display text-xl font-semibold tracking-tight text-zinc-50 md:mt-6">
               {step.title}
             </h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">{step.body}</p>
+            <p className="mt-2 text-pretty text-[15px] leading-relaxed text-zinc-400">{step.body}</p>
           </Reveal>
         ))}
       </div>

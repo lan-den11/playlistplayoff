@@ -78,7 +78,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
           <m.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
             <m.h1
               variants={headline}
-              className="font-display text-[1.7rem] font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
+              className="text-balance font-display text-[1.7rem] font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
             >
               {HEADLINE_WORDS.map((w, i) => (
                 <Fragment key={i}>
@@ -92,7 +92,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
 
             <m.p
               variants={item}
-              className="mx-auto mt-2.5 max-w-lg text-[13px] leading-snug text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
+              className="mx-auto mt-2.5 max-w-lg text-pretty text-[13px] leading-snug text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
             >
               Battle tracks head-to-head until one takes the crown. Connect your listening history to generate personalized matchups.
             </m.p>

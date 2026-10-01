@@ -75,20 +75,27 @@ export default function WaitlistForm({
             >
               <form
                 onSubmit={handleSubmit}
-                className="relative flex w-full items-center rounded-full border border-white/30 bg-white/10 p-1.5 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50"
+                className="relative flex w-full flex-col gap-1.5 rounded-3xl border border-white/30 bg-white/10 p-1.5 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 min-[460px]:flex-row min-[460px]:items-center min-[460px]:rounded-full"
               >
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   inputMode="email"
+                  enterKeyHint="send"
                   autoComplete="email"
                   aria-label="Email address"
                   placeholder="you@example.com"
                   disabled={isSubmitting}
-                  className="min-w-0 flex-1 bg-transparent px-4 py-1 text-sm text-zinc-50 placeholder:text-zinc-400 focus:outline-none disabled:opacity-60"
+                  className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-zinc-50 placeholder:text-zinc-400 focus:outline-none disabled:opacity-60 min-[460px]:py-1 [@media(pointer:coarse)]:text-base"
                 />
-                <GradientButton type="submit" gradient={gradient} size="sm" disabled={isSubmitting} className="flex-none">
+                <GradientButton
+                  type="submit"
+                  gradient={gradient}
+                  size="sm"
+                  disabled={isSubmitting}
+                  className="w-full flex-none min-[460px]:w-auto"
+                >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
                   {isSubmitting ? busyLabel : label}
                 </GradientButton>

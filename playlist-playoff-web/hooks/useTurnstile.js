@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAFKhvemkWbseY2rX';
 const TOKEN_WAIT_MS = 10000;
+const PRELOAD_MARGIN = '600px 0px';
 
 export const TURNSTILE_ACTION = 'waitlist';
 
@@ -34,32 +35,51 @@ export function useTurnstile() {
   const enabled = Boolean(SITE_KEY);
 
   useEffect(() => {
-    if (!enabled) return;
+    const node = containerRef.current;
+    if (!enabled || !node) return;
     let cancelled = false;
+    let observer = null;
 
-    loadTurnstile().then((turnstile) => {
-      if (cancelled || !turnstile || !containerRef.current) return;
-      widgetRef.current = turnstile.render(containerRef.current, {
-        sitekey: SITE_KEY,
-        action: TURNSTILE_ACTION,
-        theme: 'dark',
-        appearance: 'interaction-only',
-        retry: 'auto',
-        'refresh-expired': 'auto',
-        callback: (token) => {
-          tokenRef.current = token;
-        },
-        'expired-callback': () => {
-          tokenRef.current = null;
-        },
-        'error-callback': () => {
-          tokenRef.current = null;
-        },
+    const mount = () => {
+      loadTurnstile().then((turnstile) => {
+        if (cancelled || !turnstile || widgetRef.current !== null) return;
+        widgetRef.current = turnstile.render(node, {
+          sitekey: SITE_KEY,
+          action: TURNSTILE_ACTION,
+          theme: 'dark',
+          appearance: 'interaction-only',
+          retry: 'auto',
+          'refresh-expired': 'auto',
+          callback: (token) => {
+            tokenRef.current = token;
+          },
+          'expired-callback': () => {
+            tokenRef.current = null;
+          },
+          'error-callback': () => {
+            tokenRef.current = null;
+          },
+        });
       });
-    });
+    };
+
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+          mount();
+        },
+        { rootMargin: PRELOAD_MARGIN }
+      );
+      observer.observe(node);
+    } else {
+      mount();
+    }
 
     return () => {
       cancelled = true;
+      observer?.disconnect();
       if (widgetRef.current !== null) {
         try {
           window.turnstile?.remove(widgetRef.current);
