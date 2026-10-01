@@ -86,23 +86,29 @@ export default function Faq() {
     <section className="relative overflow-x-clip">
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
-      <Reveal amount={0.12} distance={20} className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
-        <h2 className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10">
+      <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
+        <Reveal
+          as="h2"
+          amount={0.4}
+          distance={20}
+          className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
+        >
           Your questions, our answers
-        </h2>
+        </Reveal>
 
         <div className="relative space-y-3">
           {FAQS.map((faqItem, i) => (
-            <FaqItem
-              key={faqItem.q}
-              item={faqItem}
-              index={i}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
-            />
+            <Reveal key={faqItem.q} amount={0.2} distance={20} delay={i * 0.1}>
+              <FaqItem
+                item={faqItem}
+                index={i}
+                isOpen={openIndex === i}
+                onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+              />
+            </Reveal>
           ))}
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }

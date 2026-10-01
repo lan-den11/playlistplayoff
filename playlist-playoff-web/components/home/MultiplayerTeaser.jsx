@@ -19,33 +19,20 @@ export default function MultiplayerTeaser() {
         <Glow tone="amber" className="-top-28 left-1/2 h-80 w-[46rem] max-w-[140%] -translate-x-1/2" />
         <Glow tone="brand" className="-bottom-28 right-0 h-72 w-[40rem] max-w-full" />
 
-        <Reveal
-          amount={0.4}
-          className="relative mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300"
-        >
-          <Sparkles className="h-4 w-4 animate-pulse" />
-          Coming soon
-        </Reveal>
+        <Reveal amount={0.25} className="relative">
+          <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
+            <Sparkles className="h-4 w-4 animate-pulse" />
+            Coming soon
+          </span>
 
-        <Reveal
-          as="h2"
-          amount={0.4}
-          delay={0.12}
-          className="relative mt-6 text-balance font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl"
-        >
-          Music taste, revolutionized
-        </Reveal>
-        <Reveal
-          as="p"
-          amount={0.4}
-          delay={0.24}
-          className="relative mx-auto mt-5 max-w-xl text-pretty text-[17px] leading-relaxed text-zinc-400"
-        >
-          Generate personalized brackets using your listening data, and let PlayoffAI uncover insights about your true music taste.
-        </Reveal>
+          <h2 className="mt-6 text-balance font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
+            Music taste, revolutionized
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-pretty text-[17px] leading-relaxed text-zinc-400">
+            Generate personalized brackets using your listening data, and let PlayoffAI uncover insights about your true music taste.
+          </p>
 
-        <Reveal amount={0.4} delay={0.36}>
-          <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Claim My Spot" className="relative mt-9" />
+          <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Claim My Spot" className="mt-9" />
         </Reveal>
       </div>
     </m.section>
