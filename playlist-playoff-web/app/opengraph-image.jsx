@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import BrandIcon from '../components/ui/BrandIcon';
 
 export const alt = 'Playlist Playoff — Turn any playlist into a showdown';
 export const size = { width: 1200, height: 630 };
@@ -23,13 +24,31 @@ export default function OpengraphImage() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div
             style={{
+              position: 'relative',
               width: 56,
               height: 56,
               borderRadius: 18,
-              backgroundImage: 'linear-gradient(180deg, #4d74ff 0%, #0A1A6B 100%)',
               marginRight: 18,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              backgroundImage: 'linear-gradient(180deg, #4d74ff 0%, #0A1A6B 100%)',
+              border: '1px solid rgba(255,255,255,0.25)',
             }}
-          />
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '55%',
+                backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
+              }}
+            />
+            <BrandIcon size={38} color="#fafafa" strokeWidth={2.5} />
+          </div>
           <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: -1 }}>Playlist Playoff</div>
         </div>
 

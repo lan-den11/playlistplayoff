@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Headphones } from 'lucide-react';
+import BrandIcon from '../ui/BrandIcon';
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Reveal from '../ui/Reveal';
 import { CONTACT_EMAIL } from '../../lib/contact';
@@ -17,7 +17,7 @@ export default function Footer() {
       <div className="flex flex-col items-center gap-5 border-t border-white/10 pt-8 text-center md:flex-row md:justify-between md:text-left">
         <Link href="/" className="group flex items-center gap-2.5 transition-transform duration-200 active:scale-95">
           <span className="transition-transform duration-300 group-hover:scale-110">
-            <GlassIconBadge icon={Headphones} size="sm" />
+            <GlassIconBadge icon={BrandIcon} size="sm" />
           </span>
           <span className="font-display text-lg font-bold tracking-tight text-zinc-50">Playlist Playoff</span>
         </Link>

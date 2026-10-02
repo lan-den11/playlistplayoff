@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import BrandIcon from '../components/ui/BrandIcon';
 
 export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
@@ -8,26 +9,27 @@ export default function AppleIcon() {
     (
       <div
         style={{
+          position: 'relative',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          overflow: 'hidden',
           backgroundImage: 'linear-gradient(180deg, #4d74ff 0%, #0A1A6B 100%)',
         }}
       >
-        <svg
-          width="112"
-          height="112"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fafafa"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3v-7a9 9 0 1 1 18 0v7h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
-        </svg>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '55%',
+            backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
+          }}
+        />
+        <BrandIcon size={112} color="#fafafa" strokeWidth={2.5} />
       </div>
     ),
     { ...size }

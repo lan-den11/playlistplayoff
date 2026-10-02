@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { m } from 'framer-motion';
-import { Headphones } from 'lucide-react';
+import BrandIcon from './BrandIcon';
 import GlassIconBadge from './GlassIconBadge';
 
 export default function SiteHeader({ logoHref = '/', children }) {
@@ -19,7 +19,7 @@ export default function SiteHeader({ logoHref = '/', children }) {
           className="group flex items-center gap-2.5 transition-transform duration-200 active:scale-95"
         >
           <span className="transition-transform duration-300 group-hover:scale-110">
-            <GlassIconBadge icon={Headphones} size="sm" />
+            <GlassIconBadge icon={BrandIcon} size="sm" />
           </span>
           <span className="font-display text-lg font-bold tracking-tight text-zinc-50">
             Playlist Playoff
