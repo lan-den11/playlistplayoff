@@ -13,7 +13,7 @@ const card = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring', stiffness: 200, damping: 26 },
+    transition: { type: 'spring', stiffness: 300, damping: 26 },
   },
 };
 
@@ -22,7 +22,7 @@ const rise = {
   show: (delay = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { type: 'spring', stiffness: 260, damping: 24, delay },
+    transition: { type: 'spring', stiffness: 300, damping: 22, delay },
   }),
 };
 
@@ -47,7 +47,7 @@ export default function MultiplayerTeaser() {
         <Glow tone="brand" className="-bottom-28 right-0 h-72 w-[40rem] max-w-full" />
 
         <div className="relative">
-          <m.div variants={rise} custom={0.3} className="flex justify-center">
+          <m.div variants={rise} custom={0.1} className="flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300">
               <Sparkles className="h-4 w-4 animate-pulse" />
               Coming soon
@@ -57,20 +57,20 @@ export default function MultiplayerTeaser() {
           <WordReveal
             as="h2"
             inherit
-            delay={0.45}
+            delay={0.16}
             text="Music taste, revolutionized"
             className="mt-6 text-balance font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl"
           />
 
           <m.p
             variants={rise}
-            custom={1}
+            custom={0.4}
             className="mx-auto mt-5 max-w-xl text-pretty text-[17px] leading-relaxed text-zinc-400"
           >
             Generate personalized brackets using your listening data, and let PlayoffAI uncover insights about your true music taste.
           </m.p>
 
-          <m.div variants={rise} custom={1.2} className="mt-9">
+          <m.div variants={rise} custom={0.5} className="mt-9">
             <WaitlistForm source="multiplayer_teaser" gradient="gold" label="Claim My Spot" />
           </m.div>
         </div>
