@@ -1,15 +1,48 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useInView } from 'framer-motion';
+import { animate, m, useInView, useMotionValue, useReducedMotion, useTransform } from 'framer-motion';
 import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 import Glow from '../ui/Glow';
 import Reveal from '../ui/Reveal';
 
+const EASE = [0.22, 1, 0.36, 1];
+
+function CountUp({ to, active, delay = 0 }) {
+  const reduce = useReducedMotion();
+  const value = useMotionValue(0);
+  const rounded = useTransform(value, (v) => Math.round(v));
+
+  useEffect(() => {
+    if (reduce) {
+      value.set(to);
+      return;
+    }
+    if (!active) return;
+    const controls = animate(value, to, { duration: 1.2, delay, ease: EASE });
+    return () => controls.stop();
+  }, [active, reduce, to, delay, value]);
+
+  return <m.span>{rounded}</m.span>;
+}
+
+function Bar({ pct, active, delay = 0, className }) {
+  return (
+    <m.div
+      initial={{ width: '0%' }}
+      animate={{ width: active ? `${pct}%` : '0%' }}
+      transition={{ duration: 1.2, delay, ease: EASE }}
+      className={className}
+    />
+  );
+}
+
 function TrackDetailsMockup() {
   const ref = useRef(null);
+  const barsRef = useRef(null);
   const inView = useInView(ref, { once: true, margin: '400px 0px' });
+  const barsInView = useInView(barsRef, { once: true, amount: 0.6 });
   const [albumArt, setAlbumArt] = useState(null);
 
   useEffect(() => {
@@ -34,7 +67,7 @@ function TrackDetailsMockup() {
         <div className="flex h-14 w-14 flex-none items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-amber-500/25 to-brand/25 backdrop-blur-md">
           {albumArt ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={albumArt} alt="" decoding="async" className="h-full w-full object-cover" />
+            <img src={albumArt} alt="" decoding="async" className="h-full w-full animate-fade-in object-cover" />
           ) : (
             <Music2 className="h-6 w-6 text-zinc-50" />
           )}
@@ -47,27 +80,36 @@ function TrackDetailsMockup() {
         </div>
       </div>
 
-      <div className="mt-5 space-y-4">
+      <div ref={barsRef} className="mt-5 space-y-4">
         <div>
           <div className="mb-1.5 flex items-center justify-between text-xs">
             <span className="flex items-center gap-1.5 font-medium text-zinc-300">
               <BarChart3 className="h-3.5 w-3.5 text-brand-light" />
               Your plays
             </span>
-            <span className="font-display font-bold text-zinc-50">247</span>
+            <span className="font-display font-bold tabular-nums text-zinc-50">
+              <CountUp to={247} active={barsInView} delay={0.2} />
+            </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
-            <div className="h-full w-[88%] rounded-full bg-gradient-to-r from-brand to-brand-light transition-[filter] duration-300 group-hover:brightness-125" />
+            <Bar
+              pct={88}
+              active={barsInView}
+              delay={0.2}
+              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-light transition-[filter] duration-300 group-hover:brightness-125"
+            />
           </div>
         </div>
 
         <div>
           <div className="mb-1.5 flex items-center justify-between text-xs">
             <span className="font-medium text-zinc-500">Global popularity</span>
-            <span className="font-display font-bold text-zinc-500">34</span>
+            <span className="font-display font-bold tabular-nums text-zinc-500">
+              <CountUp to={34} active={barsInView} delay={0.4} />
+            </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
-            <div className="h-full w-[24%] rounded-full bg-zinc-600" />
+            <Bar pct={24} active={barsInView} delay={0.4} className="h-full rounded-full bg-zinc-600" />
           </div>
         </div>
       </div>

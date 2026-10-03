@@ -50,7 +50,7 @@ export default function FitToScreen({ reserve = 0, minScale = 0.55, children }) 
 
   return (
     <div
-      className={`relative flex w-full items-center justify-center transition-opacity duration-500 ease-out ${
+      className={`relative flex w-full items-center justify-center ${
         measured ? 'opacity-100' : 'pointer-events-none opacity-0'
       }`}
       style={isMobile ? undefined : { minHeight: avail ?? `calc(100svh - ${reserve}px)` }}

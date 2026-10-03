@@ -8,6 +8,7 @@ import GradientButton from '../ui/GradientButton';
 import FitToScreen from '../ui/FitToScreen';
 import HeroMatchup from './HeroMatchup';
 import GenreToggle from './GenreToggle';
+import { useAnimateReady } from '../../hooks/useAnimateReady';
 import { scrollToWaitlist } from '../../lib/scroll';
 import { captureEvent } from '../../lib/posthog-client';
 
@@ -15,22 +16,35 @@ const HEADLINE_WORDS = 'Turn any playlist into a showdown.'.split(' ');
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
+  show: {},
 };
 
-const item = {
+const fadeUp = {
   hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
+  show: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 300, damping: 22, delay },
+  }),
 };
 
 const headline = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.04 } },
+  show: { transition: { staggerChildren: 0.065 } },
 };
 
 const word = {
   hidden: { opacity: 0, y: 26 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 18 } },
+};
+
+const stage = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 240, damping: 24, delay: 0.35 },
+  },
 };
 
 const NAVBAR_HEIGHT_PX = 57;
@@ -43,6 +57,7 @@ const TRENDING_GENRE = { key: 'trending', label: 'Trending', playlistId: null };
 export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'hero-only', showNavbar = true }) {
   const router = useRouter();
   const isOpen = accessMode === 'unlocked';
+  const ready = useAnimateReady();
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [trialFinished, setTrialFinished] = useState(false);
 
@@ -71,11 +86,13 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
     return () => window.removeEventListener('scroll', handleScroll);
   }, [showScrollHint]);
 
+  const state = ready ? 'show' : 'hidden';
+
   return (
     <section className={`relative px-6 pb-10 md:px-8 md:pb-14 ${showNavbar ? 'pt-3 md:pt-4' : 'pt-6'}`}>
       <FitToScreen reserve={reservedPx}>
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-4 md:grid-cols-2 md:gap-16">
-          <m.div variants={container} initial="hidden" animate="show" className="text-center md:text-left">
+          <m.div variants={container} initial="hidden" animate={state} className="text-center md:text-left">
             <m.h1
               variants={headline}
               className="text-balance font-display text-[1.7rem] font-bold leading-[1.1] tracking-tight text-zinc-50 sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem]"
@@ -91,13 +108,14 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
             </m.h1>
 
             <m.p
-              variants={item}
+              variants={fadeUp}
+              custom={0.5}
               className="mx-auto mt-2.5 max-w-lg text-pretty text-[13px] leading-snug text-zinc-400 sm:text-base md:mx-0 md:mt-5 md:text-lg"
             >
               Battle tracks head-to-head until one takes the crown. Connect your listening history to generate personalized matchups.
             </m.p>
 
-            <m.div variants={item} className="mt-4 flex justify-center md:mt-8 md:justify-start">
+            <m.div variants={fadeUp} custom={0.65} className="mt-4 flex justify-center md:mt-8 md:justify-start">
               <GradientButton gradient="brand" onClick={handleCtaClick}>
                 {isOpen ? 'Start a bracket' : 'Join the waitlist'}
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -105,7 +123,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
             </m.div>
           </m.div>
 
-          <div className="flex flex-col">
+          <m.div variants={stage} initial="hidden" animate={state} className="flex flex-col">
             <div className="order-1 w-full">
               <GenreToggle genres={allGenres} selected={selected.key} onSelect={setSelectedKey} />
             </div>
@@ -116,7 +134,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
                 onTrialStateChange={setTrialFinished}
               />
             </div>
-          </div>
+          </m.div>
         </div>
       </FitToScreen>
 
@@ -125,7 +143,7 @@ export default function Hero({ trendingPlaylistId, genres = [], accessMode = 'he
           <m.div
             key="scroll-hint"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 1, duration: 0.6 } }}
+            animate={{ opacity: 1, transition: { delay: 1.8, duration: 0.6 } }}
             exit={{ opacity: 0, transition: { duration: 0.3 } }}
             className="pointer-events-none fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-10 flex justify-center md:bottom-[calc(1rem+env(safe-area-inset-bottom))]"
           >
