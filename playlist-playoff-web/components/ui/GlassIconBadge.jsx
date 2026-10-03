@@ -15,9 +15,9 @@ export default function GlassIconBadge({ icon: Icon, size = 'md', className = ''
       />
       <span
         aria-hidden="true"
-        className="absolute inset-0 rounded-[inherit] border border-white/25 bg-gradient-to-b from-brand/45 via-brand/25 to-brand-deep/40 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(255,255,255,0.08),0_6px_16px_rgba(0,0,0,0.3)]"
+        className="absolute inset-0 rounded-[inherit] border border-white/30 bg-gradient-to-b from-brand/50 via-brand/30 to-brand-deep/40 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_24px_rgba(0,0,0,0.35)]"
       />
-      <Icon className={`relative z-10 text-zinc-50 ${s.icon}`} strokeWidth={2.5} />
+      <Icon className={`relative z-10 text-zinc-50 ${s.icon}`} strokeWidth={Icon.glyphStrokeWidth ?? 2.5} />
     </span>
   );
 }

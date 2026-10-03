@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { buildRounds, decodeBracket } from '../../../lib/shareBracket';
 import { getTracksByIds } from '../../../lib/spotifyTracks';
 import { limited } from '../../../lib/rateLimit';
-import BrandIcon from '../../../components/ui/BrandIcon';
+import BrandGlassBadge from '../../../components/ui/BrandGlassBadge';
 
 const CROWN_PATHS = [
   'M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z',
@@ -94,32 +94,8 @@ export async function GET(request) {
 
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginLeft: 72 }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div
-              style={{
-                position: 'relative',
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                marginRight: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                backgroundImage: 'linear-gradient(180deg, #4d74ff 0%, #0A1A6B 100%)',
-                border: '1px solid rgba(255,255,255,0.25)',
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '55%',
-                  backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
-                }}
-              />
-              <BrandIcon size={34} color="#fafafa" strokeWidth={2.5} />
+            <div style={{ display: 'flex', marginRight: 16 }}>
+              <BrandGlassBadge size={52} />
             </div>
             <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: -1 }}>Playlist Playoff</div>
           </div>

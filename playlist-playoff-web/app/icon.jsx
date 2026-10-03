@@ -1,38 +1,9 @@
 import { ImageResponse } from 'next/og';
-import BrandIcon from '../components/ui/BrandIcon';
+import BrandGlassBadge from '../components/ui/BrandGlassBadge';
 
 export const size = { width: 64, height: 64 };
 export const contentType = 'image/png';
 
 export default function Icon() {
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          borderRadius: 14,
-          backgroundImage: 'linear-gradient(180deg, #4d74ff 0%, #0A1A6B 100%)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '55%',
-            backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
-          }}
-        />
-        <BrandIcon size={54} color="#fafafa" strokeWidth={2.6} />
-      </div>
-    ),
-    { ...size }
-  );
+  return new ImageResponse(<BrandGlassBadge size={64} iconRatio={0.5} strokeWidth={2} />, { ...size });
 }
