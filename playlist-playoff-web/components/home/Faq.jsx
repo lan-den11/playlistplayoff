@@ -6,6 +6,7 @@ import { ChevronDown, Music2, UserCircle, ListMusic, CreditCard } from 'lucide-r
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Glow from '../ui/Glow';
 import Reveal from '../ui/Reveal';
+import WordReveal from '../ui/WordReveal';
 
 const FAQS = [
   {
@@ -87,18 +88,16 @@ export default function Faq() {
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
       <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
-        <Reveal
+        <WordReveal
           as="h2"
+          text="Your questions, our answers"
           amount={0.4}
-          distance={20}
           className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
-        >
-          Your questions, our answers
-        </Reveal>
+        />
 
         <div className="relative space-y-3">
           {FAQS.map((faqItem, i) => (
-            <Reveal key={faqItem.q} amount={0.2} distance={20} delay={i * 0.1}>
+            <Reveal key={faqItem.q} amount={0.2} distance={20} delay={0.15 + i * 0.1}>
               <FaqItem
                 item={faqItem}
                 index={i}

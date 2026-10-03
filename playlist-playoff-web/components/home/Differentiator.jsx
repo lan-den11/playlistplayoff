@@ -6,6 +6,7 @@ import { BarChart3, Music2 } from 'lucide-react';
 import { fetchAlbumArt } from '../../lib/api';
 import Glow from '../ui/Glow';
 import Reveal from '../ui/Reveal';
+import WordReveal from '../ui/WordReveal';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -127,15 +128,23 @@ export default function Differentiator() {
       <Glow tone="brand" className="-top-16 right-0 h-[28rem] w-[46rem] max-w-full opacity-70" />
 
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
-        <Reveal amount={0.35} className="text-center md:text-left">
-          <h2 className="text-balance font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
-            Not just a vote. Your true taste.
-          </h2>
-          <p className="mx-auto mt-5 max-w-md text-pretty text-[17px] leading-relaxed text-zinc-400 md:mx-0">
+        <div className="text-center md:text-left">
+          <WordReveal
+            as="h2"
+            text="Not just a vote. Your true taste."
+            amount={0.35}
+            className="text-balance font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl"
+          />
+          <Reveal
+            as="p"
+            amount={0.35}
+            delay={0.35}
+            className="mx-auto mt-5 max-w-md text-pretty text-[17px] leading-relaxed text-zinc-400 md:mx-0"
+          >
             Link your Last.fm account and every matchup turns personal with your listening data. See what you
             actually listen to, not just what's trending.
-          </p>
-        </Reveal>
+          </Reveal>
+        </div>
 
         <Reveal amount={0.35} delay={0.15}>
           <TrackDetailsMockup />
