@@ -32,6 +32,7 @@ const SETUP_STEPS = [
     checked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     taken_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`,
+  `ALTER TABLE playlist_snapshots ADD COLUMN IF NOT EXISTS refresh_token TEXT`,
   `CREATE UNIQUE INDEX IF NOT EXISTS waitlist_signups_email_lower_idx ON waitlist_signups (lower(email))`,
   `ALTER TABLE playlist_snapshots ENABLE ROW LEVEL SECURITY`,
 ];

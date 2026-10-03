@@ -3,7 +3,7 @@ import { readSnapshot, saveSnapshot } from './snapshotStore';
 import { pruneStaleSnapshots } from './snapshotPrune';
 import { loadLive } from './spotifyPlaylist';
 import { TRENDING_PLAYLIST_ID } from './spotifyAuth';
-import { getTrendingPlaylistId, getGenrePlaylists, captureServerEvent } from './posthog-server';
+import { getTrendingPlaylistId, getGenrePlaylists, getSnapshotRefreshToken, captureServerEvent } from './posthog-server';
 
 const TIME_ZONE = 'America/Chicago';
 const REFRESH_AT_MINUTES = 7 * 60;
@@ -39,8 +39,9 @@ export function currentWindow(now = new Date()) {
   };
 }
 
-function needsRefresh(snapshot, now) {
+function needsRefresh(snapshot, now, refreshToken) {
   if (!snapshot) return true;
+  if (refreshToken && snapshot.refreshToken !== refreshToken) return true;
   const { key, minutesIntoWindow } = currentWindow(now);
   if (snapshot.windowKey !== key) return true;
   const unchangedThisWindow = snapshot.changedWindowKey !== key;
@@ -52,7 +53,7 @@ function needsRefresh(snapshot, now) {
   );
 }
 
-async function refreshSnapshot(playlistId, windowKey) {
+async function refreshSnapshot(playlistId, windowKey, refreshToken) {
   const live = await loadLive(playlistId);
   const saved = await saveSnapshot({
     playlistId,
@@ -60,6 +61,7 @@ async function refreshSnapshot(playlistId, windowKey) {
     tracks: live.tracks,
     spotifySnapshotId: live.spotifySnapshotId,
     windowKey,
+    refreshToken,
   });
   if (!saved) return null;
 
@@ -76,6 +78,7 @@ async function refreshSnapshot(playlistId, windowKey) {
       changed,
       track_count: snapshot.tracks.length,
       window_key: windowKey,
+      refresh_token: refreshToken,
       $process_person_profile: false,
     },
   }).catch(() => {});
@@ -89,12 +92,15 @@ export function ensureHeroSnapshot(playlistId) {
 
   const task = (async () => {
     const now = new Date();
-    const snapshot = await readSnapshot(playlistId);
-    if (!needsRefresh(snapshot, now)) return snapshot;
+    const [snapshot, refreshToken] = await Promise.all([
+      readSnapshot(playlistId),
+      getSnapshotRefreshToken().catch(() => null),
+    ]);
+    if (!needsRefresh(snapshot, now, refreshToken)) return snapshot;
     if (now.getTime() - (state.lastAttempt.get(playlistId) || 0) < FAILURE_BACKOFF_MS) return snapshot;
     state.lastAttempt.set(playlistId, now.getTime());
     try {
-      return (await refreshSnapshot(playlistId, currentWindow(now).key)) ?? snapshot;
+      return (await refreshSnapshot(playlistId, currentWindow(now).key, refreshToken)) ?? snapshot;
     } catch (e) {
       console.error(`[hero-snapshot] refresh failed for ${playlistId}, keeping previous snapshot:`, e.message);
       return snapshot;

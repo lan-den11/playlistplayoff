@@ -15,6 +15,7 @@ function fromRow(r) {
     version: r.version,
     windowKey: r.window_key,
     changedWindowKey: r.changed_window_key,
+    refreshToken: r.refresh_token ?? null,
     checkedAt: new Date(r.checked_at).getTime(),
     takenAt: new Date(r.taken_at).getTime(),
   };
@@ -43,7 +44,7 @@ export async function readSnapshot(playlistId) {
   }
 }
 
-export async function saveSnapshot({ playlistId, playlistName, tracks, spotifySnapshotId, windowKey }) {
+export async function saveSnapshot({ playlistId, playlistName, tracks, spotifySnapshotId, windowKey, refreshToken = null }) {
   const pool = getPool();
   if (!pool) return null;
   await ensureTable();
@@ -52,7 +53,7 @@ export async function saveSnapshot({ playlistId, playlistName, tracks, spotifySn
     .update(tracks.map((t) => t.id).join(','))
     .digest('hex');
   const prevResult = await pool.query(
-    'SELECT content_hash, version, changed_window_key, taken_at FROM playlist_snapshots WHERE playlist_id = $1',
+    'SELECT content_hash, version, changed_window_key, taken_at, refresh_token FROM playlist_snapshots WHERE playlist_id = $1',
     [playlistId]
   );
   const prev = prevResult.rows[0];
@@ -62,8 +63,8 @@ export async function saveSnapshot({ playlistId, playlistName, tracks, spotifySn
 
   await pool.query(
     `INSERT INTO playlist_snapshots
-       (playlist_id, playlist_name, tracks, spotify_snapshot_id, content_hash, version, window_key, changed_window_key, checked_at, taken_at)
-     VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8, now(), now())
+       (playlist_id, playlist_name, tracks, spotify_snapshot_id, content_hash, version, window_key, changed_window_key, refresh_token, checked_at, taken_at)
+     VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8, $10::text, now(), now())
      ON CONFLICT (playlist_id) DO UPDATE SET
        playlist_name = $2,
        tracks = $3::jsonb,
@@ -72,9 +73,10 @@ export async function saveSnapshot({ playlistId, playlistName, tracks, spotifySn
        version = $6,
        window_key = $7,
        changed_window_key = $8,
+       refresh_token = COALESCE($10::text, playlist_snapshots.refresh_token),
        checked_at = now(),
        taken_at = CASE WHEN $9::boolean THEN now() ELSE playlist_snapshots.taken_at END`,
-    [playlistId, playlistName, JSON.stringify(tracks), spotifySnapshotId, contentHash, version, windowKey, changedWindowKey, changed]
+    [playlistId, playlistName, JSON.stringify(tracks), spotifySnapshotId, contentHash, version, windowKey, changedWindowKey, changed, refreshToken]
   );
 
   const now = Date.now();
@@ -87,6 +89,7 @@ export async function saveSnapshot({ playlistId, playlistName, tracks, spotifySn
     version,
     windowKey,
     changedWindowKey,
+    refreshToken: refreshToken ?? prev?.refresh_token ?? null,
     checkedAt: now,
     takenAt: changed || !prev ? now : new Date(prev.taken_at).getTime(),
   };

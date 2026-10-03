@@ -58,6 +58,7 @@ const GLOBAL_CONFIG_DISTINCT_ID = 'app-global-config';
 
 export const APP_ACCESS_MODE_FLAG_KEY = 'app-access-mode';
 export const TRENDING_PLAYLIST_FLAG_KEY = 'homepage-trending-playlist';
+export const SNAPSHOT_REFRESH_FLAG_KEY = 'homepage-snapshot-refresh';
 
 export const GENRE_PLAYLIST_FLAGS = [
   { key: 'hiphop', label: 'Hip-Hop', flagKey: 'homepage-genre-hiphop-playlist' },
@@ -71,6 +72,7 @@ const DEFAULT_ACCESS_MODE = 'hero-only';
 const ALL_FLAG_KEYS = [
   APP_ACCESS_MODE_FLAG_KEY,
   TRENDING_PLAYLIST_FLAG_KEY,
+  SNAPSHOT_REFRESH_FLAG_KEY,
   ...GENRE_PLAYLIST_FLAGS.map((g) => g.flagKey),
 ];
 const FLAGS_CACHE_MS = 30_000;
@@ -161,6 +163,12 @@ export async function getGenrePlaylists({ bypassCache = false } = {}) {
     }))
   );
   return resolved.filter((genre) => Boolean(genre.playlistId));
+}
+
+export async function getSnapshotRefreshToken({ bypassCache = false } = {}) {
+  const { payload, error } = await flagResult(SNAPSHOT_REFRESH_FLAG_KEY, { bypassCache });
+  if (error || (typeof payload !== 'string' && typeof payload !== 'number')) return null;
+  return String(payload).trim().slice(0, 100) || null;
 }
 
 export async function debugEvaluateFlags() {
