@@ -27,7 +27,7 @@ export function useReveal({ stagger = 0.12, distance = 24, amount = 0.3 } = {}) 
       viewport: {
         once: true,
         amount: isMobile ? Math.min(amount, 0.2) : amount,
-        margin: isMobile ? '0px 0px -40px 0px' : '0px',
+        margin: isMobile ? '0px 0px -90px 0px' : '0px 0px -120px 0px',
       },
     }),
     [isMobile, stagger, distance, amount]

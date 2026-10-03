@@ -1,6 +1,6 @@
 import BrandIcon from './BrandIcon';
 
-export default function BrandGlassBadge({ size, flat = false, iconRatio = 0.46, strokeWidth = 1.75 }) {
+export default function BrandGlassBadge({ size, flat = false, iconRatio = 0.5, strokeWidth = 1.75 }) {
   return (
     <div
       style={{

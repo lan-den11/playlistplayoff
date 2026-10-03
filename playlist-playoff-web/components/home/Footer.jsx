@@ -13,7 +13,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <Reveal as="footer" amount={0.2} distance={16} className="relative mx-auto max-w-7xl px-6 pb-10 pt-4 md:px-8">
+    <Reveal as="footer" amount={0.05} distance={16} className="relative mx-auto max-w-7xl px-6 pb-10 pt-4 md:px-8">
       <div className="flex flex-col items-center gap-5 border-t border-white/10 pt-8 text-center md:flex-row md:justify-between md:text-left">
         <Link href="/" className="group flex items-center gap-2.5 transition-transform duration-200 active:scale-95">
           <span className="transition-transform duration-300 group-hover:scale-110">
