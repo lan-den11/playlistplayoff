@@ -5,7 +5,6 @@ import { m } from 'framer-motion';
 import { ChevronDown, Music2, UserCircle, ListMusic, CreditCard } from 'lucide-react';
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Glow from '../ui/Glow';
-import Reveal from '../ui/Reveal';
 import WordReveal from '../ui/WordReveal';
 
 const FAQS = [
@@ -30,6 +29,22 @@ const FAQS = [
     a: "Yes - the free tier will cover standard-sized solo brackets. Playoff Pro unlocks larger solo brackets plus extra benefits for our multiplayer features, coming soon. Join the waitlist now and you'll get a free week of Playoff Pro the day we launch.",
   },
 ];
+
+const group = {
+  hidden: {},
+  show: {},
+};
+
+const rise = {
+  hidden: { opacity: 0, y: 20 },
+  show: (index = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 280, damping: 24, delay: 0.35 + index * 0.1 },
+  }),
+};
+
+const VIEWPORT = { once: true, amount: 0.25, margin: '0px 0px -60px 0px' };
 
 function FaqItem({ item: faqItem, index, isOpen, onToggle }) {
   const panelId = `faq-panel-${index}`;
@@ -87,27 +102,33 @@ export default function Faq() {
     <section className="relative overflow-x-clip">
       <Glow tone="deep" className="-top-24 left-1/2 h-[22rem] w-[44rem] max-w-full -translate-x-1/2" />
 
-      <div className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20">
+      <m.div
+        variants={group}
+        initial="hidden"
+        whileInView="show"
+        viewport={VIEWPORT}
+        className="mx-auto max-w-3xl px-6 py-14 md:px-8 md:py-20"
+      >
         <WordReveal
           as="h2"
+          inherit
           text="Your questions, our answers"
-          amount={0.4}
           className="relative mb-8 text-center font-display text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl md:mb-10"
         />
 
         <div className="relative space-y-3">
           {FAQS.map((faqItem, i) => (
-            <Reveal key={faqItem.q} amount={0.2} distance={20} delay={0.15 + i * 0.1}>
+            <m.div key={faqItem.q} variants={rise} custom={i}>
               <FaqItem
                 item={faqItem}
                 index={i}
                 isOpen={openIndex === i}
                 onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
               />
-            </Reveal>
+            </m.div>
           ))}
         </div>
-      </div>
+      </m.div>
     </section>
   );
 }
