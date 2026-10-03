@@ -18,7 +18,6 @@ const SETTLE_MS = 800;
 const WINDOW_FRAMES = 36;
 const SLOW_FRAME_MS = 28;
 const SLOW_WINDOWS_TO_DOWNGRADE = 2;
-const SCROLL_IDLE_MS = 140;
 
 const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
 
@@ -44,38 +43,12 @@ export default function PageBackground() {
   const [tier, setTier] = useState(null);
   const [dpr, setDpr] = useState(TIERS[0].dpr);
   const [coarse, setCoarse] = useState(false);
-  const [scrolling, setScrolling] = useState(false);
 
   useEffect(() => {
     const start = Math.max(deviceStartTier(), readStoredTier());
     setTier(start);
     setDpr(TIERS[start].dpr);
     setCoarse(isCoarsePointer());
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    let timer = 0;
-    let active = false;
-    const onScroll = () => {
-      if (!active) {
-        active = true;
-        root.dataset.scrolling = '1';
-        setScrolling(true);
-      }
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        active = false;
-        delete root.dataset.scrolling;
-        setScrolling(false);
-      }, SCROLL_IDLE_MS);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      clearTimeout(timer);
-      delete root.dataset.scrolling;
-    };
   }, []);
 
   useEffect(() => {
@@ -145,7 +118,7 @@ export default function PageBackground() {
             speed={0.16}
             dpr={dpr}
             fps={config.fps}
-            paused={config.paused || scrolling}
+            paused={config.paused}
             className="z-0 animate-fade-in"
           />
           <div className="absolute inset-0 z-10 opacity-80">

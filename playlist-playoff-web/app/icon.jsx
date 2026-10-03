@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import BrandIcon from '../components/ui/BrandIcon';
 
-export const size = { width: 32, height: 32 };
+export const size = { width: 64, height: 64 };
 export const contentType = 'image/png';
 
 export default function Icon() {
@@ -16,7 +16,7 @@ export default function Icon() {
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          borderRadius: 7,
+          borderRadius: 14,
           backgroundImage: 'linear-gradient(180deg, #4d74ff 0%, #0A1A6B 100%)',
         }}
       >
@@ -30,7 +30,7 @@ export default function Icon() {
             backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
           }}
         />
-        <BrandIcon size={22} color="#fafafa" strokeWidth={2.75} />
+        <BrandIcon size={54} color="#fafafa" strokeWidth={2.6} />
       </div>
     ),
     { ...size }

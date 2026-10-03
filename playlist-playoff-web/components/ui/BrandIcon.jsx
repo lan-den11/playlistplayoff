@@ -2,7 +2,7 @@ export default function BrandIcon({ className, size, color = 'currentColor', str
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
+      viewBox="3 5.5 17.8 13"
       width={size}
       height={size}
       fill="none"
@@ -10,7 +10,7 @@ export default function BrandIcon({ className, size, color = 'currentColor', str
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
+      className={className ? `${className} scale-150` : undefined}
       aria-hidden="true"
       {...rest}
     >

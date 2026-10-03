@@ -29,7 +29,7 @@ export default function AppleIcon() {
             backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
           }}
         />
-        <BrandIcon size={112} color="#fafafa" strokeWidth={2.5} />
+        <BrandIcon size={124} color="#fafafa" strokeWidth={2.5} />
       </div>
     ),
     { ...size }

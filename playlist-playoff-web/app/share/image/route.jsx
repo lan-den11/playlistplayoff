@@ -119,7 +119,7 @@ export async function GET(request) {
                   backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 100%)',
                 }}
               />
-              <BrandIcon size={36} color="#fafafa" strokeWidth={2.5} />
+              <BrandIcon size={34} color="#fafafa" strokeWidth={2.5} />
             </div>
             <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: -1 }}>Playlist Playoff</div>
           </div>
