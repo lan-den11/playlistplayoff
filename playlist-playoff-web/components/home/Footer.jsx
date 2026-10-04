@@ -4,6 +4,7 @@ import Link from 'next/link';
 import BrandIcon from '../ui/BrandIcon';
 import GlassIconBadge from '../ui/GlassIconBadge';
 import Reveal from '../ui/Reveal';
+import SocialLinks from './SocialLinks';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { OPEN_CONSENT_EVENT } from '../../lib/consent';
 
@@ -14,13 +15,16 @@ export default function Footer() {
 
   return (
     <Reveal as="footer" amount={0.05} distance={16} className="relative mx-auto max-w-7xl px-6 pb-10 pt-4 md:px-8">
-      <div className="flex flex-col items-center gap-5 border-t border-white/10 pt-8 text-center md:flex-row md:justify-between md:text-left">
-        <Link href="/" className="group flex items-center gap-2.5 transition-transform duration-200 active:scale-95">
-          <span className="transition-transform duration-300 group-hover:scale-110">
-            <GlassIconBadge icon={BrandIcon} size="sm" />
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight text-zinc-50">Playlist Playoff</span>
-        </Link>
+      <div className="flex flex-col items-center gap-6 border-t border-white/10 pt-8 text-center md:flex-row md:justify-between md:text-left">
+        <div className="flex flex-col items-center gap-4 md:items-start">
+          <Link href="/" className="group flex items-center gap-2.5 transition-transform duration-200 active:scale-95">
+            <span className="transition-transform duration-300 group-hover:scale-110">
+              <GlassIconBadge icon={BrandIcon} size="sm" />
+            </span>
+            <span className="font-display text-lg font-bold tracking-tight text-zinc-50">Playlist Playoff</span>
+          </Link>
+          <SocialLinks />
+        </div>
 
         <nav aria-label="Legal" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
           <Link href="/privacy" className={LINK}>

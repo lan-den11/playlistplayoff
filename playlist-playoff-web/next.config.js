@@ -40,6 +40,18 @@ const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
 ];
 
+const socialRedirects = [
+  ['ig', 'instagram'],
+  ['tiktok', 'tiktok'],
+  ['yt', 'youtube'],
+  ['reddit', 'reddit'],
+  ['threads', 'threads'],
+].map(([path, source]) => ({
+  source: `/${path}`,
+  destination: `/?utm_source=${source}&utm_medium=social&utm_campaign=bio`,
+  permanent: false,
+}));
+
 const nextConfig = {
   poweredByHeader: false,
   experimental: {
@@ -48,6 +60,9 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
+  },
+  async redirects() {
+    return socialRedirects;
   },
   async rewrites() {
     return [
